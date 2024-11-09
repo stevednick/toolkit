@@ -1,0 +1,41 @@
+import 'dart:async';
+import 'package:flame/components.dart';
+import 'package:flutter/material.dart';
+
+class Asset extends SpriteComponent with HasGameReference, HasVisibility {
+  final Vector2 pos;
+  final Vector2 sca;
+  final String imagePath;
+  final Color colour;
+
+  Asset(this.pos, this.sca, this.imagePath, this.colour);
+  @override
+  Future<FutureOr<void>> onLoad() async {
+    changeColour(colour);
+    await super.onLoad();  // Ensure base class's onLoad is awaited
+    sprite = await game.loadSprite(imagePath);
+    size = sca;
+    position = pos;
+  }
+
+  void positionSprite() {
+    position = pos;  // Ensure 'pos' is defined
+  }
+
+  void changePosition(Vector2 adjustment) {
+    position += adjustment;  // Adjust position by the given vector
+  }
+
+  void changeColour(Color colour) {
+    paint = Paint()..colorFilter = ColorFilter.mode(colour, BlendMode.srcIn);
+  }
+
+  static Asset createCrotchet() => Asset(Vector2(0, -87), Vector2(34, 100), 'crotchet.png', Colors.black);
+  static Asset createInvertedCrotchet() => Asset(Vector2(0, -11), Vector2(34, 100), 'invertedCrotchet.png', Colors.black);
+  //static Asset createSharp() => Asset(Vector2(-40, -27), Vector2(28, 56), 'sharp.png', Colors.black);
+  static Asset createSharp() => Asset(Vector2(-40, -27), Vector2(28, 28), 'doubleSharp.png', Colors.black);
+  static Asset createFlat() => Asset(Vector2(-38, -35), Vector2(25, 51), 'flat.png', Colors.black);
+  static Asset createTrebleClef() => Asset(Vector2(-50, -88), Vector2(100, 185), 'treble.png', Colors.black);
+  static Asset createBassClef() => Asset(Vector2(-30, -49), Vector2(70, 81), 'bass.png', Colors.black);
+  static Asset createArrow() => Asset(Vector2(49, -19), Vector2(20, 40), 'arrows.png', Colors.blue);
+}

@@ -1,0 +1,50 @@
+class Transposition {
+  final String name;
+  final int pitchModifier;
+
+  Transposition({required this.name, required this.pitchModifier});
+
+  static Transposition cAlto = Transposition(name: "C Alto", pitchModifier: 0);
+  static Transposition bFlatAlto =
+      Transposition(name: "Bb Alto", pitchModifier: -2);
+  static Transposition aAlto = Transposition(name: "A Alto", pitchModifier: -3);
+  static Transposition g = Transposition(name: "G", pitchModifier: -5);
+  static Transposition fSharp = Transposition(name: "F Sharp", pitchModifier: -6);
+  static Transposition f = Transposition(name: "F", pitchModifier: -7);
+  static Transposition e = Transposition(name: "E", pitchModifier: -8);
+  static Transposition eFlat = Transposition(name: "Eb", pitchModifier: -9);
+  static Transposition d = Transposition(name: "D", pitchModifier: -10);
+  static Transposition dFlat = Transposition(name: "D Flat", pitchModifier: -11);
+  static Transposition c = Transposition(name: "C", pitchModifier: -12);
+  static Transposition bBasso = Transposition(name: "B Basso", pitchModifier: -13);
+  static Transposition bFlatBasso = Transposition(name: "B Flat Basso", pitchModifier: -14);
+  static Transposition aBasso = Transposition(name: "A Basso", pitchModifier: -15);
+  static Transposition aFlatBasso = Transposition(name: "A Flat Basso", pitchModifier: -16);
+
+
+  // List of all predefined transpositions
+  static List<Transposition> transpositions = [
+    cAlto,
+    bFlatAlto,
+    aAlto,
+    g,
+    fSharp,
+    f,
+    e,
+    eFlat,
+    d,
+    dFlat,
+    c,
+    bBasso,
+    bFlatBasso,
+    aBasso,
+    aFlatBasso,
+  ];
+
+  // Method to get a transposition by name
+  static Transposition? getByName(String name) {
+    return transpositions.firstWhere(
+        (transposition) => transposition.name == name,
+        orElse: () => Transposition.f);
+  }
+}

@@ -1,0 +1,26 @@
+TODO:
+
+Range adjustment screen:
+
+Center note. 
+Range limits (lower note + ghost note): Adjust one and other moves out. 
+
+Slightly more polished game mode. 
+
+Test and refine other modes. 
+
+Now:
+
+Fix staff width w/wo ghost notes. 
+Add ghost note functionality. 
+display
+
+Tidy up Pong mode:
+2 size metronome. 
+3 and 2 and 1 and go... ?
+Green background + red for not playing. 
+
+
+
+
+

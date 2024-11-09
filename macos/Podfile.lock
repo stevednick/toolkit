@@ -1,0 +1,62 @@
+PODS:
+  - EZAudioClone (0.1.7):
+    - EZAudioClone/Full (= 0.1.7)
+  - EZAudioClone/Core (0.1.7)
+  - EZAudioClone/Full (0.1.7):
+    - EZAudioClone/Core
+    - TPCircularBuffer (= 1.1)
+  - FlutterMacOS (1.0.0)
+  - package_info_plus (0.0.1):
+    - FlutterMacOS
+  - pitch_detector_plus (0.0.1):
+    - EZAudioClone
+    - FlutterMacOS
+  - shared_preferences_foundation (0.0.1):
+    - Flutter
+    - FlutterMacOS
+  - TPCircularBuffer (1.1)
+  - url_launcher_macos (0.0.1):
+    - FlutterMacOS
+  - wakelock_plus (0.0.1):
+    - FlutterMacOS
+
+DEPENDENCIES:
+  - FlutterMacOS (from `Flutter/ephemeral`)
+  - package_info_plus (from `Flutter/ephemeral/.symlinks/plugins/package_info_plus/macos`)
+  - pitch_detector_plus (from `Flutter/ephemeral/.symlinks/plugins/pitch_detector_plus/macos`)
+  - shared_preferences_foundation (from `Flutter/ephemeral/.symlinks/plugins/shared_preferences_foundation/darwin`)
+  - url_launcher_macos (from `Flutter/ephemeral/.symlinks/plugins/url_launcher_macos/macos`)
+  - wakelock_plus (from `Flutter/ephemeral/.symlinks/plugins/wakelock_plus/macos`)
+
+SPEC REPOS:
+  trunk:
+    - EZAudioClone
+    - TPCircularBuffer
+
+EXTERNAL SOURCES:
+  FlutterMacOS:
+    :path: Flutter/ephemeral
+  package_info_plus:
+    :path: Flutter/ephemeral/.symlinks/plugins/package_info_plus/macos
+  pitch_detector_plus:
+    :path: Flutter/ephemeral/.symlinks/plugins/pitch_detector_plus/macos
+  shared_preferences_foundation:
+    :path: Flutter/ephemeral/.symlinks/plugins/shared_preferences_foundation/darwin
+  url_launcher_macos:
+    :path: Flutter/ephemeral/.symlinks/plugins/url_launcher_macos/macos
+  wakelock_plus:
+    :path: Flutter/ephemeral/.symlinks/plugins/wakelock_plus/macos
+
+SPEC CHECKSUMS:
+  EZAudioClone: fbe2d0b850d4e92e6204df43ec42f594b4b05453
+  FlutterMacOS: 8f6f14fa908a6fb3fba0cd85dbd81ec4b251fb24
+  package_info_plus: fa739dd842b393193c5ca93c26798dff6e3d0e0c
+  pitch_detector_plus: d877032f256d8843fcfd6c256009b66d66be3094
+  shared_preferences_foundation: fcdcbc04712aee1108ac7fda236f363274528f78
+  TPCircularBuffer: 4960a919e667280f7f38963d771f45871b64fe62
+  url_launcher_macos: c82c93949963e55b228a30115bd219499a6fe404
+  wakelock_plus: 4783562c9a43d209c458cb9b30692134af456269
+
+PODFILE CHECKSUM: 236401fc2c932af29a9fcf0e97baeeb2d750d367
+
+COCOAPODS: 1.15.2

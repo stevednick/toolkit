@@ -1,0 +1,34 @@
+Right.
+
+What's next.
+
+Find Android Phone,
+
+Wait for osSequina update plus upload to Google and Apple stores. 
+
+Look through code and add some comments (certainly for complicated bits)
+Tidy up file structure?
+Look for refinements plus remove outdated code. 
+Think about future growth and refactor accordingly. 
+What to add next?
+
+Finish simple Pong game with start, countdown, finish screen. 
+Test thoroughly + get working nicely!
+
+Start Discord plus start discussion: Facebook Post, Link online, BHS? What else? 
+
+Upload basic app with 2 games online? 
+
+Ideas for more features?
+
+Scale machine. 
+Farkas 2.0 proper.
+Farkas Jr.
+
+Find display bug on change of range in Simple mode. 
+Add metronome to pong mode. Plus speed adjustment.
+
+
+
+
+
