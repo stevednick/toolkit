@@ -12,6 +12,8 @@ class Note extends PositionComponent{
   //late Asset accidentalSprite;
   late Asset sharpSprite;
   late Asset flatSprite;
+  late Asset doubleSharpSprite;
+  late Asset doubleFlatSprite;
   late NoteData noteData;
   late Asset arrowSprite;
   PositionComponent noteComponents = PositionComponent();
@@ -32,10 +34,14 @@ class Note extends PositionComponent{
     invertedCrotchetSprite = Asset.createInvertedCrotchet();
     sharpSprite = Asset.createSharp();
     flatSprite = Asset.createFlat();
+    doubleSharpSprite = Asset.createDoubleSharp();
+    doubleFlatSprite = Asset.createDoubleFlat();
     noteComponents.add(crotchetSprite);
     noteComponents.add(invertedCrotchetSprite);
     noteComponents.add(sharpSprite);
     noteComponents.add(flatSprite);
+    noteComponents.add(doubleSharpSprite);
+    noteComponents.add(doubleFlatSprite);
     noteComponents.add(arrowSprite);
     add(noteComponents);
     add(ledgerHolder);
@@ -52,6 +58,8 @@ class Note extends PositionComponent{
     invertedCrotchetSprite.isVisible = noteData.posOnStave > 0;
     sharpSprite.isVisible = noteData.accidental == Accidental.sharp;
     flatSprite.isVisible = noteData.accidental == Accidental.flat;
+    doubleSharpSprite.isVisible = noteData.accidental == Accidental.doubleSharp;
+    doubleFlatSprite.isVisible = noteData.accidental == Accidental.doubleFlat;
     positionCrotchetSprite();
     drawLedgers();
   }
@@ -93,7 +101,6 @@ class Note extends PositionComponent{
   }
 
   void addArrow(){
-    
     noteComponents.add(arrowSprite); 
   }
 }

@@ -18,7 +18,7 @@ class Player {
   late Instrument selectedInstrument;
   late ClefSelection clefSelection;
   ValueNotifier<int> score = ValueNotifier(0);
-  ValueNotifier<NoteData> currentNote = ValueNotifier(NoteData(name: "", pos: 0, accidental: Accidental.flat, clef: Clef.bass(), noteNum: 0));
+  ValueNotifier<NoteData> currentNote = ValueNotifier(NoteData.placeholderValue);
 
 
   Player({required this.playerKey}) {

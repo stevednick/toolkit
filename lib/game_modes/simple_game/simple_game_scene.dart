@@ -25,23 +25,15 @@ final SimpleGameController gameController;
 
   // final bool _ghostNotesOn = false;
 
-  NoteData noteData = NoteData(
-    name: "P0",
-    pos: 20,
-    accidental: Accidental.sharp,
-    clef: Clef.treble(),
-    noteNum: 5,
-  );
+  NoteData noteData = NoteData.placeholderValue;
 
   SimpleGameScene(this.gameController) {
-    getAndSetNote();
+    //getAndSetNote();
 
     gameController.player.currentNote.addListener(() {
       getAndSetNote();
     });
   }
-
-
 
   @override
   FutureOr<void> onLoad() async {
@@ -57,17 +49,18 @@ final SimpleGameController gameController;
   @override
   void onDispose() {
     super.onDispose();
+    gameController.player.currentNote.removeListener(getAndSetNote);
     gameController.dispose();
   }
 
-  void newNote(NoteData data) { // Change this to just change the note. 
+  void newNote(NoteData data) { // Change this to just change the note.
     componentHolder.children.clear();
-    noteData = data;
-    note = Note(noteData)..position = Vector2(40, 0);
-    componentHolder.add(note);
     clefSprite = noteData.clef.sprite..positionSprite();
     PositionComponent clefHolder = PositionComponent();
     componentHolder.add(clefHolder);
+    noteData = data;
+    note = Note(noteData)..position = Vector2(40, 0);
+    componentHolder.add(note);
     clefHolder.add(clefSprite);
     clefHolder.position = Vector2(-70, 0);
   }
@@ -83,7 +76,7 @@ final SimpleGameController gameController;
   }
 
   void getAndSetNote() {
-    
+
     noteData = gameController.getNoteDataFromPlayer();
     newNote(noteData);
   }

@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:toolkit/components/note.dart';
 import 'package:toolkit/config.dart';
 import 'package:toolkit/models/asset.dart';
+import 'package:toolkit/models/clef.dart';
 import 'package:toolkit/models/clef_selection.dart';
 import 'package:toolkit/models/note_data.dart';
 import 'package:toolkit/models/player.dart';
@@ -73,19 +74,22 @@ class RangeSelectionScene extends FlameGame
 
   List<NoteData> _getNotes(){
     List<NoteData> noteData = [
-      noteGenerator.noteFromNumberOld(player.range.top, true, player.clefSelection),
-      noteGenerator.noteFromNumberOld(player.range.bottom, true, player.clefSelection)
+      noteGenerator.getNextAvailableNote(player.range.top, false, player),
+      //noteGenerator.noteFromNumberOld(player.range.top, true, player.clefSelection),
+      noteGenerator.getNextAvailableNote(player.range.bottom, true, player)
     ];
     if(isClefThresholds){
-      noteData = [noteGenerator.noteFromNumberOld(player.clefThreshold.trebleClefThreshold, true, ClefSelection.treble), 
-      noteGenerator.noteFromNumberOld(player.clefThreshold.bassClefThreshold, true, ClefSelection.bass)];
+      noteData = [NoteData.findFirstChoiceByNumber(player.clefThreshold.trebleClefThreshold, Clef.treble()), 
+      NoteData.findFirstChoiceByNumber(player.clefThreshold.bassClefThreshold, Clef.bass())];
     }
     return noteData;
   }
 
   void changeValue(bool isTop, bool up){
     if(!isClefThresholds){
-      player.range.increment(isTop, up);
+      if (noteGenerator.checkValidChange(player, isTop, up)){
+        player.range.increment(isTop, up);
+      }
     } else {
       player.clefThreshold.increment(isTop, up);
     }

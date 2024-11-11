@@ -5,9 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:toolkit/components/note.dart';
 import 'package:toolkit/config.dart';
 import 'package:toolkit/game_modes/pong/pong_controller.dart';
-import 'package:toolkit/models/accidental.dart';
 import 'package:toolkit/models/asset.dart';
-import 'package:toolkit/models/clef.dart';
 import 'package:toolkit/models/note_data.dart';
 import 'package:toolkit/sprites/ball.dart';
 
@@ -24,13 +22,7 @@ class PongScene extends FlameGame{
   Ball ball = Ball();
 
 
-  NoteData noteData = NoteData(
-    name: "P0",
-    pos: 20,
-    accidental: Accidental.sharp,
-    clef: Clef.treble(),
-    noteNum: 5,
-  );
+  NoteData noteData = NoteData.placeholderValue;
 
   PongScene(this.gameController, this.side) {
     getAndSetNote();
@@ -79,8 +71,7 @@ class PongScene extends FlameGame{
     PositionComponent clefHolder = PositionComponent();
     componentHolder.add(clefHolder);
     clefHolder.add(clefSprite);
-    clefHolder.position = Vector2(-70, 0);
-    
+    clefHolder.position = Vector2(-70, 0); 
   }
 
   void drawLines() {

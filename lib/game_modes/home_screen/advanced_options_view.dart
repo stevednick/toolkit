@@ -1,5 +1,6 @@
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
+import 'package:toolkit/game_modes/home_screen/note_selector_view.dart';
 import 'package:toolkit/models/player.dart';
 import 'package:toolkit/scenes/range_selection_scene.dart';
 
@@ -12,13 +13,13 @@ class AdvancedOptionsView extends StatefulWidget {
 }
 
 class _AdvancedOptionsViewState extends State<AdvancedOptionsView> {
-
-    Widget _buildMainText() {
+  Widget _buildMainText() {
     return const Align(
       alignment: Alignment.topCenter,
       child: Padding(
         padding: EdgeInsets.all(20),
-        child: Text("Choose how low treble clef and high bass clef notes should go.",
+        child: Text(
+          "Choose how low treble clef and high bass clef notes should go.",
           style: TextStyle(fontSize: 15),
         ),
       ),
@@ -43,6 +44,23 @@ class _AdvancedOptionsViewState extends State<AdvancedOptionsView> {
     );
   }
 
+  Widget _buildNoteSelectorButton() {
+    return Positioned(
+      bottom: 40,
+      right: 40,
+      child: ElevatedButton(
+        child: const Text("Note Selection"),
+        onPressed: () {
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const NoteSelectorView(),
+              ));
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -51,6 +69,7 @@ class _AdvancedOptionsViewState extends State<AdvancedOptionsView> {
         children: [
           _buildClefThresholdsScene(),
           _buildMainText(),
+          _buildNoteSelectorButton(),
           _buildBackButton(),
         ],
       ),

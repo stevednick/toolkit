@@ -46,11 +46,12 @@ class PongController {
     noteChecker = NoteChecker(
       correctNoteHeard, getNoteDifference
     );
+    
   }
 
   void startButtonPressed() {
     if (mode.value == GameMode.waitingToStart) {
-      
+      startListener();
       changeNote(1);
       changeNote(0);
       startCountdown();
@@ -69,7 +70,7 @@ class PongController {
   void startGame() {
     //if (!gameRunning) nextGo();
     //currentPlayer.value ^= 1;
-    startListener();
+    //startListener();
     buttonText = "Finish";
     currentPlayer.value = 0;
     currentBeat.value = 1;
@@ -96,13 +97,16 @@ class PongController {
   }
 
   void startCountdown() {
+    
     gameText.value = "Player 1 Get Ready!";
     buttonText = "Wait";
     mode.value = GameMode.countingDown;
     countDownCounter = 3;
     countDownText.value = "3";
     double gameMillis = 60000/gameBPM;
-    Timer.periodic(Duration(seconds: gameMillis.toInt()), (timer) {
+    print("Timer Should Starts");
+    Timer.periodic(Duration(milliseconds: gameMillis.toInt()), (timer) {
+      print("Timer Starts");
       decreaseCountdown();
       if (countDownCounter == 0) timer.cancel();
     });

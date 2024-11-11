@@ -55,6 +55,7 @@ class _SimpleGameViewState extends State<SimpleGameView> {
   @override
   void dispose() {
     gameController.dispose();
+    pongScene.onDispose();
     super.dispose();
   }
 
@@ -221,8 +222,9 @@ class _SimpleGameViewState extends State<SimpleGameView> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                  builder: (context) =>
-                      AdvancedOptionsView(gameController.player)),
+                builder: (context) =>
+                    AdvancedOptionsView(gameController.player),
+              ),
             );
           },
           icon: const Icon(Icons.settings_outlined)),

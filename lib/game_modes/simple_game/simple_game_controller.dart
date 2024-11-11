@@ -15,12 +15,7 @@ import 'package:wakelock_plus/wakelock_plus.dart';
 enum GameState { listening, changingNote }
 
 class SimpleGameController {
-  ValueNotifier<NoteData> currentNote = ValueNotifier<NoteData>(NoteData(
-      name: "",
-      pos: 0,
-      accidental: Accidental.flat,
-      clef: Clef.bass(),
-      noteNum: 0));
+  ValueNotifier<NoteData> currentNote = ValueNotifier<NoteData>(NoteData.placeholderValue);
   final NoteGenerator noteGenerator = NoteGenerator();
   late NoteChecker noteChecker;
   late Player player;
