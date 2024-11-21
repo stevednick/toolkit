@@ -4,28 +4,37 @@ import 'package:toolkit/models/clef_selection.dart';
 import 'package:toolkit/models/note_data.dart';
 import 'package:toolkit/models/player.dart';
 
-class NoteGenerator {  // todo Next sort out the list for random selection.. 
-//todo then ensure that note selection stops once there are fewer than two options. 
-// todo maybe use the list to do that check? Needs to be modified every time anyway... 
+class NoteGenerator {
+  // todo Next sort out the list for random selection..
+//todo then ensure that note selection stops once there are fewer than two options.
+// todo maybe use the list to do that check? Needs to be modified every time anyway...
   Random random = Random();
-  List<NoteData> availableNotes = []; // todo fill this. 
-
+  List<NoteData> availableNotes = []; // todo fill this.
+  QuarterElementSelector selector = QuarterElementSelector();
   NoteGenerator();
 
-  void buildNoteList(Player player){
+  void buildNoteList(Player player) {
     availableNotes = [];
-    for (int i = player.range.bottom; i <= player.range.top; i++){
+    for (int i = player.range.bottom; i <= player.range.top; i++) {
       availableNotes.addAll(NoteData.findNotesByNumber(i));
     }
   }
 
-  bool checkValidChange(Player player, bool isTop, bool isUp){
+  bool checkValidChange(Player player, bool isTop, bool isUp) {
     List<NoteData> availables = [];
     int top = player.range.top;
-    top += isTop ? isUp ? 1 : -1 : 0;
+    top += isTop
+        ? isUp
+            ? 1
+            : -1
+        : 0;
     int bottom = player.range.bottom;
-    bottom += !isTop ? isUp ? 1 : -1 : 0;
-    for (int i = bottom; i <= top; i++){
+    bottom += !isTop
+        ? isUp
+            ? 1
+            : -1
+        : 0;
+    for (int i = bottom; i <= top; i++) {
       availables.addAll(NoteData.findNotesByNumber(i));
     }
     return availables.length >= 2;
@@ -72,7 +81,6 @@ class NoteGenerator {  // todo Next sort out the list for random selection..
   NoteData getNextAvailableNote(int num, bool isUp, Player player) {
     int increment = isUp ? 1 : -1;
     for (int i = num; true; i += increment) {
-      
       if (NoteData.findNotesByNumber(i).isNotEmpty) {
         NoteData noteToReturn = NoteData.findNotesByNumber(i).first;
         noteToReturn.clef = _getDisplayClef(i, player);
@@ -81,9 +89,14 @@ class NoteGenerator {  // todo Next sort out the list for random selection..
     }
   }
 
-  NoteData randomNoteFromRange(Player player) {
+  NoteData randomNoteFromRange(Player player, {bool bigJumps = false}) {
     buildNoteList(player);
-    NoteData noteToReturn = availableNotes[random.nextInt(availableNotes.length)];
+    NoteData noteToReturn =
+        availableNotes[random.nextInt(availableNotes.length)];
+    if (bigJumps) {
+      NoteData? note = selector.getAlternatingQuarterElement(availableNotes);
+      if (note != null) noteToReturn = note;
+    }
     noteToReturn.clef = _getClef(noteToReturn.noteNum, player);
     return noteToReturn;
   }
@@ -103,7 +116,7 @@ class NoteGenerator {  // todo Next sort out the list for random selection..
     return Clef.bass();
   }
 
-  Clef _getDisplayClef(int note, Player player){
+  Clef _getDisplayClef(int note, Player player) {
     if (player.clefSelection == ClefSelection.treble) {
       return Clef.treble();
     } else if (player.clefSelection == ClefSelection.bass) {
@@ -118,5 +131,35 @@ class NoteGenerator {  // todo Next sort out the list for random selection..
 
   int wrapAround(int value, int modulo) {
     return (value % modulo + modulo) % modulo;
+  }
+}
+
+class QuarterElementSelector<T> {
+  final Random _random = Random();
+  bool _isHighTurn = true;
+
+  T? getAlternatingQuarterElement(List<T> list) {
+    // Check if the list has at least 4 elements
+    if (list.length < 4) {
+      print('The list must have at least 4 elements.');
+      return null;
+    }
+
+    // Calculate the size of a quarter
+    final quarterSize = list.length ~/ 4;
+
+    int randomIndex;
+    if (_isHighTurn) {
+      // Select a random element from the top quarter
+      randomIndex = _random.nextInt(quarterSize);
+    } else {
+      // Select a random element from the bottom quarter
+      randomIndex = list.length - quarterSize + _random.nextInt(quarterSize);
+    }
+
+    // Toggle the turn for the next call
+    _isHighTurn = !_isHighTurn;
+
+    return list[randomIndex];
   }
 }

@@ -44,22 +44,6 @@ class _AdvancedOptionsViewState extends State<AdvancedOptionsView> {
     );
   }
 
-  Widget _buildNoteSelectorButton() {
-    return Positioned(
-      bottom: 40,
-      right: 40,
-      child: ElevatedButton(
-        child: const Text("Note Selection"),
-        onPressed: () {
-          Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const NoteSelectorView(),
-              ));
-        },
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -69,7 +53,6 @@ class _AdvancedOptionsViewState extends State<AdvancedOptionsView> {
         children: [
           _buildClefThresholdsScene(),
           _buildMainText(),
-          _buildNoteSelectorButton(),
           _buildBackButton(),
         ],
       ),

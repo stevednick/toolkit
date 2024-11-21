@@ -34,6 +34,13 @@ class NoteChecker {
     }
   }
 
+  double distanceToCorrectNote(){
+    if (noteNotifier.value < -100){
+      return 0;
+    }
+    return (noteNotifier.value-noteToCheck).toDouble();
+  }
+
   void initialize() async {
     pitchGetter.startListening();
     print("Note Checker Initialised");

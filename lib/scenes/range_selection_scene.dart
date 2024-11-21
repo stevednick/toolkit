@@ -8,7 +8,6 @@ import 'package:toolkit/components/note.dart';
 import 'package:toolkit/config.dart';
 import 'package:toolkit/models/asset.dart';
 import 'package:toolkit/models/clef.dart';
-import 'package:toolkit/models/clef_selection.dart';
 import 'package:toolkit/models/note_data.dart';
 import 'package:toolkit/models/player.dart';
 import 'package:toolkit/tools/note_generator.dart';

@@ -3,13 +3,16 @@ import 'dart:async';
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import 'package:toolkit/game_modes/home_screen/advanced_options_view.dart';
+import 'package:toolkit/game_modes/home_screen/note_selector_view.dart';
 import 'package:toolkit/game_modes/simple_game/simple_game_controller.dart';
 import 'package:toolkit/game_modes/simple_game/simple_game_scene.dart';
 import 'package:toolkit/models/game_mode.dart';
 import 'package:toolkit/scenes/range_selection_scene.dart';
-import 'package:toolkit/widgets/clef_selection_button.dart';
+import 'package:toolkit/widgets/toggle_button.dart';
+import 'package:toolkit/widgets/enhanced_clef_selection_button.dart';
+import 'package:toolkit/widgets/nice_button.dart';
 import 'package:toolkit/widgets/score_text.dart';
-import 'package:toolkit/widgets/tick.dart';
+import 'package:toolkit/widgets/tempo_selector_persistance.dart';
 import 'package:toolkit/widgets/transposition_drop_down.dart';
 
 class SimpleGameView extends StatefulWidget {
@@ -22,19 +25,14 @@ class SimpleGameView extends StatefulWidget {
 class _SimpleGameViewState extends State<SimpleGameView> {
   late final SimpleGameController gameController;
   late final SimpleGameScene pongScene;
-  late Tick tick;
 
   bool showTick = false;
 
   @override
   void initState() {
     super.initState();
-    gameController = SimpleGameController();
+    gameController = SimpleGameController(triggerTick);
     pongScene = SimpleGameScene(gameController);
-    gameController.player.score.addListener(() {
-      triggerTick();
-    });
-    tick = const Tick();
   }
 
   void triggerTick() {
@@ -65,7 +63,7 @@ class _SimpleGameViewState extends State<SimpleGameView> {
         width: 300,
         height: 500,
         child: GameWidget(
-          game: gameController.gameMode != GameMode.waitingToStart
+          game: gameController.gameMode.value != GameMode.waitingToStart
               ? pongScene
               : RangeSelectionScene(gameController.player),
         ),
@@ -78,7 +76,7 @@ class _SimpleGameViewState extends State<SimpleGameView> {
       top: 40,
       right: 40,
       child: Visibility(
-        visible: gameController.gameMode == GameMode.running,
+        visible: gameController.gameMode.value == GameMode.running,
         child: ScoreText(
           player: gameController.player,
         ),
@@ -123,7 +121,7 @@ class _SimpleGameViewState extends State<SimpleGameView> {
     return Positioned(
       top: 40,
       left: 40,
-      child: gameController.gameMode == GameMode.waitingToStart
+      child: gameController.gameMode.value == GameMode.waitingToStart
           ? TranspositionDropDown(
               player: gameController.player,
             )
@@ -137,9 +135,11 @@ class _SimpleGameViewState extends State<SimpleGameView> {
   }
 
   Widget _buildClefSelectionButton() {
-    return Align(
-      alignment: const Alignment(-0.8, 0),
-      child: ClefSelectionButton(gameController.player, refreshScene),
+    return Positioned(
+      bottom: 130,
+      right: 30,
+      child: EnhancedClefSelectionButton(gameController.player,
+          refreshScene), //ClefSelectionButton(gameController.player, refreshScene),
     );
   }
 
@@ -158,9 +158,10 @@ class _SimpleGameViewState extends State<SimpleGameView> {
                     gameController.startButtonPressed();
                   });
                 },
-                child: Text(gameController.gameMode == GameMode.waitingToStart
-                    ? "Start"
-                    : "End"), // Transfer text duties to game controller!
+                child: Text(
+                    gameController.gameMode.value == GameMode.waitingToStart
+                        ? "Start"
+                        : "End"), // Transfer text duties to game controller!
               ),
               const SizedBox(
                 height: 20,
@@ -193,22 +194,40 @@ class _SimpleGameViewState extends State<SimpleGameView> {
   }
 
   Widget _buildTickAndFeedbackText() {
-    return Align(
-      alignment: const Alignment(0.3, -0.5),
-      child: Visibility(
-        visible: gameController.gameMode == GameMode.running,
-        child: showTick
-            ? tick
-            : ValueListenableBuilder(
-                valueListenable: gameController.feedbackText,
-                builder: (context, text, child) {
-                  return Text(
-                    text,
-                    style: const TextStyle(
-                      fontSize: 30,
-                    ),
-                  );
-                }),
+    // todo Fix name!
+    return Stack(
+      children: [
+        Align(
+          alignment: const Alignment(0.3, -0.5),
+          child: Visibility(
+            visible: gameController.gameMode.value == GameMode.running,
+            child: ValueListenableBuilder(
+              valueListenable: gameController.feedbackText,
+              builder: (context, text, child) {
+                return Text(
+                  text,
+                  style: const TextStyle(
+                    fontSize: 30,
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTempoOnButton() {
+    return Positioned(
+      left: 30,
+      bottom: 90,
+      child: ToggleButton(
+        text: "Show Beat",
+        initialState: gameController.showTempo,
+        onToggle: (newValue) {
+          gameController.showTempo = newValue;
+        },
       ),
     );
   }
@@ -217,17 +236,49 @@ class _SimpleGameViewState extends State<SimpleGameView> {
     return Positioned(
       bottom: 30,
       right: 30,
-      child: IconButton(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) =>
-                    AdvancedOptionsView(gameController.player),
-              ),
-            );
-          },
-          icon: const Icon(Icons.settings_outlined)),
+      child: NiceButton(
+        text: "Clef Thresholds",
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => AdvancedOptionsView(gameController.player),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildNoteSelectorButton() {
+    return Positioned(
+      bottom: 78,
+      right: 30,
+      child: NiceButton(
+        text: "Note Selection",
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const NoteSelectorView(),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildBigJumpSwitch() {
+    return Positioned(
+      bottom: 190,
+      right: 30,
+      child: ToggleButton(
+        text: "Big Jumps",
+        initialState: gameController.bigJumpsMode,
+        onToggle: (value) {
+          gameController.bigJumpsMode = value;
+        },
+      ),
     );
   }
 
@@ -243,6 +294,27 @@ class _SimpleGameViewState extends State<SimpleGameView> {
     );
   }
 
+  Widget _buildTempoSelectorButton() {
+    return Positioned(
+      left: 30,
+      bottom: 30,
+      child: TempoSelector(onTempoChanged: (int newTempo) {}),
+    );
+  }
+
+  Widget _buildSettingsButtons() {
+    return Stack(
+      children: [
+        _buildBigJumpSwitch(),
+        _buildClefSelectionButton(),
+        _buildSettingsButton(),
+        _buildNoteSelectorButton(),
+        _buildTempoSelectorButton(),
+        _buildTempoOnButton(),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -252,14 +324,11 @@ class _SimpleGameViewState extends State<SimpleGameView> {
           _buildGameScene(),
           _buildScoreText(),
           _buildGameText(),
-          //_buildFeedbackText(),
           _buildTranspositionDropDown(),
-          if (gameController.gameMode == GameMode.waitingToStart)
-            _buildClefSelectionButton(),
+          if (gameController.gameMode.value == GameMode.waitingToStart)
+            _buildSettingsButtons(),
           _buildStartButton(),
-          _buildTickAndFeedbackText(),
-          _buildSettingsButton(),
-          //_buildGhostNoteToggle(), Implement this.
+          //_buildTickAndFeedbackText(),
           _buildBackButton(),
         ],
       ),

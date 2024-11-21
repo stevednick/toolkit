@@ -12,7 +12,7 @@ class ScoreText extends StatelessWidget {
       builder: (context, score, child) {
         return Text(
           'Score: $score',
-          style: const TextStyle(fontSize: 36, color: Colors.black),
+          style: const TextStyle(fontSize: 30, color: Colors.black),
         );
       },
     );

@@ -17,9 +17,6 @@ enum GameState {
 bool gameRunning = false;
 
 class PongController {
-
-  //ValueNotifier<List<NoteData>> notes = ValueNotifier<List<NoteData>>([NoteData(name: "", pos: 0, accidental: Accidental.flat, clef: Clef.bass(), noteNum: 0), NoteData(name: "", pos: 0, accidental: Accidental.flat, clef: Clef.bass(), noteNum: 0)]);
-  int countDownCounter = 3;
   ValueNotifier<String> countDownText = ValueNotifier<String>("");
   ValueNotifier<String> gameText = ValueNotifier("Set your range.");
   ValueNotifier<int> currentPlayer = ValueNotifier<int>(1);
@@ -28,7 +25,6 @@ class PongController {
   // late Player leftPlayer, rightPlayer;
   late List<Player> players;
   String leftPlayerKey = "leftTestKey", rightPlayerKey = "rightTestKey";
-  late Timer gameTimer;
 
   Duration waitDuration = const Duration(seconds: 1);
   GameState _state = GameState.listening;
@@ -37,23 +33,17 @@ class PongController {
   ValueNotifier<String> leftFeedbackText = ValueNotifier("");
   ValueNotifier<String> rightFeedbackText = ValueNotifier("");
   String buttonText = "Start";
-  int gameBPM = 40;
-  
+  int gameBPM = 60;
+  double time = -4;
 
   PongController() {
     WakelockPlus.enable();
     setPlayers();
-    noteChecker = NoteChecker(
-      correctNoteHeard, getNoteDifference
-    );
-    
+    noteChecker = NoteChecker(correctNoteHeard, getNoteDifference);
   }
 
   void startButtonPressed() {
     if (mode.value == GameMode.waitingToStart) {
-      startListener();
-      changeNote(1);
-      changeNote(0);
       startCountdown();
     } else if (mode.value == GameMode.running) {
       endGame();
@@ -61,84 +51,79 @@ class PongController {
       currentPlayer.value = 0;
       players[0].score.value = 0;
       players[1].score.value = 0;
-      changeNote(1);
-      changeNote(0);
       startCountdown();
     }
   }
 
+  void update(double dt) {
+    int prevTime = time.toInt();
+    time += dt * gameBPM / 60;
+
+    if (time > 4) time -= 4;
+    if (time.toInt() != prevTime) {
+      nextBeat(time.toInt());
+    }
+    if (mode.value == GameMode.countingDown) {
+      countDownText.value = (-time + 1).toInt().toString();
+      if (time >= 0) {
+        startGame();
+        countDownText.value = "Go!";
+        Timer _ = Timer(
+          const Duration(seconds: 1),
+          () {
+            countDownText.value = "";
+          },
+        );
+      }
+    }
+  }
+
+  void resetTime() {
+    time = -3;
+  }
+
   void startGame() {
-    //if (!gameRunning) nextGo();
-    //currentPlayer.value ^= 1;
-    //startListener();
     buttonText = "Finish";
     currentPlayer.value = 0;
     currentBeat.value = 1;
     _state = GameState.listening;
-    double gameMillis = 60000/gameBPM;
-    gameTimer = Timer.periodic(Duration(milliseconds: gameMillis.toInt()), (timer) {
-      nextBeat();
-    });
+
     mode.value = GameMode.running;
     gameRunning = true;
   }
 
   void pauseGame() {
     mode.value = GameMode.paused;
-    gameTimer.cancel();
   }
 
   void endGame() {
     gameText.value = "Set your range!";
     buttonText = "Start";
     mode.value = GameMode.finished;
-    gameTimer.cancel();
     stopListener();
   }
 
   void startCountdown() {
-    
-    gameText.value = "Player 1 Get Ready!";
+    startListener();
+    changeNote(1);
+    changeNote(0);
+    resetTime();
+    gameText.value = "";
     buttonText = "Wait";
     mode.value = GameMode.countingDown;
-    countDownCounter = 3;
-    countDownText.value = "3";
-    double gameMillis = 60000/gameBPM;
-    print("Timer Should Starts");
-    Timer.periodic(Duration(milliseconds: gameMillis.toInt()), (timer) {
-      print("Timer Starts");
-      decreaseCountdown();
-      if (countDownCounter == 0) timer.cancel();
-    });
   }
 
-  void decreaseCountdown() {
-    countDownCounter--;
-    if (countDownCounter > 0) {
-      countDownText.value = countDownCounter.toString();
-    } else {
-      countDownText.value = "Go!";
-      gameText.value = "Player 1";
-      startGame();
-      Timer.periodic(const Duration(seconds: 3), (timer) {
-        countDownText.value = "";
-        timer.cancel();
-      });
-    }
-  }
-
-  void getNoteDifference(int difference){
-    print("Difference $difference, side ${currentPlayer.value}");
+  void getNoteDifference(int difference) {
     noteFeedback(difference, currentPlayer.value);
   }
 
-  void noteFeedback(int difference, int side){
+  void noteFeedback(int difference, int side) {
     String t = "";
-    if (difference > 0){
+    if (difference > 0) {
       t = "Too High";
-    } else if (difference < 0 && difference > -1000){
+    } else if (difference < 0 && difference > -1000) {
       t = "Too Low";
-    } 
+    }
     leftFeedbackText.value = side == 0 ? t : "";
     rightFeedbackText.value = side == 1 ? t : "";
   }
@@ -154,10 +139,9 @@ class PongController {
     noteChecker.initialize();
   }
 
-  void stopListener(){
+  void stopListener() {
     noteChecker.dispose();
   }
-
 
   void correctNoteHeard() {
     if (_state == GameState.listening) {
@@ -167,23 +151,29 @@ class PongController {
     }
   }
 
-  void nextBeat() {
-    currentBeat.value++;
-    if (currentBeat.value >= 5) currentBeat.value = 1;
-    if (currentBeat.value == 1 || currentBeat.value == 3) nextGo();
+  void nextBeat(int beat) {
+    if (beat == 0 || beat == 2) {
+      currentPlayer.value ^= 1;
+      noteChecker.noteToCheck = players[currentPlayer.value].getNoteToCheck();
+      _state = GameState.listening;
+    }
+    if (beat == 1 || beat == 3) {
+      changeNote(currentPlayer.value);
+    }
   }
 
-  void nextGo() {
-    changeNote(currentPlayer.value);
-    
-    currentPlayer.value ^= 1;
-    gameText.value = "Player ${currentPlayer.value + 1}";
-    noteChecker.noteToCheck = players[currentPlayer.value].getNoteToCheck();
-    _state = GameState.listening;
-  }
+  // void nextGo() {
+  //   changeNote(currentPlayer.value);
+
+  //   // gameText.value = "Player ${currentPlayer.value + 1}";
+  //   noteChecker.noteToCheck = players[currentPlayer.value].getNoteToCheck();
+
+  // }
 
   void changeNote(player) {
-    players[player].currentNote.value = noteGenerator.randomNoteFromRange(players[player]); // There's definitely a more elegant way to set this up...
+    players[player].currentNote.value = noteGenerator.randomNoteFromRange(
+        players[
+            player]); // There's definitely a more elegant way to set this up...
   }
 
   void _incrementScore() {

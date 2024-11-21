@@ -19,13 +19,14 @@ class _NoteSelectorViewState extends State<NoteSelectorView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        toolbarHeight: 30,
         title: const Text('Note Selector'),
       ),
       body: GridView.builder(
         padding: const EdgeInsets.all(16),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 7,
-          childAspectRatio: 2,
+          childAspectRatio: 2.2,
           crossAxisSpacing: 8,
           mainAxisSpacing: 8,
         ),
@@ -108,7 +109,7 @@ class NoteToggleButton extends StatelessWidget {
         fit: BoxFit.scaleDown,
         child: Text(
           '$note$accidental',
-          style: const TextStyle(fontSize: 25, fontWeight: FontWeight.w400),
+          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w400),
         ),
       ),
     );

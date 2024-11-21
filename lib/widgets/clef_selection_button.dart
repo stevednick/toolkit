@@ -25,7 +25,7 @@ class _ClefSelectionButtonState extends State<ClefSelectionButton> {
   Future<void> _setMode() async {
     ClefSelection selection = await widget.player.getClefSelection();
     setState(() {
-      mode = ClefSelection.values.indexOf(selection);
+      mode = (ClefSelection.values.indexOf(selection));
     });
   }
 

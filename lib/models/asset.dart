@@ -39,4 +39,6 @@ class Asset extends SpriteComponent with HasGameReference, HasVisibility {
   static Asset createTrebleClef() => Asset(Vector2(-50, -88), Vector2(100, 185), 'treble.png', Colors.black);
   static Asset createBassClef() => Asset(Vector2(-30, -49), Vector2(70, 81), 'bass.png', Colors.black);
   static Asset createArrow() => Asset(Vector2(49, -19), Vector2(20, 40), 'arrows.png', Colors.blue);
+  static Asset createTick() => Asset(Vector2.zero(), Vector2(70, 80), 'tick.png', Colors.greenAccent);
+  static Asset createFeedbackArrow() => Asset(Vector2.zero(), Vector2(100, 100), 'arrow.png', Colors.black);
 }

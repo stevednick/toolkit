@@ -7,6 +7,7 @@ import 'package:toolkit/game_modes/pong/pong_scene.dart';
 import 'package:toolkit/models/game_mode.dart';
 import 'package:toolkit/scenes/range_selection_scene.dart';
 import 'package:toolkit/widgets/clef_selection_button.dart';
+import 'package:toolkit/widgets/enhanced_clef_selection_button.dart';
 import 'package:toolkit/widgets/score_text.dart';
 import 'package:toolkit/widgets/tick.dart';
 import 'package:toolkit/widgets/transposition_drop_down.dart';
@@ -29,7 +30,6 @@ class _PongViewState extends State<PongView>
       const TextStyle(fontSize: 36, color: Colors.black);
   final TextStyle countdownTextStyle = const TextStyle(fontSize: 60);
   List<bool> showTicks = [false, false];
-  Tick tick = const Tick();
 
   @override
   void initState() {
@@ -42,14 +42,12 @@ class _PongViewState extends State<PongView>
       }
     });
     gameController.currentBeat.addListener(triggerFlash);
-    gameController.players[0].score.addListener((){
+    gameController.players[0].score.addListener(() {
       triggerTick(0);
     });
-    gameController.players[1].score.addListener((){
+    gameController.players[1].score.addListener(() {
       triggerTick(1);
     });
-
-    
 
     _controller = AnimationController(
       vsync: this,
@@ -62,15 +60,15 @@ class _PongViewState extends State<PongView>
     super.initState();
   }
 
-  void triggerTick(int side){
+  void triggerTick(int side) {
     setState(() {
-        showTicks[side] = true;
+      showTicks[side] = true;
+    });
+    Timer _ = Timer(const Duration(milliseconds: 1500), () {
+      setState(() {
+        showTicks[side] = false;
       });
-      Timer _ = Timer(const Duration(milliseconds: 1500), (){
-        setState(() {
-          showTicks[side] = false;
-        });
-      });
+    });
   }
 
   void triggerFlash() {
@@ -145,7 +143,7 @@ class _PongViewState extends State<PongView>
       int playerIndex, Alignment alignment) {
     final player = gameController.players[playerIndex];
     return Positioned(
-      top: 40,
+      top: 30,
       left: alignment == Alignment.topLeft ? 40 : null,
       right: alignment == Alignment.topRight ? 40 : null,
       child: gameController.mode.value == GameMode.waitingToStart ||
@@ -159,18 +157,22 @@ class _PongViewState extends State<PongView>
   }
 
   Widget _buildClefSelectionButton() {
-    return Align(
-        alignment: const Alignment(0, -0.6),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            ClefSelectionButton(gameController.players[0], refreshScene),
-            const SizedBox(
-              width: 40,
-            ),
-            ClefSelectionButton(gameController.players[1], refreshScene),
-          ],
-        ));
+    return Stack(
+      children: [
+        Positioned(
+          bottom: 30,
+          left: 30,
+          child: EnhancedClefSelectionButton(
+              gameController.players[0], refreshScene),
+        ),
+        Positioned(
+          bottom: 30,
+          right: 30,
+          child: EnhancedClefSelectionButton(
+              gameController.players[1], refreshScene),
+        ),
+      ],
+    );
   }
 
   Widget _buildScoreTexts() {
@@ -220,7 +222,7 @@ class _PongViewState extends State<PongView>
       valueListenable: gameController.countDownText,
       builder: (context, text, child) {
         return Align(
-          alignment: const Alignment(0, -0.5),
+          alignment: const Alignment(0, 0),
           child: Text(
             text,
             style: countdownTextStyle,
@@ -251,55 +253,52 @@ class _PongViewState extends State<PongView>
     );
   }
 
-  Widget _buildTicks() {
-    return Stack(
-      children: [
-        Align(
-          alignment: const Alignment(-0.3, -0.5),
-          child: tick,
-        ),
-        Align(
-          alignment: const Alignment(0.3, -0.5),
-          child: tick,
-        )
-      ],
-    );
-  }
+  // Widget _buildTicks() {
+  //   return Stack(
+  //     children: [
+  //       Align(
+  //         alignment: const Alignment(-0.3, -0.5),
+  //         child: tick,
+  //       ),
+  //       Align(
+  //         alignment: const Alignment(0.3, -0.5),
+  //         child: tick,
+  //       )
+  //     ],
+  //   );
+  // }
 
   Widget _buildTicksAndFeedbackText() {
+    // todo remove feedback text!
     return Visibility(
       visible: gameController.mode.value == GameMode.running,
       child: Stack(
         children: [
           Align(
-            alignment: const Alignment(-0.3, -0.5),
-            child: showTicks[0]
-                ? tick
-                : ValueListenableBuilder(
-                    valueListenable: gameController.leftFeedbackText,
-                    builder: (context, text, child) {
-                      return Text(
-                        text,
-                        style: const TextStyle(
-                          fontSize: 30,
-                        ),
-                      );
-                    }),
+            alignment: const Alignment(0, -0.5),
+            child: ValueListenableBuilder(
+                valueListenable: gameController.leftFeedbackText,
+                builder: (context, text, child) {
+                  return Text(
+                    text,
+                    style: const TextStyle(
+                      fontSize: 30,
+                    ),
+                  );
+                }),
           ),
           Align(
-            alignment: const Alignment(0.3, -0.5),
-            child: showTicks[1]
-                ? tick
-                : ValueListenableBuilder(
-                    valueListenable: gameController.rightFeedbackText,
-                    builder: (context, text, child) {
-                      return Text(
-                        text,
-                        style: const TextStyle(
-                          fontSize: 30,
-                        ),
-                      );
-                    }),
+            alignment: const Alignment(0, -0.5),
+            child: ValueListenableBuilder(
+                valueListenable: gameController.rightFeedbackText,
+                builder: (context, text, child) {
+                  return Text(
+                    text,
+                    style: const TextStyle(
+                      fontSize: 30,
+                    ),
+                  );
+                }),
           ),
         ],
       ),
@@ -321,7 +320,7 @@ class _PongViewState extends State<PongView>
           _buildPlayerText(),
           _buildCountdownText(),
           _buildStartButton(),
-          _buildTicksAndFeedbackText(),
+          //_buildTicksAndFeedbackText(),
           const BackButton(),
         ],
       ),

@@ -3,8 +3,7 @@ import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:toolkit/models/accidental.dart';
-import 'package:toolkit/models/clef.dart';
+import 'package:flutter/widgets.dart';
 import 'package:toolkit/models/game_mode.dart';
 import 'package:toolkit/models/note_data.dart';
 import 'package:toolkit/models/player.dart';
@@ -12,7 +11,7 @@ import 'package:toolkit/tools/note_checker.dart';
 import 'package:toolkit/tools/note_generator.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
-enum GameState { listening, changingNote }
+enum GameState { listening, correctNoteHeard }
 
 class SimpleGameController {
   ValueNotifier<NoteData> currentNote = ValueNotifier<NoteData>(NoteData.placeholderValue);
@@ -20,16 +19,22 @@ class SimpleGameController {
   late NoteChecker noteChecker;
   late Player player;
   final String playerKey = "SimpleTestKey";
-  GameMode gameMode = GameMode.waitingToStart;
+  ValueNotifier<GameMode> gameMode = ValueNotifier(GameMode.waitingToStart);
   // ValueNotifier<String> countDownText = ValueNotifier("");
   ValueNotifier<String> gameText = ValueNotifier("Set your range.");
   ValueNotifier<String> feedbackText = ValueNotifier("");
   Duration waitDuration = const Duration(seconds: 1);
-  GameState _state = GameState.listening;
+  ValueNotifier<GameState> state = ValueNotifier(GameState.listening);
+  bool showTempo = true;
+  bool showArrow = true;
+
+  bool bigJumpsMode = false;
+  Function() triggerTick;
+
 
   bool ghostNotesOn = true;
 
-  SimpleGameController() {
+  SimpleGameController(this.triggerTick) {
     WakelockPlus.enable();
     player = Player(playerKey: playerKey);
     noteChecker = NoteChecker(
@@ -50,22 +55,23 @@ class SimpleGameController {
   }
 
   void correctNoteHeard() {
-    if (_state == GameState.listening) {
+    if (state.value == GameState.listening) {
+      triggerTick();
       _incrementScore();
       _waitAndChangeNote();
-      _state = GameState.changingNote;
+      state.value = GameState.correctNoteHeard;
     }
   }
 
   void startButtonPressed() {
-    if (gameMode == GameMode.waitingToStart) {
+    if (gameMode.value == GameMode.waitingToStart) {
       player.score.value = 0;
       gameText.value = "Play the note.";
       noteChecker.initialize();
-      gameMode = GameMode.running;
+      gameMode.value = GameMode.running;
       changeNote();
-    } else if (gameMode == GameMode.running) {
-      gameMode = GameMode.waitingToStart;
+    } else if (gameMode.value == GameMode.running) {
+      gameMode.value = GameMode.waitingToStart;
       gameText.value = "Set your range.";
       noteChecker.dispose();
     }
@@ -74,16 +80,15 @@ class SimpleGameController {
   void _waitAndChangeNote() {
     changeNote();
     Timer(waitDuration, () {
-      _state = GameState.listening;
+      state.value = GameState.listening;
     });
   }
 
   void changeNote() {
     player.currentNote.value = noteGenerator.randomNoteFromRange(
-        player);
+        player, bigJumps: bigJumpsMode);
     noteChecker.noteToCheck = player.getNoteToCheck();
-    print(
-        "noteChecker: ${noteChecker.noteToCheck}, curentNote ${currentNote.value.noteNum}");
+    print("noteChecker: ${noteChecker.noteToCheck}, curentNote ${currentNote.value.noteNum}");
   }
 
   void _incrementScore() {
