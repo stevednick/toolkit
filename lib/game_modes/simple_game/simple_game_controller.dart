@@ -26,13 +26,9 @@ class SimpleGameController {
   Duration waitDuration = const Duration(seconds: 1);
   ValueNotifier<GameState> state = ValueNotifier(GameState.listening);
   bool showTempo = true;
-  bool showArrow = true;
 
   bool bigJumpsMode = false;
   Function() triggerTick;
-
-
-  bool ghostNotesOn = true;
 
   SimpleGameController(this.triggerTick) {
     WakelockPlus.enable();
@@ -41,17 +37,10 @@ class SimpleGameController {
       correctNoteHeard,
       noteFeedback,
     );
-    //changeNote();
   }
 
   void noteFeedback(int difference) {
-    if (difference > 0) {
-      feedbackText.value = "Too High";
-    } else if (difference < 0 && difference > -1000) {
-      feedbackText.value = "Too Low";
-    } else {
-      feedbackText.value = "";
-    }
+    //
   }
 
   void correctNoteHeard() {
@@ -88,7 +77,6 @@ class SimpleGameController {
     player.currentNote.value = noteGenerator.randomNoteFromRange(
         player, bigJumps: bigJumpsMode);
     noteChecker.noteToCheck = player.getNoteToCheck();
-    print("noteChecker: ${noteChecker.noteToCheck}, curentNote ${currentNote.value.noteNum}");
   }
 
   void _incrementScore() {

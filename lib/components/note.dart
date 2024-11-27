@@ -6,7 +6,7 @@ import 'package:toolkit/models/accidental.dart';
 import 'package:toolkit/models/asset.dart';
 import 'package:toolkit/models/note_data.dart';
 
-class Note extends PositionComponent{
+class Note extends PositionComponent {
   late Asset crotchetSprite;
   late Asset invertedCrotchetSprite;
   //late Asset accidentalSprite;
@@ -19,23 +19,36 @@ class Note extends PositionComponent{
   PositionComponent noteComponents = PositionComponent();
   PositionComponent ledgerHolder = PositionComponent();
   final bool arrowShowing;
+  final bool isGhostNote;
 
-
-  Note(this.noteData, {this.arrowShowing = false, super.position, super.size, super.scale, super.angle, super.nativeAngle, super.anchor, super.children, super.priority, super.key});
+  Note(this.noteData,
+      {this.arrowShowing = false,
+      this.isGhostNote = false,
+      super.position,
+      super.size,
+      super.scale,
+      super.angle,
+      super.nativeAngle,
+      super.anchor,
+      super.children,
+      super.priority,
+      super.key});
 
   @override
   Future<void> onLoad() async {
     super.onLoad();
     setUp();
   }
+
   void setUp() {
+    Color colour = isGhostNote ? Colors.grey : Colors.black;
     arrowSprite = Asset.createArrow();
-    crotchetSprite = Asset.createCrotchet();
-    invertedCrotchetSprite = Asset.createInvertedCrotchet();
-    sharpSprite = Asset.createSharp();
-    flatSprite = Asset.createFlat();
-    doubleSharpSprite = Asset.createDoubleSharp();
-    doubleFlatSprite = Asset.createDoubleFlat();
+    crotchetSprite = Asset.createCrotchet(colour: colour);
+    invertedCrotchetSprite = Asset.createInvertedCrotchet(colour: colour);
+    sharpSprite = Asset.createSharp(colour: colour);
+    flatSprite = Asset.createFlat(colour: colour);
+    doubleSharpSprite = Asset.createDoubleSharp(colour: colour);
+    doubleFlatSprite = Asset.createDoubleFlat(colour: colour);
     noteComponents.add(crotchetSprite);
     noteComponents.add(invertedCrotchetSprite);
     noteComponents.add(sharpSprite);
@@ -48,10 +61,9 @@ class Note extends PositionComponent{
     positionCrotchetSprite();
     //setUpAccidental();
     changeNote(noteData);
-    
   }
 
-  void changeNote(NoteData newNote){ 
+  void changeNote(NoteData newNote) {
     noteData = newNote;
     arrowSprite.isVisible = arrowShowing;
     crotchetSprite.isVisible = noteData.posOnStave <= 0;
@@ -89,9 +101,10 @@ class Note extends PositionComponent{
   }
 
   void drawLedger(int p) {
+    Color colour = isGhostNote ? Colors.grey : Colors.black;
     RectangleComponent ledgerLine = RectangleComponent(
       size: Vector2(ledgerLength, lineWidth),
-      paint: Paint()..color = Colors.black,
+      paint: Paint()..color = colour,
     )..position = Vector2(-13, -p / 2 * lineGap);
     ledgerHolder.add(ledgerLine);
   }
@@ -100,7 +113,7 @@ class Note extends PositionComponent{
     noteComponents.position = Vector2(0, -lineGap * noteData.posOnStave / 2.0);
   }
 
-  void addArrow(){
-    noteComponents.add(arrowSprite); 
+  void addArrow() {
+    noteComponents.add(arrowSprite);
   }
 }

@@ -39,9 +39,9 @@ class _ToggleButtonState extends State<ToggleButton> {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 300),
         width: 120,
-        height: 42,
+        height: 36,
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(21),
+          borderRadius: BorderRadius.circular(18),
           color: _isEnabled ? Colors.green : Colors.grey[200],
           boxShadow: [
             BoxShadow(

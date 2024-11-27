@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:toolkit/widgets/nice_button.dart';
 
 class HomeScreenNavigationButton extends StatelessWidget {
   final Widget route;
@@ -8,7 +9,8 @@ class HomeScreenNavigationButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return OutlinedButton(
+    return NiceButton(
+      text: text,
       onPressed: () {
         Navigator.push(
           context,
@@ -17,7 +19,6 @@ class HomeScreenNavigationButton extends StatelessWidget {
           ),
         );
       },
-      child: Text(text),
     );
   }
 }

@@ -30,15 +30,15 @@ class Asset extends SpriteComponent with HasGameReference, HasVisibility {
     paint = Paint()..colorFilter = ColorFilter.mode(colour, BlendMode.srcIn);
   }
 
-  static Asset createCrotchet() => Asset(Vector2(0, -87), Vector2(34, 100), 'crotchet.png', Colors.black);
-  static Asset createInvertedCrotchet() => Asset(Vector2(0, -11), Vector2(34, 100), 'invertedCrotchet.png', Colors.black);
-  static Asset createSharp() => Asset(Vector2(-40, -27), Vector2(28, 56), 'sharp.png', Colors.black);
-  static Asset createDoubleSharp() => Asset(Vector2(-42, -14), Vector2(25, 29), 'doubleSharp.png', Colors.black);
-  static Asset createFlat() => Asset(Vector2(-38, -35), Vector2(25, 51), 'flat.png', Colors.black);
-  static Asset createDoubleFlat() => Asset(Vector2(-44, -40), Vector2(40, 55), 'doubleFlat.png', Colors.black);
+  static Asset createCrotchet({Color colour = Colors.black}) => Asset(Vector2(0, -87), Vector2(34, 100), 'crotchet.png', colour);
+  static Asset createInvertedCrotchet({Color colour = Colors.black}) => Asset(Vector2(0, -11), Vector2(34, 100), 'invertedCrotchet.png', colour);
+  static Asset createSharp({Color colour = Colors.black}) => Asset(Vector2(-40, -27), Vector2(28, 56), 'sharp.png', colour);
+  static Asset createDoubleSharp({Color colour = Colors.black}) => Asset(Vector2(-42, -14), Vector2(25, 29), 'doubleSharp.png', colour);
+  static Asset createFlat({Color colour = Colors.black}) => Asset(Vector2(-38, -35), Vector2(25, 51), 'flat.png', colour);
+  static Asset createDoubleFlat({Color colour = Colors.black}) => Asset(Vector2(-44, -40), Vector2(40, 55), 'doubleFlat.png', colour);
   static Asset createTrebleClef() => Asset(Vector2(-50, -88), Vector2(100, 185), 'treble.png', Colors.black);
   static Asset createBassClef() => Asset(Vector2(-30, -49), Vector2(70, 81), 'bass.png', Colors.black);
   static Asset createArrow() => Asset(Vector2(49, -19), Vector2(20, 40), 'arrows.png', Colors.blue);
-  static Asset createTick() => Asset(Vector2.zero(), Vector2(70, 80), 'tick.png', Colors.greenAccent);
+  static Asset createTick() => Asset(Vector2.zero(), Vector2(70, 80), 'tick.png', Colors.green);
   static Asset createFeedbackArrow() => Asset(Vector2.zero(), Vector2(100, 100), 'arrow.png', Colors.black);
 }

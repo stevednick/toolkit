@@ -6,10 +6,10 @@ import 'package:toolkit/game_modes/pong/pong_controller.dart';
 import 'package:toolkit/game_modes/pong/pong_scene.dart';
 import 'package:toolkit/models/game_mode.dart';
 import 'package:toolkit/scenes/range_selection_scene.dart';
-import 'package:toolkit/widgets/clef_selection_button.dart';
 import 'package:toolkit/widgets/enhanced_clef_selection_button.dart';
+import 'package:toolkit/widgets/nice_button.dart';
 import 'package:toolkit/widgets/score_text.dart';
-import 'package:toolkit/widgets/tick.dart';
+import 'package:toolkit/widgets/tempo_selector_persistance.dart';
 import 'package:toolkit/widgets/transposition_drop_down.dart';
 
 class PongView extends StatefulWidget {
@@ -24,7 +24,6 @@ class _PongViewState extends State<PongView>
   final PongController gameController = PongController();
   late PongScene leftPongScene, rightPongScene;
   late AnimationController _controller;
-  late Animation<double> _animation;
 
   final TextStyle playerTextStyle =
       const TextStyle(fontSize: 36, color: Colors.black);
@@ -33,8 +32,7 @@ class _PongViewState extends State<PongView>
 
   @override
   void initState() {
-    leftPongScene = PongScene(gameController, 0);
-    rightPongScene = PongScene(gameController, 1);
+    super.initState();
 
     gameController.countDownText.addListener(() {
       if (gameController.countDownText.value == "Go!") {
@@ -55,11 +53,10 @@ class _PongViewState extends State<PongView>
           const Duration(milliseconds: 300), // Duration of the fade in/out
     );
 
-    _animation = Tween<double>(begin: 1, end: 0).animate(_controller);
-
-    super.initState();
+    leftPongScene = PongScene(gameController, 0);
+    rightPongScene = PongScene(gameController, 1);
   }
-
+  
   void triggerTick(int side) {
     setState(() {
       showTicks[side] = true;
@@ -85,29 +82,11 @@ class _PongViewState extends State<PongView>
     setState(() {});
   }
 
-  Widget _buildFlashCircle() {
-    return Center(
-      child: Visibility(
-        visible: gameController.mode.value == GameMode.running,
-        child: FadeTransition(
-          opacity: _animation,
-          child: Container(
-            width: 50,
-            height: 50,
-            decoration: const BoxDecoration(
-              shape: BoxShape.circle,
-              color: Colors.blue,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
   Widget _buildGameWidgets() {
     return Center(
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
+        //mainAxisSize: MainAxisSize.max,
         children: [
           _buildPongScene(0, leftPongScene),
           const SizedBox(width: 100),
@@ -160,13 +139,13 @@ class _PongViewState extends State<PongView>
     return Stack(
       children: [
         Positioned(
-          bottom: 30,
+          bottom: 20,
           left: 30,
           child: EnhancedClefSelectionButton(
               gameController.players[0], refreshScene),
         ),
         Positioned(
-          bottom: 30,
+          bottom: 20,
           right: 30,
           child: EnhancedClefSelectionButton(
               gameController.players[1], refreshScene),
@@ -179,8 +158,8 @@ class _PongViewState extends State<PongView>
     return Stack(
       children: [
         Positioned(
-          bottom: 40,
-          left: 40,
+          bottom: 30,
+          left: 170,
           child: Visibility(
             visible: gameController.mode.value != GameMode.waitingToStart,
             child: ScoreText(
@@ -189,8 +168,8 @@ class _PongViewState extends State<PongView>
           ),
         ),
         Positioned(
-          bottom: 40,
-          right: 40,
+          bottom: 30,
+          right: 170,
           child: Visibility(
             visible: gameController.mode.value != GameMode.waitingToStart,
             child: ScoreText(
@@ -241,9 +220,9 @@ class _PongViewState extends State<PongView>
           child: Column(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              FilledButton(
+              NiceButton(
+                text: gameController.buttonText,
                 onPressed: _startButtonPressed,
-                child: Text(gameController.buttonText),
               ),
               const SizedBox(height: 40),
             ],
@@ -253,55 +232,19 @@ class _PongViewState extends State<PongView>
     );
   }
 
-  // Widget _buildTicks() {
-  //   return Stack(
-  //     children: [
-  //       Align(
-  //         alignment: const Alignment(-0.3, -0.5),
-  //         child: tick,
-  //       ),
-  //       Align(
-  //         alignment: const Alignment(0.3, -0.5),
-  //         child: tick,
-  //       )
-  //     ],
-  //   );
-  // }
+  Widget _buildTempoSelectorButton(){
+    return Positioned(
+      left: 30,
+      bottom: 70,
+      child: TempoSelector(onTempoChanged: (int newTempo){}, keyString: 'pong_tempo'),);
+  }
 
-  Widget _buildTicksAndFeedbackText() {
-    // todo remove feedback text!
-    return Visibility(
-      visible: gameController.mode.value == GameMode.running,
-      child: Stack(
-        children: [
-          Align(
-            alignment: const Alignment(0, -0.5),
-            child: ValueListenableBuilder(
-                valueListenable: gameController.leftFeedbackText,
-                builder: (context, text, child) {
-                  return Text(
-                    text,
-                    style: const TextStyle(
-                      fontSize: 30,
-                    ),
-                  );
-                }),
-          ),
-          Align(
-            alignment: const Alignment(0, -0.5),
-            child: ValueListenableBuilder(
-                valueListenable: gameController.rightFeedbackText,
-                builder: (context, text, child) {
-                  return Text(
-                    text,
-                    style: const TextStyle(
-                      fontSize: 30,
-                    ),
-                  );
-                }),
-          ),
-        ],
-      ),
+  Widget _buildMenuComponents(){
+    return Stack(
+      children: [
+        _buildClefSelectionButton(),
+        _buildTempoSelectorButton(),
+      ],
     );
   }
 
@@ -311,16 +254,14 @@ class _PongViewState extends State<PongView>
       backgroundColor: Colors.white,
       body: Stack(
         children: [
-          _buildFlashCircle(),
           _buildGameWidgets(),
           _buildTranspositionDropDowns(),
-          if (gameController.mode.value == GameMode.waitingToStart)
-            _buildClefSelectionButton(),
+          if (gameController.mode.value == GameMode.waitingToStart || gameController.mode.value == GameMode.finished)
+            _buildMenuComponents(),
           _buildScoreTexts(),
           _buildPlayerText(),
           _buildCountdownText(),
           _buildStartButton(),
-          //_buildTicksAndFeedbackText(),
           const BackButton(),
         ],
       ),

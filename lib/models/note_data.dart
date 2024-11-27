@@ -82,6 +82,13 @@ class NoteData {
     return (value % modulo + modulo) % modulo;
   }
 
+  static bool checkValidSwitch(){
+    for (NoteData noteToCheck in octave){
+      if (noteToCheck.isActive) return true;
+    }
+    return false; 
+  }
+
   static List<NoteData> octave = [
     NoteData(
         name: "C",

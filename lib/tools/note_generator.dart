@@ -1,4 +1,6 @@
 import 'dart:math';
+import 'package:toolkit/components/note.dart';
+import 'package:toolkit/models/accidental.dart';
 import 'package:toolkit/models/clef.dart';
 import 'package:toolkit/models/clef_selection.dart';
 import 'package:toolkit/models/note_data.dart';
@@ -10,6 +12,7 @@ class NoteGenerator {
 // todo maybe use the list to do that check? Needs to be modified every time anyway...
   Random random = Random();
   List<NoteData> availableNotes = []; // todo fill this.
+  List<NoteData> fullRange = [];
   QuarterElementSelector selector = QuarterElementSelector();
   NoteGenerator();
 
@@ -19,6 +22,15 @@ class NoteGenerator {
       availableNotes.addAll(NoteData.findNotesByNumber(i));
     }
   }
+
+  void buildFullRange(){
+    fullRange = [];
+    for (int i = -100; i <= 100; i++) {
+      fullRange.add(NoteData.findFirstChoiceByNumber(i, Clef.neutral()));
+    }
+  }
+
+
 
   bool checkValidChange(Player player, bool isTop, bool isUp) {
     List<NoteData> availables = [];
@@ -63,14 +75,9 @@ class NoteGenerator {
     return noteToReturn;
   }
 
-  NoteData noteFromNumber(int num, bool clean, Clef clef) {
+  NoteData noteFromNumber(int num, Clef clef) {
     NoteData? noteToReturn;
-    noteToReturn = NoteData.octave[
-            getNoteInOctave(num)] // Todo replace this with value that works!
-        .copyWith(clef: clef);
-    noteToReturn.noteNum = num;
-    noteToReturn.pos += getOctaveNumber(num) * 7;
-    //print("num: ${noteToReturn.noteNum}, pos: ${noteToReturn.pos}");
+    noteToReturn = NoteData.findFirstChoiceByNumber(num, clef);
     return noteToReturn;
   }
 

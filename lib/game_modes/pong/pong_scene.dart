@@ -3,12 +3,12 @@ import 'package:flame/components.dart';
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import 'package:toolkit/components/note.dart';
+import 'package:toolkit/components/tick.dart';
 import 'package:toolkit/config.dart';
 import 'package:toolkit/game_modes/pong/pong_ball.dart';
 import 'package:toolkit/game_modes/pong/pong_controller.dart';
 import 'package:toolkit/models/asset.dart';
 import 'package:toolkit/models/note_data.dart';
-import 'package:toolkit/sprites/ball.dart';
 
 class PongScene extends FlameGame {
   final PongController gameController;
@@ -20,6 +20,7 @@ class PongScene extends FlameGame {
   late Asset clefSprite;
   PositionComponent componentHolder = PositionComponent();
   PongBall pongBall = PongBall();
+  Tick tick = Tick();
 
   NoteData noteData = NoteData.placeholderValue;
 
@@ -27,7 +28,7 @@ class PongScene extends FlameGame {
     getAndSetNote();
     //addClef();
     gameController.players[side].score.addListener(() {
-      //ball.goGreen();
+      tick.showTick();
     });
     gameController.players[side].currentNote.addListener(() {
       getAndSetNote();
@@ -36,17 +37,20 @@ class PongScene extends FlameGame {
 
   @override
   FutureOr<void> onLoad() async {
-    super.onLoad();
+    await super.onLoad();
     world.add(componentHolder);
-    camera.viewfinder.visibleGameSize = viewSize;
+    //camera.viewfinder.visibleGameSize = viewSize;
+    camera.viewfinder.zoom = 0.85;
     camera.viewfinder.anchor = Anchor.center;
+    world.add(tick);
+    tick.position = Vector2(150, -70);
     for (int player = 0; player < 2; player++) {
       drawLines();
       newNote(noteData);
     }
     if (side == 1) {
       world.add(pongBall);
-      pongBall.position = Vector2(-400, -70);
+      pongBall.position = Vector2(-360, -70);
     }
   }
 
@@ -56,7 +60,6 @@ class PongScene extends FlameGame {
       gameController.update(dt);
       pongBall.positionBall(gameController.time);
     }
-    
 
     // TODO: implement update
     super.update(dt);
@@ -68,8 +71,17 @@ class PongScene extends FlameGame {
     gameController.dispose();
   }
 
+  // void setBallPosition(double width){
+  //   if (side == 1) {
+  //     pongBall.position = Vector2(-320 - width, -70);
+  //     pongBall.xOffset = width+180;
+  //   }
+  // }
+
   void newNote(NoteData data) {
-    componentHolder.children.clear();
+    componentHolder.children.toList().forEach((child) {
+      child.removeFromParent();
+    });
     noteData = data;
     note = Note(noteData)..position = Vector2(40, 0);
     componentHolder.add(note);

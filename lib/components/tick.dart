@@ -6,7 +6,7 @@ class Tick extends PositionComponent{
   double showTime = 0.7;
   double fadeTime = 0.7;
   late Asset image;
-  double displayTime = -4;
+  double displayTime = 3;
 
   Tick(){
     _loadImage();

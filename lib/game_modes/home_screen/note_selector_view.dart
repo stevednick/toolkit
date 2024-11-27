@@ -41,6 +41,9 @@ class _NoteSelectorViewState extends State<NoteSelectorView> {
             onPressed: () {
               setState(() {
                 octave[index].isActive = !octave[index].isActive;
+                if (!NoteData.checkValidSwitch()){
+                  octave[index].isActive = true;
+                }
                 octave[index].saveIsActive();
                 //selectedNotes[noteIndex][accidentalIndex] = !selectedNotes[noteIndex][accidentalIndex];
               });

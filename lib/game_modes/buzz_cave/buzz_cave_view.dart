@@ -2,9 +2,6 @@ import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import 'package:toolkit/game_modes/buzz_cave/buzz_cave_controller.dart';
 import 'package:toolkit/game_modes/buzz_cave/buzz_cave_scene.dart';
-import 'package:toolkit/game_modes/pong/pong_controller.dart';
-import 'package:toolkit/widgets/score_text.dart';
-
 class BuzzCaveView extends StatefulWidget {
   const BuzzCaveView({super.key});
 

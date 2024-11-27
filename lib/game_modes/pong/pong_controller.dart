@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:toolkit/models/game_mode.dart';
 import 'package:toolkit/models/note_data.dart';
 import 'package:toolkit/models/player.dart';
+import 'package:toolkit/models/tempo.dart';
 import 'package:toolkit/tools/note_checker.dart';
 import 'package:toolkit/tools/note_generator.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
@@ -35,6 +36,7 @@ class PongController {
   String buttonText = "Start";
   int gameBPM = 60;
   double time = -4;
+  Tempo tempo = Tempo(key: 'pong_tempo');
 
   PongController() {
     WakelockPlus.enable();
@@ -103,7 +105,8 @@ class PongController {
     stopListener();
   }
 
-  void startCountdown() {
+  void startCountdown() async {
+    gameBPM = await tempo.loadSavedTempo();
     startListener();
     changeNote(1);
     changeNote(0);
@@ -152,14 +155,16 @@ class PongController {
   }
 
   void nextBeat(int beat) {
+    if (mode.value == GameMode.countingDown) return;
     if (beat == 0 || beat == 2) {
+      changeNote(currentPlayer.value);
       currentPlayer.value ^= 1;
       noteChecker.noteToCheck = players[currentPlayer.value].getNoteToCheck();
       _state = GameState.listening;
     }
-    if (beat == 1 || beat == 3) {
-      changeNote(currentPlayer.value);
-    }
+    // if (beat == 1 || beat == 3) {
+    //   changeNote(currentPlayer.value);
+    // }
   }
 
   // void nextGo() {

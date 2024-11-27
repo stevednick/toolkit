@@ -8,6 +8,7 @@ import 'package:toolkit/game_modes/simple_game/simple_game_controller.dart';
 import 'package:toolkit/game_modes/simple_game/simple_game_scene.dart';
 import 'package:toolkit/models/game_mode.dart';
 import 'package:toolkit/scenes/range_selection_scene.dart';
+import 'package:toolkit/widgets/future_builder_toggle.dart';
 import 'package:toolkit/widgets/toggle_button.dart';
 import 'package:toolkit/widgets/enhanced_clef_selection_button.dart';
 import 'package:toolkit/widgets/nice_button.dart';
@@ -24,7 +25,7 @@ class SimpleGameView extends StatefulWidget {
 
 class _SimpleGameViewState extends State<SimpleGameView> {
   late final SimpleGameController gameController;
-  late final SimpleGameScene pongScene;
+  late final SimpleGameScene scene;
 
   bool showTick = false;
 
@@ -32,7 +33,7 @@ class _SimpleGameViewState extends State<SimpleGameView> {
   void initState() {
     super.initState();
     gameController = SimpleGameController(triggerTick);
-    pongScene = SimpleGameScene(gameController);
+    scene = SimpleGameScene(gameController);
   }
 
   void triggerTick() {
@@ -53,7 +54,7 @@ class _SimpleGameViewState extends State<SimpleGameView> {
   @override
   void dispose() {
     gameController.dispose();
-    pongScene.onDispose();
+    scene.onDispose();
     super.dispose();
   }
 
@@ -64,7 +65,7 @@ class _SimpleGameViewState extends State<SimpleGameView> {
         height: 500,
         child: GameWidget(
           game: gameController.gameMode.value != GameMode.waitingToStart
-              ? pongScene
+              ? scene
               : RangeSelectionScene(gameController.player),
         ),
       ),
@@ -102,21 +103,6 @@ class _SimpleGameViewState extends State<SimpleGameView> {
     );
   }
 
-  Widget _buildFeedbackText() {
-    return Align(
-        alignment: const Alignment(0.5, -0.5),
-        child: ValueListenableBuilder(
-            valueListenable: gameController.feedbackText,
-            builder: (context, text, child) {
-              return Text(
-                text,
-                style: const TextStyle(
-                  fontSize: 30,
-                ),
-              );
-            }));
-  }
-
   Widget _buildTranspositionDropDown() {
     return Positioned(
       top: 40,
@@ -135,12 +121,7 @@ class _SimpleGameViewState extends State<SimpleGameView> {
   }
 
   Widget _buildClefSelectionButton() {
-    return Positioned(
-      bottom: 130,
-      right: 30,
-      child: EnhancedClefSelectionButton(gameController.player,
-          refreshScene), //ClefSelectionButton(gameController.player, refreshScene),
-    );
+    return EnhancedClefSelectionButton(gameController.player, refreshScene);
   }
 
   Widget _buildStartButton() {
@@ -152,16 +133,15 @@ class _SimpleGameViewState extends State<SimpleGameView> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              FilledButton(
+              NiceButton(
+                text: gameController.gameMode.value == GameMode.waitingToStart
+                    ? "Start"
+                    : "End",
                 onPressed: () {
                   setState(() {
                     gameController.startButtonPressed();
                   });
                 },
-                child: Text(
-                    gameController.gameMode.value == GameMode.waitingToStart
-                        ? "Start"
-                        : "End"), // Transfer text duties to game controller!
               ),
               const SizedBox(
                 height: 20,
@@ -173,112 +153,55 @@ class _SimpleGameViewState extends State<SimpleGameView> {
     );
   }
 
-  Widget _buildGhostNoteToggle() {
-    return Align(
-      alignment: const Alignment(0.7, -0.3),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Switch(
-            value: gameController.ghostNotesOn,
-            onChanged: (newValue) {
-              setState(() {
-                gameController.ghostNotesOn = newValue;
-              });
-            },
-          ),
-          const Text("Ghost Notes"),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTickAndFeedbackText() {
-    // todo Fix name!
-    return Stack(
-      children: [
-        Align(
-          alignment: const Alignment(0.3, -0.5),
-          child: Visibility(
-            visible: gameController.gameMode.value == GameMode.running,
-            child: ValueListenableBuilder(
-              valueListenable: gameController.feedbackText,
-              builder: (context, text, child) {
-                return Text(
-                  text,
-                  style: const TextStyle(
-                    fontSize: 30,
-                  ),
-                );
-              },
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
   Widget _buildTempoOnButton() {
-    return Positioned(
-      left: 30,
-      bottom: 90,
-      child: ToggleButton(
-        text: "Show Beat",
-        initialState: gameController.showTempo,
-        onToggle: (newValue) {
-          gameController.showTempo = newValue;
-        },
-      ),
+    return FutureBuilderToggle(
+      getInitialState: scene.getTempoOn,
+      onToggle: (newValue) async {
+        scene.showBall = newValue;
+        scene.setTempoOn();
+        scene.rebuildQueued = true;
+        // If you need to persist this change, you might want to call a method here
+        // await scene.saveGhostNotesState(newValue);
+      },
+      text: "Show Beat",
     );
   }
 
   Widget _buildSettingsButton() {
-    return Positioned(
-      bottom: 30,
-      right: 30,
-      child: NiceButton(
-        text: "Clef Thresholds",
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => AdvancedOptionsView(gameController.player),
-            ),
-          );
-        },
-      ),
+    return NiceButton(
+      text: "Clef Thresholds",
+      onPressed: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => AdvancedOptionsView(gameController.player),
+          ),
+        );
+      },
     );
   }
 
   Widget _buildNoteSelectorButton() {
-    return Positioned(
-      bottom: 78,
-      right: 30,
-      child: NiceButton(
-        text: "Note Selection",
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const NoteSelectorView(),
-            ),
-          );
-        },
-      ),
+    return NiceButton(
+      text: "Note Selection",
+      onPressed: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const NoteSelectorView(),
+          ),
+        );
+      },
     );
   }
 
   Widget _buildBigJumpSwitch() {
-    return Positioned(
-      bottom: 190,
-      right: 30,
-      child: ToggleButton(
-        text: "Big Jumps",
-        initialState: gameController.bigJumpsMode,
-        onToggle: (value) {
-          gameController.bigJumpsMode = value;
-        },
-      ),
+    return ToggleButton(
+      text: "Big Jumps",
+      initialState: gameController.bigJumpsMode,
+      onToggle: (value) {
+        gameController.bigJumpsMode = value;
+      },
     );
   }
 
@@ -295,22 +218,69 @@ class _SimpleGameViewState extends State<SimpleGameView> {
   }
 
   Widget _buildTempoSelectorButton() {
-    return Positioned(
-      left: 30,
-      bottom: 30,
-      child: TempoSelector(onTempoChanged: (int newTempo) {}),
+    return TempoSelector(
+      onTempoChanged: (int newTempo) {},
+      keyString: 'simple_game_tempo',
+    );
+  }
+
+  Widget _buildGhostNoteButton() {
+    return FutureBuilderToggle(
+      getInitialState: scene.getGhostNotesOn,
+      onToggle: (newValue) async {
+        scene.showGhostNotes = newValue;
+        scene.setGhostNotesOn();
+        scene.rebuildQueued = true;
+      },
+      text: 'Ghost Notes',
     );
   }
 
   Widget _buildSettingsButtons() {
     return Stack(
       children: [
-        _buildBigJumpSwitch(),
-        _buildClefSelectionButton(),
-        _buildSettingsButton(),
-        _buildNoteSelectorButton(),
-        _buildTempoSelectorButton(),
-        _buildTempoOnButton(),
+        Padding(
+          padding: const EdgeInsets.all(10.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.end,
+            mainAxisSize: MainAxisSize.max,
+            children: [
+              _buildGhostNoteButton(),
+              const SizedBox(
+                height: 5,
+              ),
+              _buildTempoOnButton(),
+              const SizedBox(
+                height: 5,
+              ),
+              _buildTempoSelectorButton(),
+            ],
+          ),
+        ),
+        Align(
+          alignment: Alignment.bottomRight,
+          child: Padding(
+            padding: const EdgeInsets.all(10.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                _buildBigJumpSwitch(),
+                const SizedBox(
+                  height: 5,
+                ),
+                _buildClefSelectionButton(),
+                const SizedBox(
+                  height: 5,
+                ),
+                _buildSettingsButton(),
+                const SizedBox(
+                  height: 5,
+                ),
+                _buildNoteSelectorButton(),
+              ],
+            ),
+          ),
+        ),
       ],
     );
   }

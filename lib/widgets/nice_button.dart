@@ -22,13 +22,6 @@ class _NiceButtonState extends State<NiceButton> {
     _isEnabled = true;
   }
 
-  // void _handleToggle() {
-  //   setState(() {
-  //     _isEnabled = !_isEnabled;
-  //   });
-  //   widget.onToggle(_isEnabled);
-  // }
-
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -36,10 +29,10 @@ class _NiceButtonState extends State<NiceButton> {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 300),
         width: 120,
-        height: 42,
+        height: 36,
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(21),
-          color: _isEnabled ? Colors.blue[300] : Colors.grey[200],
+          borderRadius: BorderRadius.circular(18),
+          color: _isEnabled ? const Color.fromRGBO(0, 95, 255, 0.6): Colors.grey[200],
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.1),

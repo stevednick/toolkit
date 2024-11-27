@@ -38,36 +38,44 @@ class HomeView extends StatelessWidget {
                   ),
                   const HomeScreenNavigationButton(
                       route: SimpleGameView(), text: "Simple Game"),
+                      const SizedBox(
+                    height: 5,
+                  ),
                   const HomeScreenNavigationButton(
                       route: PongView(), text: "Pong"),
                   //const HomeScreenNavigationButton(
                   //    route: BuzzCaveView(), text: "Buzz Game"),
-                  InkWell(
-                    child: const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Padding(
-                          padding: EdgeInsets.all(8.0),
-                          child: Icon(
-                            Icons.feedback_outlined,
-                            color: Colors.blue,
-                          ),
-                        ),
-                        Text(
-                          "Leave Feedback and Report Bugs",
-                          style: TextStyle(
-                            color: Colors.blue,
-                          ),
-                        ),
-                      ],
-                    ),
-                    onTap: () => launchUrl(
-                      Uri.parse(
-                          'https://horn-toolkit.canny.io/feature-requests'),
-                    ),
-                  ),
+                  
                 ],
               ),
+            ),
+            Align(
+              alignment: Alignment.bottomCenter,
+              
+              child: InkWell(
+                      child: const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Padding(
+                            padding: EdgeInsets.all(8.0),
+                            child: Icon(
+                              Icons.feedback_outlined,
+                              color: Colors.blue,
+                            ),
+                          ),
+                          Text(
+                            "Leave Feedback and Report Bugs",
+                            style: TextStyle(
+                              color: Colors.blue,
+                            ),
+                          ),
+                        ],
+                      ),
+                      onTap: () => launchUrl(
+                        Uri.parse(
+                            'https://horn-toolkit.canny.io/feature-requests'),
+                      ),
+                    ),
             ),
             Positioned(
               bottom: 30,
