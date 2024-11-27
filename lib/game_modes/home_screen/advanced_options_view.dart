@@ -1,6 +1,5 @@
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
-import 'package:toolkit/game_modes/home_screen/note_selector_view.dart';
 import 'package:toolkit/models/player.dart';
 import 'package:toolkit/scenes/range_selection_scene.dart';
 

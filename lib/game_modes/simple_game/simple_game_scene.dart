@@ -1,16 +1,13 @@
 import 'dart:async';
-import 'dart:ui';
 import 'package:flame/components.dart';
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
-import 'package:toolkit/components/arrow.dart';
 import 'package:toolkit/components/bouncy_ball.dart';
 import 'package:toolkit/components/note.dart';
 import 'package:toolkit/components/tick.dart';
 import 'package:toolkit/config.dart';
 import 'package:toolkit/game_modes/simple_game/simple_game_controller.dart';
 import 'package:toolkit/models/asset.dart';
-import 'package:toolkit/models/clef.dart';
 import 'package:toolkit/models/note_data.dart';
 import 'package:toolkit/models/settings.dart';
 import 'package:toolkit/models/tempo.dart';

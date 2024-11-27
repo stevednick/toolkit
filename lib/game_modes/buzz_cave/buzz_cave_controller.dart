@@ -20,7 +20,6 @@ class BuzzCaveController {
 
   double middlePitch = 340;
   double zoomModifier = 10;
-  late Timer _enemySpawnTimer;
   int spawnPeriodMillis = 1500;
   ValueNotifier<int> enemiesSpawned = ValueNotifier(0);
   ValueNotifier<int> enemiesHit = ValueNotifier(0);
@@ -30,7 +29,7 @@ class BuzzCaveController {
 
   BuzzCaveController() {
     pitchGetter.pitchNotifier.addListener(_onPitchDetected);
-    _enemySpawnTimer =
+    Timer _ =
           Timer.periodic(Duration(milliseconds: spawnPeriodMillis), (timer) {
       spawnEnemy();
     });

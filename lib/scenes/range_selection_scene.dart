@@ -124,7 +124,9 @@ class RangeSelectionScene extends FlameGame
 
   void addClef(Asset? sprite, NoteData data, PositionComponent clefHolder) {
     sprite = data.clef.sprite..positionSprite();
-    clefHolder.children.clear();
+    clefHolder.children.toList().forEach((child) {
+      child.removeFromParent();
+    });
     clefHolder.add(sprite);
   }
 

@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:toolkit/models/note_data.dart';
-import 'package:toolkit/models/player.dart';
 
 class NoteSelectorView extends StatefulWidget {
   const NoteSelectorView({super.key});
 
   @override
-  _NoteSelectorViewState createState() => _NoteSelectorViewState();
+  NoteSelectorViewState createState() => NoteSelectorViewState();
 }
 
-class _NoteSelectorViewState extends State<NoteSelectorView> {
+class NoteSelectorViewState extends State<NoteSelectorView> {
   final List<String> notes = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
   final List<String> accidentals = ['♮', '♯', '♭', '𝄪', '𝄫'];
   final List<NoteData> octave = NoteData.octave;

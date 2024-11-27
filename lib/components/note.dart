@@ -76,22 +76,10 @@ class Note extends PositionComponent {
     drawLedgers();
   }
 
-  // void setUpAccidental() {
-  //   switch (noteData.accidental) {
-  //     case Accidental.sharp:
-  //       accidentalSprite = Asset.createSharp();
-  //       break;
-  //     case Accidental.flat:
-  //       accidentalSprite = Asset.createFlat();
-  //       break;
-  //     default:
-  //       return;
-  //   }
-  //   noteComponents.add(accidentalSprite);
-  // }
-
   void drawLedgers() {
-    ledgerHolder.children.clear();
+    ledgerHolder.children.toList().forEach((child) {
+      child.removeFromParent();
+    });
     for (var i = 6; i <= noteData.posOnStave; i += 2) {
       drawLedger(i);
     }

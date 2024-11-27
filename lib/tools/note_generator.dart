@@ -1,6 +1,4 @@
 import 'dart:math';
-import 'package:toolkit/components/note.dart';
-import 'package:toolkit/models/accidental.dart';
 import 'package:toolkit/models/clef.dart';
 import 'package:toolkit/models/clef_selection.dart';
 import 'package:toolkit/models/note_data.dart';

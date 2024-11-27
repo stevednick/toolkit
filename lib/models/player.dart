@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:toolkit/models/accidental.dart';
-import 'package:toolkit/models/clef.dart';
 import 'package:toolkit/models/clef_selection.dart';
 import 'package:toolkit/models/clef_threshold.dart';
 
