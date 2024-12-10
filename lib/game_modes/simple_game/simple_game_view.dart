@@ -4,17 +4,14 @@ import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import 'package:toolkit/game_modes/home_screen/advanced_options_view.dart';
 import 'package:toolkit/game_modes/home_screen/note_selector_view.dart';
+import 'package:toolkit/game_modes/simple_game/game_options.dart';
 import 'package:toolkit/game_modes/simple_game/simple_game_controller.dart';
 import 'package:toolkit/game_modes/simple_game/simple_game_scene.dart';
-import 'package:toolkit/models/game_mode.dart';
+import 'package:toolkit/models/models.dart';
 import 'package:toolkit/scenes/range_selection_scene.dart';
-import 'package:toolkit/widgets/future_builder_toggle.dart';
-import 'package:toolkit/widgets/toggle_button.dart';
-import 'package:toolkit/widgets/enhanced_clef_selection_button.dart';
-import 'package:toolkit/widgets/nice_button.dart';
-import 'package:toolkit/widgets/score_text.dart';
-import 'package:toolkit/widgets/tempo_selector_persistance.dart';
-import 'package:toolkit/widgets/transposition_drop_down.dart';
+import 'package:toolkit/widgets/qr_code_generator.dart';
+import 'package:toolkit/widgets/qr_scanner.dart';
+import 'package:toolkit/widgets/widgets.dart';
 
 class SimpleGameView extends StatefulWidget {
   const SimpleGameView({super.key});
@@ -27,6 +24,8 @@ class _SimpleGameViewState extends State<SimpleGameView> {
   late final SimpleGameController gameController;
   late final SimpleGameScene scene;
 
+  late GameOptions gameOptions;
+
   bool showTick = false;
 
   @override
@@ -34,6 +33,7 @@ class _SimpleGameViewState extends State<SimpleGameView> {
     super.initState();
     gameController = SimpleGameController(triggerTick);
     scene = SimpleGameScene(gameController);
+    gameOptions = GameOptions(top: gameController.player.range.top, bottom: gameController.player.range.bottom);
   }
 
   void triggerTick() {
@@ -56,6 +56,30 @@ class _SimpleGameViewState extends State<SimpleGameView> {
     gameController.dispose();
     scene.onDispose();
     super.dispose();
+  }
+
+  Widget _buildQRCode() {
+    return Positioned(
+      top: 100,
+      right: 30,
+      child: QRCodeGenerator(gameOptions: gameOptions),
+    );
+  }
+
+  Widget _buildQRScannerButton() {
+    return Positioned(
+      bottom:200,
+      right: 30,
+      child: ElevatedButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => QRScanner(player: gameController.player)),
+          );
+        },
+        child: const Text('Scan QR Code'),
+      ),
+    );
   }
 
   Widget _buildGameScene() {
@@ -155,10 +179,12 @@ class _SimpleGameViewState extends State<SimpleGameView> {
 
   Widget _buildTempoOnButton() {
     return FutureBuilderToggle(
-      getInitialState: scene.getTempoOn,
+      getInitialState: () {
+        return Settings.getSetting(Settings.tempoKey);
+      },
       onToggle: (newValue) async {
         scene.showBall = newValue;
-        scene.setTempoOn();
+        await scene.setSettings();
         scene.rebuildQueued = true;
         // If you need to persist this change, you might want to call a method here
         // await scene.saveGhostNotesState(newValue);
@@ -226,10 +252,12 @@ class _SimpleGameViewState extends State<SimpleGameView> {
 
   Widget _buildGhostNoteButton() {
     return FutureBuilderToggle(
-      getInitialState: scene.getGhostNotesOn,
+      getInitialState: () {
+        return Settings.getSetting(Settings.ghostNoteString);
+      },
       onToggle: (newValue) async {
         scene.showGhostNotes = newValue;
-        scene.setGhostNotesOn();
+        await scene.setSettings();
         scene.rebuildQueued = true;
       },
       text: 'Ghost Notes',
@@ -291,6 +319,8 @@ class _SimpleGameViewState extends State<SimpleGameView> {
       backgroundColor: Colors.white,
       body: Stack(
         children: [
+          _buildQRCode(),
+          _buildQRScannerButton(),
           _buildGameScene(),
           _buildScoreText(),
           _buildGameText(),

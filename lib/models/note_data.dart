@@ -1,6 +1,5 @@
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:toolkit/models/accidental.dart';
-import 'package:toolkit/models/clef.dart';
+import 'package:toolkit/models/models.dart';
 
 class NoteData {
   int pos;

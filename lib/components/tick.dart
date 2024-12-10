@@ -1,5 +1,5 @@
 import 'package:flame/components.dart';
-import 'package:toolkit/models/asset.dart';
+import 'package:toolkit/models/models.dart';
 
 class Tick extends PositionComponent{
 

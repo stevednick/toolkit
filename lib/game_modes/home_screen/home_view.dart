@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:toolkit/game_modes/home_screen/onboarding_screen.dart';
+import 'package:toolkit/game_modes/incremental_game/incremental_game_view.dart';
 import 'package:toolkit/game_modes/pong/pong_view.dart';
 import 'package:toolkit/game_modes/simple_game/simple_game_view.dart';
-import 'package:toolkit/widgets/home_screen_navigation_button.dart';
+import 'package:toolkit/game_modes/transposition_game/transposition_game_view.dart';
+import 'package:toolkit/models/models.dart';
+import 'package:toolkit/scenes/note_icon.dart';
+import 'package:toolkit/widgets/note_icon_holder.dart';
+import 'package:toolkit/widgets/widgets.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class HomeView extends StatelessWidget {
@@ -38,44 +43,44 @@ class HomeView extends StatelessWidget {
                   ),
                   const HomeScreenNavigationButton(
                       route: SimpleGameView(), text: "Simple Game"),
-                      const SizedBox(
+                  const SizedBox(
                     height: 5,
                   ),
                   const HomeScreenNavigationButton(
                       route: PongView(), text: "Pong"),
-                  //const HomeScreenNavigationButton(
-                  //    route: BuzzCaveView(), text: "Buzz Game"),
-                  
+                  const SizedBox(
+                    height: 5,
+                  ),
+                  const HomeScreenNavigationButton(
+                      route: IncrementalGameView(), text: "Incremental"),
                 ],
               ),
             ),
             Align(
               alignment: Alignment.bottomCenter,
-              
               child: InkWell(
-                      child: const Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Padding(
-                            padding: EdgeInsets.all(8.0),
-                            child: Icon(
-                              Icons.feedback_outlined,
-                              color: Colors.blue,
-                            ),
-                          ),
-                          Text(
-                            "Leave Feedback and Report Bugs",
-                            style: TextStyle(
-                              color: Colors.blue,
-                            ),
-                          ),
-                        ],
-                      ),
-                      onTap: () => launchUrl(
-                        Uri.parse(
-                            'https://horn-toolkit.canny.io/feature-requests'),
+                child: const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Icon(
+                        Icons.feedback_outlined,
+                        color: Colors.blue,
                       ),
                     ),
+                    Text(
+                      "Leave Feedback and Report Bugs",
+                      style: TextStyle(
+                        color: Colors.blue,
+                      ),
+                    ),
+                  ],
+                ),
+                onTap: () => launchUrl(
+                  Uri.parse('https://horn-toolkit.canny.io/feature-requests'),
+                ),
+              ),
             ),
             Positioned(
               bottom: 30,

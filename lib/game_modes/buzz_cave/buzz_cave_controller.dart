@@ -3,8 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:toolkit/tools/note_getter.dart';
-import 'package:toolkit/tools/pitch_getter.dart';
+import 'package:toolkit/tools/tools.dart';
 import 'dart:math';
 
 class BuzzCaveController {

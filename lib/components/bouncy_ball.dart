@@ -20,15 +20,8 @@ class BouncyBall extends PositionComponent with HasVisibility{
     return -accel / 2;
   }
 
-  void positionBall(double pointInBeat) {
+  void positionBall(double pointInBeat) {  // Todo add flash to ball on landing?
     ball.position.y = initialVelocity() * pointInBeat + (accel * pow(pointInBeat, 2) / 2);
-    
-    // Calculate deformation based on position
-    // double normalizedPosition = ball.position.y / (accel / 2);
-    // _deformationFactor = 1.0 - (maxDeformation * (1.0 - (normalizedPosition - 1).abs()));
-    
-    // Apply deformation
-    // ball.scale = Vector2(1 / _deformationFactor, _deformationFactor);
   }
 
 }

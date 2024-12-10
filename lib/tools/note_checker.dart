@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:toolkit/tools/note_getter.dart';
-import 'package:toolkit/tools/pitch_getter.dart';
+import 'package:toolkit/tools/tools.dart';
 
 class NoteChecker {
 
   PitchGetter pitchGetter = PitchGetter();
   int noteToCheck = -999;
-  int requiredCorrectValues = 6;
+  int requiredCorrectValues = 4;
 
   ValueNotifier<int> noteNotifier = ValueNotifier(0);
 
@@ -25,7 +24,7 @@ class NoteChecker {
     print(noteNotifier.value);
     noteFeedback(noteNotifier.value-noteToCheck);
     lastDetectedNotes.add(noteNotifier.value);
-    if (lastDetectedNotes.length > 8) {
+    if (lastDetectedNotes.length > 6) {
       lastDetectedNotes.removeAt(0); // Remove the oldest note
     }
     int count = lastDetectedNotes.where((note) => note == noteToCheck).length;

@@ -3,17 +3,15 @@ import 'package:flame/components.dart';
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import 'package:toolkit/components/components.dart';
-import 'package:toolkit/game_modes/simple_game/simple_game_controller.dart';
+import 'package:toolkit/game_modes/transposition_game/transposition_game_controller.dart';
 import 'package:toolkit/models/models.dart';
 import 'package:toolkit/tools/tools.dart';
 
-class SimpleGameScene extends FlameGame {
-  final SimpleGameController gameController;
+class TranspositionGameScene extends FlameGame {
+  final TranspositionGameController gameController;
 
   final Vector2 viewSize = Vector2(300, 500);
-  double staffWidth() {
-    return 250;
-  }
+  double staffWidth = 250;
 
   double ghostNoteExtension = 130;
   late Note ghostNote;
@@ -30,7 +28,7 @@ class SimpleGameScene extends FlameGame {
   bool showGhostNotes = true;
   bool rebuildQueued = false;
 
-  Tempo tempo = Tempo(key: 'simple_game_tempo');
+  Tempo tempo = Tempo(key: 'transposition_game_tempo');
   late double beatSeconds;
 
   late int previousGhostNote =
@@ -38,22 +36,22 @@ class SimpleGameScene extends FlameGame {
 
   NoteData noteData = NoteData.placeholderValue;
 
-  SimpleGameScene(this.gameController) {
+  TranspositionGameScene(this.gameController) {
     getSettings();
     gameController.player.currentNote.addListener(() {
       getAndSetNote();
     });
-    gameController.state.addListener(() {
-      if (gameController.state.value == GameState.correctNoteHeard) {
-        tick.showTick();
-      }
-    });
-    gameController.gameMode.addListener(() {
-      setTempo();
-    });
+    // gameController.state.addListener(() {
+    //   if (gameController.state.value == GameState.correctNoteHeard) {
+    //     tick.showTick();
+    //   }
+    // });
+    // gameController.gameMode.addListener(() {
+    //   setTempo();
+    // });
   }
 
-  Future<void> getSettings() async{
+  Future<void> getSettings() async {
     showGhostNotes = await Settings.getSetting(Settings.ghostNoteString);
     showBall = await Settings.getSetting(Settings.tempoKey);
   }
@@ -94,7 +92,7 @@ class SimpleGameScene extends FlameGame {
   @override
   void update(double dt) {
     if (showGhostNotes) {
-      showGhostNote(gameController.noteChecker.noteNotifier.value);
+      //showGhostNote(gameController.noteChecker.noteNotifier.value);
     }
     if (showBall) {
       gameTime += dt; // todo extract this timing shit.
@@ -142,12 +140,12 @@ class SimpleGameScene extends FlameGame {
       return;
     }
     NoteData d = noteGenerator.noteFromNumber(num, noteData.clef);
-    if (num == gameController.noteChecker.noteToCheck - gameController
-        .player.selectedInstrument.currentTransposition.pitchModifier){
-      d = noteData;
-    }
+    // if (num == gameController.noteChecker.noteToCheck - gameController
+    //     .player.selectedInstrument.currentTransposition.pitchModifier){
+    //   d = noteData;
+    // }
     ghostNote = Note(d, isGhostNote: true)..position = Vector2(170, 0);
-    
+
     ghostNoteHolder.add(ghostNote);
     previousGhostNote = num;
   }
@@ -155,16 +153,16 @@ class SimpleGameScene extends FlameGame {
   void drawLines() {
     for (var i = -2; i < 3; i++) {
       RectangleComponent newLine = RectangleComponent(
-        size: Vector2(staffWidth() + (showGhostNotes ? ghostNoteExtension : 0),
+        size: Vector2(staffWidth + (showGhostNotes ? ghostNoteExtension : 0),
             lineWidth),
         paint: Paint()..color = Colors.black,
-      )..position = Vector2(-staffWidth() / 2, i * lineGap);
+      )..position = Vector2(-staffWidth / 2, i * lineGap);
       world.add(newLine);
     }
   }
 
   void getAndSetNote() {
-    noteData = gameController.getNoteDataFromPlayer();
+    //noteData = gameController.getNoteDataFromPlayer();
     newNote(noteData);
   }
 

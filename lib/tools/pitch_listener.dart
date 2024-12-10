@@ -3,7 +3,9 @@
 // import 'package:pitch_detector_plus/pitch_detector_plus.dart';
 // import 'note_getter.dart';
 
-// class PitchListener {
+
+// todo kept for posterity... 
+// class PitchListener {  
 //   final pitchDetectorDart = PitchDetectorPlus();
 //   late PitchDetector pitchDart;
 //   StreamSubscription? streamSub;

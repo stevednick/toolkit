@@ -29,7 +29,7 @@ class Range {
   }
 
 
-  Future<void> _saveValues() async {
+  Future<void> saveValues() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setInt(topKey, top);       // Save 'top' to SharedPreferences
     await prefs.setInt(bottomKey, bottom); // Save 'bottom' to SharedPreferences
@@ -49,6 +49,6 @@ class Range {
         if (bottom > -100) bottom--;    // Decrement 'bottom' if within the limit
       }
     }
-    await _saveValues();  // Save the updated values
+    await saveValues();  // Save the updated values
   }
 }

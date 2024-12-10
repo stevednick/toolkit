@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/foundation.dart';
 import 'package:toolkit/tools/yin_pitch_detection.dart';
 import 'package:flutter_audio_capture/flutter_audio_capture.dart';
@@ -18,6 +20,8 @@ class PitchGetter {
   bool _isListening = false;
 
   final ValueNotifier<double> pitchNotifier = ValueNotifier<double>(0.0);
+
+  Random random = Random();
 
   Future<void> _requestMicrophonePermission() async {
     final status = await Permission.microphone.request();
@@ -42,10 +46,9 @@ class PitchGetter {
 
         // print("detectPitchWithConfidence $pitch $confidence");
         if (pitch > 0 && pitch.isFinite && (pitch > 1500 || confidence > 0.51) ) {
-
             pitchNotifier.value = pitch;
         } else {
-          pitchNotifier.value = -10000;
+          pitchNotifier.value = -10000 + random.nextInt(10).toDouble(); //todo make sure this works!
         }
       },
           (Object e) {

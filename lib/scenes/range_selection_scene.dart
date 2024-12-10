@@ -5,7 +5,7 @@ import 'package:flame/events.dart';
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import 'package:toolkit/components/note.dart';
-import 'package:toolkit/config.dart';
+import 'package:toolkit/tools/config.dart';
 import 'package:toolkit/models/asset.dart';
 import 'package:toolkit/models/clef.dart';
 import 'package:toolkit/models/note_data.dart';

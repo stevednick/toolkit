@@ -26,6 +26,8 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>Camera Required to scan QR codes.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Microphone access required to analyse playing in real time.</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>

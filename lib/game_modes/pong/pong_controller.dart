@@ -1,12 +1,8 @@
 import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:toolkit/models/game_mode.dart';
-import 'package:toolkit/models/note_data.dart';
-import 'package:toolkit/models/player.dart';
-import 'package:toolkit/models/tempo.dart';
-import 'package:toolkit/tools/note_checker.dart';
-import 'package:toolkit/tools/note_generator.dart';
+import 'package:toolkit/models/models.dart';
+import 'package:toolkit/tools/tools.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
 enum GameState {

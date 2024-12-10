@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:toolkit/models/note_data.dart';
+import 'package:toolkit/models/models.dart';
 
 class NoteSelectorView extends StatefulWidget {
   const NoteSelectorView({super.key});

@@ -2,13 +2,11 @@ import 'dart:async';
 import 'package:flame/components.dart';
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
-import 'package:toolkit/components/note.dart';
-import 'package:toolkit/components/tick.dart';
-import 'package:toolkit/config.dart';
+import 'package:toolkit/components/components.dart';
+import 'package:toolkit/tools/config.dart';
 import 'package:toolkit/game_modes/pong/pong_ball.dart';
 import 'package:toolkit/game_modes/pong/pong_controller.dart';
-import 'package:toolkit/models/asset.dart';
-import 'package:toolkit/models/note_data.dart';
+import 'package:toolkit/models/models.dart';
 
 class PongScene extends FlameGame {
   final PongController gameController;

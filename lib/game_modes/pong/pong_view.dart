@@ -4,13 +4,9 @@ import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import 'package:toolkit/game_modes/pong/pong_controller.dart';
 import 'package:toolkit/game_modes/pong/pong_scene.dart';
-import 'package:toolkit/models/game_mode.dart';
+import 'package:toolkit/models/models.dart';
 import 'package:toolkit/scenes/range_selection_scene.dart';
-import 'package:toolkit/widgets/enhanced_clef_selection_button.dart';
-import 'package:toolkit/widgets/nice_button.dart';
-import 'package:toolkit/widgets/score_text.dart';
-import 'package:toolkit/widgets/tempo_selector_persistance.dart';
-import 'package:toolkit/widgets/transposition_drop_down.dart';
+import 'package:toolkit/widgets/widgets.dart';
 
 class PongView extends StatefulWidget {
   const PongView({super.key});

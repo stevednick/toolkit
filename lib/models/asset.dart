@@ -11,8 +11,9 @@ class Asset extends SpriteComponent with HasGameReference, HasVisibility {
   Asset(this.pos, this.sca, this.imagePath, this.colour);
   @override
   Future<FutureOr<void>> onLoad() async {
+    await super.onLoad(); 
     changeColour(colour);
-    await super.onLoad();  // Ensure base class's onLoad is awaited
+     // Ensure base class's onLoad is awaited
     sprite = await game.loadSprite(imagePath);
     size = sca;
     position = pos;

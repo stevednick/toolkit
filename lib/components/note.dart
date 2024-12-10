@@ -1,10 +1,9 @@
 import 'dart:async';
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
-import 'package:toolkit/config.dart';
-import 'package:toolkit/models/accidental.dart';
-import 'package:toolkit/models/asset.dart';
-import 'package:toolkit/models/note_data.dart';
+import 'package:toolkit/tools/config.dart';
+import 'package:toolkit/models/models.dart';
+import 'package:toolkit/tools/utils.dart';
 
 class Note extends PositionComponent {
   late Asset crotchetSprite;
@@ -59,7 +58,6 @@ class Note extends PositionComponent {
     add(noteComponents);
     add(ledgerHolder);
     positionCrotchetSprite();
-    //setUpAccidental();
     changeNote(noteData);
   }
 
@@ -77,9 +75,7 @@ class Note extends PositionComponent {
   }
 
   void drawLedgers() {
-    ledgerHolder.children.toList().forEach((child) {
-      child.removeFromParent();
-    });
+    Utils.removeAllChildren(ledgerHolder);
     for (var i = 6; i <= noteData.posOnStave; i += 2) {
       drawLedger(i);
     }

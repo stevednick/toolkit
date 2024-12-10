@@ -5,7 +5,7 @@ import 'package:flame/events.dart';
 import 'package:flame/game.dart';
 import 'package:toolkit/components/note.dart';
 import 'package:toolkit/game_modes/buzz_cave/buzz_cave_controller.dart';
-import 'package:toolkit/tools/note_generator.dart';
+import 'package:toolkit/tools/tools.dart';
 
 class BuzzCaveOptionsScene extends FlameGame with VerticalDragDetector, HasVisibility {
 

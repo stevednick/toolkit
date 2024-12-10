@@ -3,12 +3,13 @@ import 'package:flame/components.dart';
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import 'package:toolkit/components/components.dart';
-import 'package:toolkit/game_modes/simple_game/simple_game_controller.dart';
 import 'package:toolkit/models/models.dart';
 import 'package:toolkit/tools/tools.dart';
 
-class SimpleGameScene extends FlameGame {
-  final SimpleGameController gameController;
+import 'package:toolkit/game_modes/incremental_game/incremental_game.dart';
+
+class IncrementalGameScene extends FlameGame {
+  final IncrementalGameController gameController;
 
   final Vector2 viewSize = Vector2(300, 500);
   double staffWidth() {
@@ -38,19 +39,19 @@ class SimpleGameScene extends FlameGame {
 
   NoteData noteData = NoteData.placeholderValue;
 
-  SimpleGameScene(this.gameController) {
+  IncrementalGameScene(this.gameController) {
     getSettings();
-    gameController.player.currentNote.addListener(() {
+    gameController.currentNote.addListener(() {
       getAndSetNote();
     });
-    gameController.state.addListener(() {
-      if (gameController.state.value == GameState.correctNoteHeard) {
-        tick.showTick();
-      }
-    });
-    gameController.gameMode.addListener(() {
-      setTempo();
-    });
+    // gameController.state.addListener(() {
+    //   if (gameController.state.value == GameState.correctNoteHeard) {
+    //     tick.showTick();
+    //   }
+    // });
+    // gameController.gameMode.addListener(() {
+    //   setTempo();
+    // });
   }
 
   Future<void> getSettings() async{
@@ -94,7 +95,7 @@ class SimpleGameScene extends FlameGame {
   @override
   void update(double dt) {
     if (showGhostNotes) {
-      showGhostNote(gameController.noteChecker.noteNotifier.value);
+      //showGhostNote(gameController.noteChecker.noteNotifier.value);
     }
     if (showBall) {
       gameTime += dt; // todo extract this timing shit.
@@ -110,12 +111,6 @@ class SimpleGameScene extends FlameGame {
     super.update(dt);
   }
 
-  @override
-  void onDispose() {
-    super.onDispose();
-    gameController.player.currentNote.removeListener(getAndSetNote);
-    gameController.dispose();
-  }
 
   void newNote(NoteData data) {
     // Change this to just change the note.
@@ -131,25 +126,25 @@ class SimpleGameScene extends FlameGame {
   }
 
   void showGhostNote(int num) {
-    num -= gameController
-        .player.selectedInstrument.currentTransposition.pitchModifier;
-    if (num == previousGhostNote) return;
-    ghostNoteHolder.children.toList().forEach((child) {
-      child.removeFromParent();
-    });
-    if (num < -500) {
-      previousGhostNote = -1001;
-      return;
-    }
-    NoteData d = noteGenerator.noteFromNumber(num, noteData.clef);
-    if (num == gameController.noteChecker.noteToCheck - gameController
-        .player.selectedInstrument.currentTransposition.pitchModifier){
-      d = noteData;
-    }
-    ghostNote = Note(d, isGhostNote: true)..position = Vector2(170, 0);
+    // num -= gameController
+    //     .player.selectedInstrument.currentTransposition.pitchModifier;
+    // if (num == previousGhostNote) return;
+    // ghostNoteHolder.children.toList().forEach((child) {
+    //   child.removeFromParent();
+    // });
+    // if (num < -500) {
+    //   previousGhostNote = -1001;
+    //   return;
+    // }
+    // NoteData d = noteGenerator.noteFromNumber(num, noteData.clef);
+    // if (num == gameController.noteChecker.noteToCheck - gameController
+    //     .player.selectedInstrument.currentTransposition.pitchModifier){
+    //   d = noteData;
+    // }
+    // ghostNote = Note(d, isGhostNote: true)..position = Vector2(170, 0);
     
-    ghostNoteHolder.add(ghostNote);
-    previousGhostNote = num;
+    // ghostNoteHolder.add(ghostNote);
+    // previousGhostNote = num;
   }
 
   void drawLines() {
@@ -164,8 +159,9 @@ class SimpleGameScene extends FlameGame {
   }
 
   void getAndSetNote() {
-    noteData = gameController.getNoteDataFromPlayer();
+    noteData = gameController.currentNote.value.data;
     newNote(noteData);
+    print(noteData.name);
   }
 
   @override

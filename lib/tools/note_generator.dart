@@ -1,8 +1,6 @@
 import 'dart:math';
-import 'package:toolkit/models/clef.dart';
-import 'package:toolkit/models/clef_selection.dart';
-import 'package:toolkit/models/note_data.dart';
-import 'package:toolkit/models/player.dart';
+import 'package:toolkit/models/models.dart';
+import 'package:toolkit/models/transposition_file.dart';
 
 class NoteGenerator {
   // todo Next sort out the list for random selection..
@@ -14,11 +12,12 @@ class NoteGenerator {
   QuarterElementSelector selector = QuarterElementSelector();
   NoteGenerator();
 
-  void buildNoteList(Player player) {
+  void buildNoteList(Player player) { // todo return code after testing;
     availableNotes = [];
     for (int i = player.range.bottom; i <= player.range.top; i++) {
       availableNotes.addAll(NoteData.findNotesByNumber(i));
     }
+    //availableNotes = TranspositionFile.majorScale.notes;
   }
 
   void buildFullRange(){
@@ -26,6 +25,7 @@ class NoteGenerator {
     for (int i = -100; i <= 100; i++) {
       fullRange.add(NoteData.findFirstChoiceByNumber(i, Clef.neutral()));
     }
+    //fullRange = TranspositionFile.majorScale.notes;
   }
 
 
