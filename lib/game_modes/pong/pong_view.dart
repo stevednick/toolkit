@@ -25,10 +25,15 @@ class _PongViewState extends State<PongView>
       const TextStyle(fontSize: 36, color: Colors.black);
   final TextStyle countdownTextStyle = const TextStyle(fontSize: 60);
   List<bool> showTicks = [false, false];
+  late List<RangeSelectionScene> rangeSelectionScenes = [];
+
+  double width = 1000;
 
   @override
   void initState() {
     super.initState();
+    rangeSelectionScenes.add(RangeSelectionScene(gameController.players[0]));
+    rangeSelectionScenes.add(RangeSelectionScene(gameController.players[1]));
 
     gameController.countDownText.addListener(() {
       if (gameController.countDownText.value == "Go!") {
@@ -51,6 +56,7 @@ class _PongViewState extends State<PongView>
 
     leftPongScene = PongScene(gameController, 0);
     rightPongScene = PongScene(gameController, 1);
+
   }
   
   void triggerTick(int side) {
@@ -94,13 +100,13 @@ class _PongViewState extends State<PongView>
 
   Widget _buildPongScene(int playerIndex, PongScene scene) {
     return SizedBox(
-      width: 300,
+      width: width/3,
       height: 500,
       child: GameWidget(
         game: gameController.mode.value == GameMode.running ||
                 gameController.mode.value == GameMode.countingDown
             ? scene
-            : RangeSelectionScene(gameController.players[playerIndex]),
+            : rangeSelectionScenes[playerIndex],
       ),
     );
   }
@@ -246,6 +252,9 @@ class _PongViewState extends State<PongView>
 
   @override
   Widget build(BuildContext context) {
+    width = MediaQuery.sizeOf(context).width;
+    rangeSelectionScenes[0].width = width;
+    rangeSelectionScenes[1].width = width;
     return Scaffold(
       backgroundColor: Colors.white,
       body: Stack(

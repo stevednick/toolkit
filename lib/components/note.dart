@@ -5,7 +5,7 @@ import 'package:toolkit/tools/config.dart';
 import 'package:toolkit/models/models.dart';
 import 'package:toolkit/tools/utils.dart';
 
-class Note extends PositionComponent {
+class Note extends PositionComponent with HasVisibility{
   late Asset crotchetSprite;
   late Asset invertedCrotchetSprite;
   //late Asset accidentalSprite;
@@ -13,12 +13,15 @@ class Note extends PositionComponent {
   late Asset flatSprite;
   late Asset doubleSharpSprite;
   late Asset doubleFlatSprite;
+  late Asset naturalSprite;
   late NoteData noteData;
   late Asset arrowSprite;
   PositionComponent noteComponents = PositionComponent();
   PositionComponent ledgerHolder = PositionComponent();
   final bool arrowShowing;
   final bool isGhostNote;
+
+  bool isSetUpComplete = false;
 
   Note(this.noteData,
       {this.arrowShowing = false,
@@ -36,10 +39,12 @@ class Note extends PositionComponent {
   @override
   Future<void> onLoad() async {
     super.onLoad();
-    setUp();
+    await setUp();
+    isSetUpComplete = true;
+
   }
 
-  void setUp() {
+  Future<void> setUp() async {
     Color colour = isGhostNote ? Colors.grey : Colors.black;
     arrowSprite = Asset.createArrow();
     crotchetSprite = Asset.createCrotchet(colour: colour);
@@ -48,13 +53,16 @@ class Note extends PositionComponent {
     flatSprite = Asset.createFlat(colour: colour);
     doubleSharpSprite = Asset.createDoubleSharp(colour: colour);
     doubleFlatSprite = Asset.createDoubleFlat(colour: colour);
-    noteComponents.add(crotchetSprite);
-    noteComponents.add(invertedCrotchetSprite);
-    noteComponents.add(sharpSprite);
-    noteComponents.add(flatSprite);
-    noteComponents.add(doubleSharpSprite);
-    noteComponents.add(doubleFlatSprite);
-    noteComponents.add(arrowSprite);
+    naturalSprite = Asset.createNatural(colour: colour);
+    noteComponents
+    ..add(crotchetSprite)
+    ..add(invertedCrotchetSprite)
+    ..add(sharpSprite)
+    ..add(flatSprite)
+    ..add(doubleSharpSprite)
+    ..add(doubleFlatSprite)
+    ..add(arrowSprite)
+    ..add(naturalSprite);
     add(noteComponents);
     add(ledgerHolder);
     positionCrotchetSprite();
@@ -70,6 +78,7 @@ class Note extends PositionComponent {
     flatSprite.isVisible = noteData.accidental == Accidental.flat;
     doubleSharpSprite.isVisible = noteData.accidental == Accidental.doubleSharp;
     doubleFlatSprite.isVisible = noteData.accidental == Accidental.doubleFlat;
+    naturalSprite.isVisible = noteData.accidental == Accidental.natural;
     positionCrotchetSprite();
     drawLedgers();
   }

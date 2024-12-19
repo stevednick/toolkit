@@ -8,23 +8,23 @@ class Range {
   final String bottomKey;
 
   Range({this.topKey = 'topKey', this.bottomKey = 'bottomKey'}) {
-    _loadValues();
+    loadValues();
   }
 
-  Future<void> _loadValues() async {
+  Future<void> loadValues() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     top = prefs.getInt(topKey) ?? 8;       // Load 'top' from SharedPreferences, or default to 8
     bottom = prefs.getInt(bottomKey) ?? 0; // Load 'bottom' from SharedPreferences, or default to 0
-    print("Values Loaded");
-    print('$top, $bottom');
+    // print("Values Loaded");
+    // print('$top, $bottom');
   }
 
   Future<List<int>> getValues() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     top = prefs.getInt(topKey) ?? 8;       // Load 'top' from SharedPreferences, or default to 8
     bottom = prefs.getInt(bottomKey) ?? 0; // Load 'bottom' from SharedPreferences, or default to 0
-    print("Values Loaded");
-    print('$top, $bottom');
+    // print("Values Loaded");
+    // print('$top, $bottom');
     return [top, bottom];
   }
 

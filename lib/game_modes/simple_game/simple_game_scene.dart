@@ -3,100 +3,165 @@ import 'package:flame/components.dart';
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import 'package:toolkit/components/components.dart';
+import 'package:toolkit/game_modes/simple_game/game_timer.dart';
 import 'package:toolkit/game_modes/simple_game/simple_game_controller.dart';
+import 'package:toolkit/models/key_signature.dart';
 import 'package:toolkit/models/models.dart';
 import 'package:toolkit/tools/tools.dart';
 
 class SimpleGameScene extends FlameGame {
   final SimpleGameController gameController;
+  final GameStateManager stateManager = GameStateManager();
 
-  final Vector2 viewSize = Vector2(300, 500);
-  double staffWidth() {
-    return 250;
-  }
-
-  double ghostNoteExtension = 130;
   late Note ghostNote;
+  int previousGhostNote = -556;
+  bool ghostNoteLoadStarted = false;
 
-  late Note note;
-  late Asset clefSprite;
-  PositionComponent componentHolder = PositionComponent();
-  PositionComponent ghostNoteHolder = PositionComponent();
   final NoteGenerator noteGenerator = NoteGenerator();
-  final BouncyBall bouncyBall = BouncyBall();
-  double gameTime = 0.0;
-  bool showBall = false;
+
+  bool loadComplete = false;
+
+  late NoteData currentNoteData;
+  late NoteData nextNote;
+  bool noteChangeQueued = false;
+  late Note note;
+
+  late Asset clefSprite;
+  PositionComponent clefHolder = PositionComponent();
+
+  PositionComponent noteHolder = PositionComponent();
+  PositionComponent ghostNoteHolder = PositionComponent();
+
+  double width = 1000;
+  double screenWidthRatio = 3;
+
+  late PositionManager positionManager;
+
   Tick tick = Tick();
-  bool showGhostNotes = true;
-  bool rebuildQueued = false;
 
+  final BouncyBall bouncyBall = BouncyBall();
   Tempo tempo = Tempo(key: 'simple_game_tempo');
-  late double beatSeconds;
+  double beatSeconds = 1000;
+  double gameTime = 0;
 
-  late int previousGhostNote =
-      -1000; // use this to prevent loading ghost note evey frame!
+  late KeySignature keySignature;
+  PositionComponent keySignatureHolder = PositionComponent();
 
-  NoteData noteData = NoteData.placeholderValue;
+  SimpleGameScene(
+    this.gameController,
+  );
 
-  SimpleGameScene(this.gameController) {
-    getSettings();
+  @override
+  FutureOr<void> onLoad() async {
+    await super.onLoad();
     gameController.player.currentNote.addListener(() {
-      getAndSetNote();
+      queueNewNote(gameController.player.currentNote.value);
     });
     gameController.state.addListener(() {
       if (gameController.state.value == GameState.correctNoteHeard) {
         tick.showTick();
       }
     });
-    gameController.gameMode.addListener(() {
-      setTempo();
+
+    stateManager.showGhostNotes = //  todo Move loading to state manager?
+        await Settings.getSetting(Settings.ghostNoteString);
+    stateManager.showBall = await Settings.getSetting(Settings.tempoKey);
+    keySignature = await gameController.player.loadKeySignature();
+    positionManager = PositionManager(keySignature, stateManager);
+    await buildAllElements();
+    gameController.noteChecker.noteNotifier.addListener(() {
+      if (stateManager.showGhostNotes) {
+        showGhostNote();
+      }
     });
-  }
-
-  Future<void> getSettings() async{
-    showGhostNotes = await Settings.getSetting(Settings.ghostNoteString);
-    showBall = await Settings.getSetting(Settings.tempoKey);
-  }
-
-  Future<void> setSettings() async {
-    Settings.saveSetting(Settings.ghostNoteString, showGhostNotes);
-    Settings.saveSetting(Settings.tempoKey, showBall);
-  }
-
-  void rebuild() {
-    Utils.removeAllChildren(world);
-    world.add(componentHolder);
-    if (showGhostNotes) world.add(ghostNoteHolder);
-    drawLines();
-    world.add(tick);
-    world.add(bouncyBall);
-    rebuildQueued = false;
-    newNote(noteData);
-  }
-
-  @override
-  FutureOr<void> onLoad() async {
-    super.onLoad();
-    camera.viewfinder.visibleGameSize = viewSize;
+    camera.viewfinder.zoom = positionManager.scaleFactor(width, screenWidthRatio);
+    print("Width: $width");
     camera.viewfinder.anchor = Anchor.center;
-    bouncyBall.position = Vector2(-120, -70);
-    tick.position = Vector2(230, -90);
-    rebuild();
-    await setTempo();
-  }
-
-  Future<void> setTempo() async {
-    await getSettings();
-    bouncyBall.isVisible = showBall;
+    loadComplete = true;
+    gameController.changeNote();
     beatSeconds = await tempo.loadBeatSeconds();
   }
 
-  @override
-  void update(double dt) {
-    if (showGhostNotes) {
-      showGhostNote(gameController.noteChecker.noteNotifier.value);
+  Future<void> buildAllElements() async {
+    
+    keySignatureHolder.position = positionManager.keySignatureHolderPosition();
+    world.add(keySignatureHolder);
+    clefHolder.position = positionManager.clefHolderPosition();
+    world.add(clefHolder);
+    world.add(tick);
+    tick.position = Vector2(250, -90);
+    drawLines();
+    currentNoteData = gameController.currentNote.value;
+    bouncyBall.position = positionManager.bouncyBallPosition();
+    world.add(bouncyBall);
+    bouncyBall.isVisible = stateManager.showBall;
+    await addGhostNote();
+    await addNote();
+
+  }
+
+  Future<void> addGhostNote() async {
+    ghostNote = Note(NoteData.octave[0], isGhostNote: true)
+      ..position = positionManager.ghostNotePosition();
+
+    world.add(ghostNoteHolder);
+    ghostNoteHolder.add(ghostNote); // Add this line
+    ghostNote.isVisible = false;
+  }
+
+  Future<void> addNote() async {
+    world.add(noteHolder);
+    note = Note(currentNoteData)
+      ..position = positionManager.notePosition();
+    noteHolder.add(note);
+  }
+
+  void queueNewNote(NoteData newNoteData) {
+    nextNote = newNoteData;
+    noteChangeQueued = true;
+  }
+
+  void changeNote() {
+    if (loadComplete && noteChangeQueued) {
+      currentNoteData = nextNote;
+      currentNoteData = keySignature.noteModifier(currentNoteData);
+      note.changeNote(currentNoteData);
+      noteChangeQueued = false;
+      Utils.removeAllChildren(clefHolder);
+      clefSprite = currentNoteData.clef.sprite..positionSprite();
+      clefHolder.add(clefSprite);
+      Utils.removeAllChildren(keySignatureHolder);
+      keySignatureHolder.add(keySignature.displayKeySignature(currentNoteData.clef));
     }
-    if (showBall) {
+  }
+
+  void showGhostNote() {
+    int num = gameController.noteChecker.noteNotifier.value;
+    num -= gameController
+        .player.selectedInstrument.currentTransposition.pitchModifier;
+    if (num == previousGhostNote) return;
+    if (num < -500) {
+      previousGhostNote = -1001;
+      ghostNote.isVisible = false;
+      return;
+    }
+ 
+    NoteData d = noteGenerator.noteFromNumber(num, currentNoteData.clef);
+    d = keySignature.noteModifier(d, ghostNote: true);
+    if (num ==
+        gameController.noteChecker.noteToCheck -
+            gameController
+                .player.selectedInstrument.currentTransposition.pitchModifier) {
+      d = currentNoteData;
+    }
+
+    ghostNote.changeNote(d);
+    ghostNote.isVisible = true;
+    previousGhostNote = num;
+  }
+
+  void updateBallPosition(double dt) {
+    if (stateManager.showBall) {
       gameTime += dt; // todo extract this timing shit.
       while (gameTime > beatSeconds) {
         gameTime -= beatSeconds;
@@ -106,68 +171,74 @@ class SimpleGameScene extends FlameGame {
       }
       bouncyBall.positionBall(gameTime / beatSeconds);
     }
-    if (rebuildQueued) rebuild();
-    super.update(dt);
   }
 
   @override
-  void onDispose() {
-    super.onDispose();
-    gameController.player.currentNote.removeListener(getAndSetNote);
-    gameController.dispose();
-  }
-
-  void newNote(NoteData data) {
-    // Change this to just change the note.
-    Utils.removeAllChildren(componentHolder);
-    PositionComponent clefHolder = PositionComponent();
-    clefSprite = noteData.clef.sprite..positionSprite();
-    componentHolder.add(clefHolder);
-    noteData = data;
-    note = Note(noteData)..position = Vector2(40, 0);
-    componentHolder.add(note);
-    clefHolder.add(clefSprite);
-    clefHolder.position = Vector2(-70, 0);
-  }
-
-  void showGhostNote(int num) {
-    num -= gameController
-        .player.selectedInstrument.currentTransposition.pitchModifier;
-    if (num == previousGhostNote) return;
-    ghostNoteHolder.children.toList().forEach((child) {
-      child.removeFromParent();
-    });
-    if (num < -500) {
-      previousGhostNote = -1001;
-      return;
-    }
-    NoteData d = noteGenerator.noteFromNumber(num, noteData.clef);
-    if (num == gameController.noteChecker.noteToCheck - gameController
-        .player.selectedInstrument.currentTransposition.pitchModifier){
-      d = noteData;
-    }
-    ghostNote = Note(d, isGhostNote: true)..position = Vector2(170, 0);
-    
-    ghostNoteHolder.add(ghostNote);
-    previousGhostNote = num;
+  void update(double dt) {
+    changeNote();
+    updateBallPosition(dt);
+    super.update(dt);
   }
 
   void drawLines() {
     for (var i = -2; i < 3; i++) {
       RectangleComponent newLine = RectangleComponent(
-        size: Vector2(staffWidth() + (showGhostNotes ? ghostNoteExtension : 0),
-            lineWidth),
+        size: positionManager.staffLineSize(),
         paint: Paint()..color = Colors.black,
-      )..position = Vector2(-staffWidth() / 2, i * lineGap);
+      )..position = Vector2(
+          positionManager.staffLinePosX(), i * lineGap);
       world.add(newLine);
     }
   }
 
-  void getAndSetNote() {
-    noteData = gameController.getNoteDataFromPlayer();
-    newNote(noteData);
-  }
-
   @override
   Color backgroundColor() => Colors.white;
+}
+
+class GameStateManager {
+  bool showGhostNotes = true;
+  bool showBall = false;
+}
+
+class PositionManager {
+
+  final KeySignature keySignature;
+  final GameStateManager stateManager;
+  final double staffWidth = 280;
+  final double ghostNoteExtension = 130;
+  PositionManager(this.keySignature, this.stateManager);
+
+  Vector2 staffLineSize() {
+    return Vector2(staffWidth + (stateManager.showGhostNotes ? ghostNoteExtension : 0) + keySignature.clefOffset(), lineWidth);
+  }
+
+  double staffLinePosX() {
+    return 20 -staffWidth/2 - keySignature.clefOffset();
+  }
+
+  Vector2 notePosition() {
+    return Vector2(40, 0);
+  }
+
+  Vector2 ghostNotePosition(){
+    return Vector2(180, 0);
+  }
+
+  Vector2 bouncyBallPosition(){
+    return Vector2(130 - (stateManager.showGhostNotes ? ghostNoteExtension / 2 : 0), -70);
+  }
+
+  Vector2 clefHolderPosition(){
+    return Vector2(-70 - keySignature.clefOffset(), 0);
+  }
+
+  Vector2 keySignatureHolderPosition(){
+    return Vector2(25-keySignature.clefOffset(), 0);
+  }
+
+  double scaleFactor(double width, double screenWidthRatio) {  // Move this to pos Man
+    return width /
+        ((staffWidth + (stateManager.showGhostNotes ? ghostNoteExtension : 0) + keySignature.clefOffset())*
+            screenWidthRatio);
+  }
 }

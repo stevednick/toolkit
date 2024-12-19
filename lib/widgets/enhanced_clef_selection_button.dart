@@ -10,10 +10,10 @@ class EnhancedClefSelectionButton extends StatefulWidget {
   const EnhancedClefSelectionButton(this.player, this.refreshScene, {super.key});
 
   @override
-  State<EnhancedClefSelectionButton> createState() => _EnhancedClefSelectionButtonState();
+  State<EnhancedClefSelectionButton> createState() => EnhancedClefSelectionButtonState();
 }
 
-class _EnhancedClefSelectionButtonState extends State<EnhancedClefSelectionButton> with SingleTickerProviderStateMixin {
+class EnhancedClefSelectionButtonState extends State<EnhancedClefSelectionButton> with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _animation;
   int mode = 0;
@@ -21,12 +21,12 @@ class _EnhancedClefSelectionButtonState extends State<EnhancedClefSelectionButto
   @override
   void initState() {
     super.initState();
-    _setMode();
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 300),
     );
     _animation = Tween<double>(begin: 0, end: 1).animate(_animationController);
+    _initializeMode();
   }
 
   @override
@@ -35,18 +35,24 @@ class _EnhancedClefSelectionButtonState extends State<EnhancedClefSelectionButto
     super.dispose();
   }
 
-  Future<void> _setMode() async {
+  Future<void> _initializeMode() async {
     ClefSelection selection = await widget.player.getClefSelection();
     setState(() {
-      mode = (ClefSelection.values.indexOf(selection)+2)%3;
+      mode = (ClefSelection.values.indexOf(selection) + 2) % 3;
     });
     _animationController.value = mode / 2;
+  }
+
+  Future<void> setMode() async {
+    print("Set Mode Called");
+    await _initializeMode();
+    _animationController.animateTo(mode / 2);
   }
 
   void _toggleSelection() {
     setState(() {
       mode = (mode + 1) % 3;
-      widget.player.clefSelection = ClefSelection.values[(mode+1)%3];
+      widget.player.clefSelection = ClefSelection.values[(mode + 1) % 3];
       widget.player.saveInstrumentAndTransposition(
         widget.player.selectedInstrument.currentTransposition,
       );
@@ -54,6 +60,7 @@ class _EnhancedClefSelectionButtonState extends State<EnhancedClefSelectionButto
     });
     _animationController.animateTo(mode / 2);
   }
+
 
   @override
   Widget build(BuildContext context) {

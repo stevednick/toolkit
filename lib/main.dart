@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:toolkit/game_modes/home_screen/home_view.dart';
 import 'package:toolkit/game_modes/home_screen/onboarding_screen.dart';
+import 'package:toolkit/models/asset.dart';
 import 'package:toolkit/tools/orientation_helpers.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   setOrientation(ScreenOrientation.landscapeOnly);
+  await AssetManager().initialize();
 
   runApp(
     MaterialApp(

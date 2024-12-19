@@ -14,14 +14,14 @@ class NoteChecker {
   final List<int> lastDetectedNotes = [];
 
   NoteChecker(this.onNoteHeard, this.noteFeedback) {
-    print("Note Checker Opened");
+    // print("Note Checker Opened");
     pitchGetter.pitchNotifier.addListener(_onPitchDetected);
   }
 
   void _onPitchDetected() {
     noteNotifier.value =
         NoteGetter().getNotefromFrequency(pitchGetter.pitchNotifier.value);
-    print(noteNotifier.value);
+    // print(noteNotifier.value);
     noteFeedback(noteNotifier.value-noteToCheck);
     lastDetectedNotes.add(noteNotifier.value);
     if (lastDetectedNotes.length > 6) {
@@ -42,7 +42,7 @@ class NoteChecker {
 
   void initialize() async {
     pitchGetter.startListening();
-    print("Note Checker Initialised");
+    // print("Note Checker Initialised");
   }
  
   void dispose() async {

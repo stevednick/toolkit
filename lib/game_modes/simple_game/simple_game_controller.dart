@@ -17,7 +17,6 @@ class SimpleGameController {
   late Player player;
   final String playerKey = "SimpleTestKey";
   ValueNotifier<GameMode> gameMode = ValueNotifier(GameMode.waitingToStart);
-  // ValueNotifier<String> countDownText = ValueNotifier("");
   ValueNotifier<String> gameText = ValueNotifier("Set your range.");
   ValueNotifier<String> feedbackText = ValueNotifier("");
   Duration waitDuration = const Duration(seconds: 1);
@@ -55,12 +54,16 @@ class SimpleGameController {
       gameText.value = "Play the note.";
       noteChecker.initialize();
       gameMode.value = GameMode.running;
-      changeNote();
+      //changeNote();
     } else if (gameMode.value == GameMode.running) {
       gameMode.value = GameMode.waitingToStart;
       gameText.value = "Set your range.";
       noteChecker.dispose();
     }
+  }
+
+  void sceneLoaded(){
+    changeNote();
   }
 
   void _waitAndChangeNote() {
@@ -71,6 +74,7 @@ class SimpleGameController {
   }
 
   void changeNote() {
+    print("GameController Changes Note");
     player.currentNote.value = noteGenerator.randomNoteFromRange(
         player, bigJumps: bigJumpsMode);
     noteChecker.noteToCheck = player.getNoteToCheck();

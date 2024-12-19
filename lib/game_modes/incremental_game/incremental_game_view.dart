@@ -1,5 +1,4 @@
 import 'package:flame/game.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:toolkit/game_modes/incremental_game/incremental_game_controller.dart';
 import 'package:toolkit/game_modes/incremental_game/incremental_game_scene.dart';
@@ -109,7 +108,7 @@ class _IncrementalGameViewState extends State<IncrementalGameView> {
   }
 
   Widget _buildResetButton() {
-    return const Positioned(
+    return Positioned(
       bottom: 30,
       right: 30,
       child: NiceButton(

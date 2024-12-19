@@ -3,8 +3,9 @@ import 'package:flutter/material.dart';
 class NiceButton extends StatefulWidget {
   final Function() onPressed;
   final String text;
+  final ValueNotifier<bool> isActive = ValueNotifier(true);
 
-  const NiceButton({
+  NiceButton({
     super.key,
     required this.onPressed, required this.text,
   });
@@ -14,18 +15,35 @@ class NiceButton extends StatefulWidget {
 }
 
 class _NiceButtonState extends State<NiceButton> {
-  late bool _isEnabled;
+  late bool _isEnabled = true;
 
   @override
   void initState() {
+    widget.isActive.addListener((){
+      _updateButtonState();
+    });
+  
     super.initState();
-    _isEnabled = true;
+  }
+
+  void _updateButtonState() {
+    if (mounted) {
+      setState(() {
+        _isEnabled = widget.isActive.value;
+      });
+    }
+  }
+
+    @override
+  void dispose() {
+    widget.isActive.removeListener(_updateButtonState);
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: widget.onPressed,
+      onTap: (){if (_isEnabled) widget.onPressed();},
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 300),
         width: 120,
@@ -42,12 +60,14 @@ class _NiceButtonState extends State<NiceButton> {
           ],
         ),
         child: Center(
-          child: Text(
-            widget.text,
-            style: TextStyle(
-              color: _isEnabled ? Colors.white : Colors.grey[700],
-              fontWeight: FontWeight.bold,
-              fontSize: 14,
+          child: FittedBox(
+            child: Text(
+              widget.text,
+              style: TextStyle(
+                color: _isEnabled ? Colors.white : Colors.grey[700],
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+              ),
             ),
           ),
         ),

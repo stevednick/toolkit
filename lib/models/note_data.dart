@@ -3,7 +3,7 @@ import 'package:toolkit/models/models.dart';
 
 class NoteData {
   int pos;
-  final Accidental accidental;
+  late Accidental accidental;
   Clef clef;
   int noteNum;
   late String name = "";

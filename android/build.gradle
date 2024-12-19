@@ -1,5 +1,5 @@
 buildscript {
-    ext.kotlin_version = '1.7.10'
+    ext.kotlin_version = '2.0.0'
     repositories {
         google()
         mavenCentral()
@@ -7,6 +7,7 @@ buildscript {
 
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath 'com.android.tools.build:gradle:8.7.3' // or the latest stable version
     }
 }
 
@@ -24,13 +25,47 @@ subprojects {
 subprojects {
     project.evaluationDependsOn(':app')
 }
-//
+
+//tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
+//    kotlinOptions {
+//        jvmTarget = "17" // Match with Java version, or "17" if using Java 17
+//    }
+//}
+
+
 //subprojects {
 //    afterEvaluate { project ->
 //        if (project.hasProperty('android')) {
 //            project.android {
 //                if (namespace == null) {
 //                    namespace project.group
+//                }
+//            }
+//        }
+//    }
+//}
+
+//subprojects {
+//    afterEvaluate { project ->
+//        if (project.hasProperty('android')) {
+//            project.android {
+//                if (namespace == null) {
+//                    namespace = project.group.toString()  // Set namespace as fallback
+//                }
+//                project.tasks.whenTaskAdded { task ->
+//                    if (task.name.contains('processDebugManifest') || task.name.contains('processReleaseManifest')) {
+//                        task.doFirst {
+//                            File manifestFile = file("${projectDir}/src/main/AndroidManifest.xml")
+//                            if (manifestFile.exists()) {
+//                                String manifestContent = manifestFile.text
+//                                if (manifestContent.contains('package=')) {
+//                                    manifestContent = manifestContent.replaceAll(/package="[^"]*"/, "")
+//                                    manifestFile.write(manifestContent)
+//                                    println "Removed 'package' attribute from ${manifestFile}"
+//                                }
+//                            }
+//                        }
+//                    }
 //                }
 //            }
 //        }

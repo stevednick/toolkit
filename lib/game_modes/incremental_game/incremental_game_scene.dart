@@ -161,7 +161,7 @@ class IncrementalGameScene extends FlameGame {
   void getAndSetNote() {
     noteData = gameController.currentNote.value.data;
     newNote(noteData);
-    print(noteData.name);
+    // print(noteData.name);
   }
 
   @override

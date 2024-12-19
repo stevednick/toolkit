@@ -5,12 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:toolkit/game_modes/home_screen/advanced_options_view.dart';
 import 'package:toolkit/game_modes/home_screen/note_selector_view.dart';
 import 'package:toolkit/game_modes/simple_game/game_options.dart';
+import 'package:toolkit/game_modes/simple_game/load_and_save_view.dart';
 import 'package:toolkit/game_modes/simple_game/simple_game_controller.dart';
 import 'package:toolkit/game_modes/simple_game/simple_game_scene.dart';
 import 'package:toolkit/models/models.dart';
 import 'package:toolkit/scenes/range_selection_scene.dart';
-import 'package:toolkit/widgets/qr_code_generator.dart';
-import 'package:toolkit/widgets/qr_scanner.dart';
+import 'package:toolkit/widgets/key_signature_dropdown.dart';
 import 'package:toolkit/widgets/widgets.dart';
 
 class SimpleGameView extends StatefulWidget {
@@ -22,18 +22,83 @@ class SimpleGameView extends StatefulWidget {
 
 class _SimpleGameViewState extends State<SimpleGameView> {
   late final SimpleGameController gameController;
-  late final SimpleGameScene scene;
+  late SimpleGameScene scene;
+  late RangeSelectionScene rangeSelectionScene;
+  late final EnhancedClefSelectionButton clefSelectionButton;
 
-  late GameOptions gameOptions;
+  late double width;
+
+  late GlobalKey<TranspositionDropDownState> _dropdownKey;
+  late GlobalKey<KeySignatureDropdownState> _keyDropDownKey;
+  final GlobalKey<EnhancedClefSelectionButtonState> _clefButtonKey =
+      GlobalKey();
+  late TempoSelector tempoSelector = TempoSelector(
+    onTempoChanged: (int newTempo) {},
+    keyString: 'simple_game_tempo',
+  );
+  late final NiceButton clefThresholdsButton = NiceButton(
+    text: "Clef Thresholds",
+    onPressed: () {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => AdvancedOptionsView(gameController.player),
+        ),
+      );
+    },
+  );
+
+  GameOptions? gameOptions;
 
   bool showTick = false;
+
+  //late double width;
 
   @override
   void initState() {
     super.initState();
+
     gameController = SimpleGameController(triggerTick);
     scene = SimpleGameScene(gameController);
-    gameOptions = GameOptions(top: gameController.player.range.top, bottom: gameController.player.range.bottom);
+    rangeSelectionScene = RangeSelectionScene(gameController.player);
+    _dropdownKey = GlobalKey<TranspositionDropDownState>();
+    _keyDropDownKey = GlobalKey<KeySignatureDropdownState>();
+    clefSelectionButton =
+        EnhancedClefSelectionButton(gameController.player, refreshScene);
+    setClefThresholdsButton();
+  }
+
+  Future<void> setTempoSelector() async {
+    tempoSelector.isActive.value = await Settings.getSetting(Settings.tempoKey);
+  }
+
+  Future<void> setClefThresholdsButton() async {
+    await setTempoSelector();
+    ClefSelection currentSelection = gameController.player.clefSelection;
+    clefThresholdsButton.isActive.value = true;
+    clefThresholdsButton.isActive.value = false;
+    clefThresholdsButton.isActive.value =
+        currentSelection.index == ClefSelection.trebleBass.index;
+  }
+
+  Future<void> fetchGameOptions() async {
+    ClefSelection clefSelection =
+        await gameController.player.getClefSelection();
+    List<bool> noteActivations =
+        NoteData.octave.map((note) => note.isActive).toList();
+    await gameController.player.range.getValues();
+    int kS = await gameController.player.loadKeySignatureInt();
+    gameOptions = GameOptions(
+      version: 1,
+      t: gameController.player.range.top,
+      b: gameController.player.range.bottom,
+      tr: gameController.player.selectedInstrument.currentTransposition.name,
+      tCT: gameController.player.clefThreshold.trebleClefThreshold,
+      bCT: gameController.player.clefThreshold.bassClefThreshold,
+      cS: ClefSelection.values.indexOf(clefSelection),
+      nS: noteActivations,
+      kS: kS,
+    );
   }
 
   void triggerTick() {
@@ -48,7 +113,15 @@ class _SimpleGameViewState extends State<SimpleGameView> {
   }
 
   void refreshScene() {
-    setState(() {});
+    setState(() {
+      rangeSelectionScene.changeNote(true);
+    });
+  }
+
+  void clefSelectionButtonPressed() {
+    //refreshScene();
+    rangeSelectionScene.changeNote(true);
+    setClefThresholdsButton();
   }
 
   @override
@@ -58,39 +131,40 @@ class _SimpleGameViewState extends State<SimpleGameView> {
     super.dispose();
   }
 
-  Widget _buildQRCode() {
-    return Positioned(
-      top: 100,
-      right: 30,
-      child: QRCodeGenerator(gameOptions: gameOptions),
-    );
-  }
-
-  Widget _buildQRScannerButton() {
-    return Positioned(
-      bottom:200,
-      right: 30,
-      child: ElevatedButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => QRScanner(player: gameController.player)),
-          );
-        },
-        child: const Text('Scan QR Code'),
-      ),
+  Widget _buildLoadSaveButton() {
+    return NiceButton(
+      onPressed: () async {
+        await fetchGameOptions();
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => LoadAndSaveView(
+              gameOptions: gameOptions!,
+              player: gameController.player,
+              refreshScene: () {
+                setState(() {
+                  _dropdownKey.currentState?.refresh();
+                  _keyDropDownKey.currentState?.refresh();
+                  _clefButtonKey.currentState?.setMode();
+                  rangeSelectionScene = RangeSelectionScene(gameController.player);
+                });
+              },
+            ),
+          ),
+        );
+      },
+      text: "Load or Share",
     );
   }
 
   Widget _buildGameScene() {
     return Center(
-      child: SizedBox(
-        width: 300,
-        height: 500,
+      child: FractionallySizedBox(
+        widthFactor: 0.33,
         child: GameWidget(
           game: gameController.gameMode.value != GameMode.waitingToStart
               ? scene
-              : RangeSelectionScene(gameController.player),
+              : rangeSelectionScene,
         ),
       ),
     );
@@ -133,6 +207,7 @@ class _SimpleGameViewState extends State<SimpleGameView> {
       left: 40,
       child: gameController.gameMode.value == GameMode.waitingToStart
           ? TranspositionDropDown(
+              key: _dropdownKey,
               player: gameController.player,
             )
           : Text(
@@ -144,8 +219,26 @@ class _SimpleGameViewState extends State<SimpleGameView> {
     );
   }
 
+  Widget _buildKeySignatureDropdown() {
+    return Positioned(
+      top: 40,
+      right: 40,
+      child: KeySignatureDropdown(
+          key: _keyDropDownKey,
+          player: gameController.player, onChanged: () { 
+              setState(() {
+                rangeSelectionScene = RangeSelectionScene(gameController.player);
+              });
+           },),
+    );
+  }
+
   Widget _buildClefSelectionButton() {
-    return EnhancedClefSelectionButton(gameController.player, refreshScene);
+    return EnhancedClefSelectionButton(
+      key: _clefButtonKey,
+      gameController.player,
+      clefSelectionButtonPressed,
+    );
   }
 
   Widget _buildStartButton() {
@@ -163,7 +256,10 @@ class _SimpleGameViewState extends State<SimpleGameView> {
                     : "End",
                 onPressed: () {
                   setState(() {
+                    scene.onDispose();
+                    scene = SimpleGameScene(gameController);
                     gameController.startButtonPressed();
+                    //setClefThresholdsButton();
                   });
                 },
               ),
@@ -183,9 +279,9 @@ class _SimpleGameViewState extends State<SimpleGameView> {
         return Settings.getSetting(Settings.tempoKey);
       },
       onToggle: (newValue) async {
-        scene.showBall = newValue;
-        await scene.setSettings();
-        scene.rebuildQueued = true;
+        //todo add rebuold code when ready...
+        await Settings.saveSetting(Settings.tempoKey, newValue);
+        setTempoSelector();
         // If you need to persist this change, you might want to call a method here
         // await scene.saveGhostNotesState(newValue);
       },
@@ -194,17 +290,7 @@ class _SimpleGameViewState extends State<SimpleGameView> {
   }
 
   Widget _buildSettingsButton() {
-    return NiceButton(
-      text: "Clef Thresholds",
-      onPressed: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => AdvancedOptionsView(gameController.player),
-          ),
-        );
-      },
-    );
+    return clefThresholdsButton;
   }
 
   Widget _buildNoteSelectorButton() {
@@ -244,21 +330,22 @@ class _SimpleGameViewState extends State<SimpleGameView> {
   }
 
   Widget _buildTempoSelectorButton() {
-    return TempoSelector(
-      onTempoChanged: (int newTempo) {},
-      keyString: 'simple_game_tempo',
-    );
+    return tempoSelector;
   }
 
   Widget _buildGhostNoteButton() {
+    // Todo, add rebuild code when ready...
     return FutureBuilderToggle(
       getInitialState: () {
         return Settings.getSetting(Settings.ghostNoteString);
       },
       onToggle: (newValue) async {
-        scene.showGhostNotes = newValue;
-        await scene.setSettings();
-        scene.rebuildQueued = true;
+        await Settings.saveSetting(Settings.ghostNoteString, newValue);
+        // scene.onDispose();
+        // scene = SimpleGameScene(gameController);
+        //scene.showGhostNotes = newValue;
+        //await scene.setSettings();
+        //scene.rebuildQueued = true;
       },
       text: 'Ghost Notes',
     );
@@ -268,11 +355,15 @@ class _SimpleGameViewState extends State<SimpleGameView> {
     return Stack(
       children: [
         Padding(
-          padding: const EdgeInsets.all(10.0),
+          padding: const EdgeInsets.fromLTRB(45, 10, 45, 10),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.end,
             mainAxisSize: MainAxisSize.max,
             children: [
+              _buildBigJumpSwitch(),
+              const SizedBox(
+                height: 5,
+              ),
               _buildGhostNoteButton(),
               const SizedBox(
                 height: 5,
@@ -288,11 +379,11 @@ class _SimpleGameViewState extends State<SimpleGameView> {
         Align(
           alignment: Alignment.bottomRight,
           child: Padding(
-            padding: const EdgeInsets.all(10.0),
+            padding: const EdgeInsets.fromLTRB(45, 10, 45, 10),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                _buildBigJumpSwitch(),
+                _buildLoadSaveButton(),
                 const SizedBox(
                   height: 5,
                 ),
@@ -315,16 +406,19 @@ class _SimpleGameViewState extends State<SimpleGameView> {
 
   @override
   Widget build(BuildContext context) {
+    width = MediaQuery.sizeOf(context).width;
+    rangeSelectionScene.width = width;
+    scene.width = width;
     return Scaffold(
       backgroundColor: Colors.white,
       body: Stack(
         children: [
-          _buildQRCode(),
-          _buildQRScannerButton(),
           _buildGameScene(),
           _buildScoreText(),
           _buildGameText(),
           _buildTranspositionDropDown(),
+          if (gameController.gameMode.value == GameMode.waitingToStart)
+          _buildKeySignatureDropdown(),
           if (gameController.gameMode.value == GameMode.waitingToStart)
             _buildSettingsButtons(),
           _buildStartButton(),

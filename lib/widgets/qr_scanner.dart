@@ -1,28 +1,103 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:qr_code_scanner/qr_code_scanner.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:toolkit/game_modes/simple_game/game_options.dart';
+import 'package:toolkit/models/clef_selection.dart';
+import 'package:toolkit/models/note_data.dart';
 import 'package:toolkit/models/player.dart';
+import 'package:toolkit/models/transposition.dart';
+import 'package:toolkit/widgets/nice_button.dart';
+import 'dart:convert';
 
-class QRScanner extends StatefulWidget {
-  const QRScanner({super.key, required this.player});
+class QrScanner extends StatefulWidget {
+  const QrScanner({super.key, required this.player});
+
   final Player player;
 
   @override
-  _QRScannerState createState() => _QRScannerState();
+  State<QrScanner> createState() => _QrScannerState();
 }
 
-class _QRScannerState extends State<QRScanner> {
-  final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
-  QRViewController? controller;
-  GameOptions? scannedOptions;
+class _QrScannerState extends State<QrScanner> {
+  GameOptions? gameOptions;
+  MobileScannerController? _controller;
+  bool dataSeen = false;
 
-  Future<void> saveValues() async {
-    if (scannedOptions != null){
-      widget.player.range.top = scannedOptions!.top;
-      widget.player.range.bottom = scannedOptions!.bottom;
-      await widget.player.range.saveValues();
+  @override
+  void initState() {
+    super.initState();
+    _controller = MobileScannerController();
+  }
+
+  @override
+  void dispose() {
+    _controller?.dispose();
+    super.dispose();
+  }
+
+  Future<void> saveOptions(GameOptions options) async {
+    try {
+      widget.player.clefSelection = ClefSelection.values[options.cS];
+      for (int i = 0; i < options.nS.length; i++) {
+        NoteData.octave[i].isActive = options.nS[i];
+        await NoteData.octave[i].saveIsActive();
+      }
+      await widget.player.clefThreshold
+        ..trebleClefThreshold = options.tCT
+        ..bassClefThreshold = options.bCT
+        ..saveValues();
+      await widget.player.range
+        ..top = options.t
+        ..bottom = options.b
+        ..saveValues();
+      await widget.player.saveKeySignature(options.kS);
+      await widget.player.saveInstrumentAndTransposition(
+        Transposition.getByName(options.tr) ?? widget.player.selectedInstrument.currentTransposition,
+      );
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Options saved successfully'), backgroundColor: Colors.green),
+      );
+    } catch (error) {
+      print("Error saving options: $error");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error saving options: $error'), backgroundColor: Colors.red),
+      );
     }
+  }
+
+  void _showErrorSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), backgroundColor: Colors.red),
+    );
+  }
+
+  Future<void> _showSaveOptionsDialog(GameOptions scannedOptions) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Save New Settings?'),
+          content: const Text('Do you want to save the new game options?'),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('No'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('Yes'),
+              onPressed: () {
+                saveOptions(scannedOptions);
+                Navigator.of(context).pop();
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -30,48 +105,37 @@ class _QRScannerState extends State<QRScanner> {
     return Scaffold(
       body: Stack(
         children: [
-          const BackButton(),
-          Column(
-            children: <Widget>[
-              Expanded(
-                flex: 5,
-                child: QRView(
-                  key: qrKey,
-                  onQRViewCreated: _onQRViewCreated,
-                ),
+          Center(
+            child: RotatedBox(
+              quarterTurns: 3,
+              child: MobileScanner(
+                controller: _controller,
+                onDetect: (scanData) async {
+                  if (dataSeen) return;
+                  try {
+                    final jsonData = jsonDecode(scanData.barcodes[0].rawValue!);
+                    final scannedOptions = GameOptions.fromJson(jsonData);
+                    dataSeen = true;
+                    await _showSaveOptionsDialog(scannedOptions);
+                  } catch (e) {
+                    _showErrorSnackBar('Error parsing QR code: $e');
+                  }
+                },
               ),
-              Expanded(
-                flex: 1,
-                child: Center(
-                  child: scannedOptions == null
-                      ? const Text('Scan a code')
-                      : Text('Scanned Options: ${scannedOptions!.top}'),
-                ),
-              )
-            ],
+            ),
+          ),
+          Positioned(
+            top: 30,
+            left: 30,
+            child: NiceButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              text: "Back",
+            ),
           ),
         ],
       ),
     );
-  }
-
-  void _onQRViewCreated(QRViewController controller) {
-    this.controller = controller;
-    controller.scannedDataStream.listen((scanData) {
-      try {
-        final jsonData = jsonDecode(scanData.code);
-        setState(() {
-          scannedOptions = GameOptions.fromJson(jsonData);
-        });
-      } catch (e) {
-        print('Error parsing QR code data: $e');
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    controller?.dispose();
-    super.dispose();
   }
 }

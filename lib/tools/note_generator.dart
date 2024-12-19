@@ -146,7 +146,7 @@ class QuarterElementSelector<T> {
   T? getAlternatingQuarterElement(List<T> list) {
     // Check if the list has at least 4 elements
     if (list.length < 4) {
-      print('The list must have at least 4 elements.');
+      // print('The list must have at least 4 elements.');
       return null;
     }
 

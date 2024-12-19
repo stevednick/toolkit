@@ -12,12 +12,10 @@ class QRCodeGenerator extends StatelessWidget { // todo move this somewhere more
   Widget build(BuildContext context) {
     final optionsJson = jsonEncode(gameOptions.toJson());
 
-    return Center(
-      child: QrImageView(
-        data: optionsJson,
-        version: QrVersions.auto,
-        size: 200.0,
-      ),
+    return QrImageView(
+      data: optionsJson,
+      version: QrVersions.auto,
+      size: 200.0,
     );
   }
 }

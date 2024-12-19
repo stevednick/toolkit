@@ -10,19 +10,20 @@ class ClefSelectionButton extends StatefulWidget {
   const ClefSelectionButton(this.player, this.refreshScene, {super.key});
 
   @override
-  State<ClefSelectionButton> createState() => _ClefSelectionButtonState();
+  State<ClefSelectionButton> createState() => ClefSelectionButtonState();
 }
 
-class _ClefSelectionButtonState extends State<ClefSelectionButton> {
+class ClefSelectionButtonState extends State<ClefSelectionButton> {
   int mode = 0;
 
   @override
   void initState() {
+    setMode();
     super.initState();
-    _setMode();
   }
 
-  Future<void> _setMode() async {
+  Future<void> setMode() async {
+    print("Set Mode called");
     ClefSelection selection = await widget.player.getClefSelection();
     setState(() {
       mode = (ClefSelection.values.indexOf(selection));

@@ -5,8 +5,9 @@ import 'package:toolkit/widgets/nice_button.dart';
 class TempoSelector extends StatefulWidget {
   final Function(int) onTempoChanged;
   final String keyString;
+  ValueNotifier<bool> isActive = ValueNotifier(true);
 
-  const TempoSelector({super.key, required this.onTempoChanged, required this.keyString});
+  TempoSelector({super.key, required this.onTempoChanged, required this.keyString});
 
   @override
   _TempoSelectorState createState() => _TempoSelectorState();
@@ -15,9 +16,19 @@ class TempoSelector extends StatefulWidget {
 class _TempoSelectorState extends State<TempoSelector> {
   int _selectedTempo = 60; // Default tempo
   late Tempo tempo = Tempo(key: widget.keyString);
+  late NiceButton button;
 
   @override
   void initState() {
+    widget.isActive.addListener((){
+      button.isActive.value = widget.isActive.value;
+    });
+    button = NiceButton(
+      text: 'Tempo: $_selectedTempo BPM',
+      onPressed: () {
+        _showTempoMenu(context);
+      },
+    );
     super.initState();
     _loadSavedTempo();
   }
@@ -31,12 +42,7 @@ class _TempoSelectorState extends State<TempoSelector> {
 
   @override
   Widget build(BuildContext context) {
-    return NiceButton(
-      text: 'Tempo: $_selectedTempo BPM',
-      onPressed: () {
-        _showTempoMenu(context);
-      },
-    );
+    return button;
   }
 
   void _showTempoMenu(BuildContext context) {

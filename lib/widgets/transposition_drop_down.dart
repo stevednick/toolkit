@@ -8,17 +8,28 @@ class TranspositionDropDown extends StatefulWidget {
   const TranspositionDropDown({super.key, required this.player});
 
   @override
-  State<TranspositionDropDown> createState() => _TranspositionDropDownState();
+  State<TranspositionDropDown> createState() => TranspositionDropDownState();
 }
 
-class _TranspositionDropDownState extends State<TranspositionDropDown> {
+class TranspositionDropDownState extends State<TranspositionDropDown> {
   late Future<Transposition> _futureCurrentTransposition;
 
   @override
   void initState() {
     super.initState();
+    _loadCurrentTransposition();
+  }
+
+  void _loadCurrentTransposition(){
     _futureCurrentTransposition =
         widget.player.selectedInstrument.loadCurrentTransposition();
+  }
+
+   void refresh() {
+    print("Drop Down Refreshed!");
+    setState(() {
+      _loadCurrentTransposition();
+    });
   }
 
   @override
@@ -38,7 +49,6 @@ class _TranspositionDropDownState extends State<TranspositionDropDown> {
             requestFocusOnTap: false,
             onSelected: (Transposition? newKey) {
               setState(() {
-                //widget.player.selectedInstrument.setTransposition(newKey!);
                 widget.player.saveInstrumentAndTransposition(newKey!);
               });
             },
