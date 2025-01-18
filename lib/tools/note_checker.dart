@@ -9,6 +9,8 @@ class NoteChecker {
 
   ValueNotifier<int> noteNotifier = ValueNotifier(0);
 
+  NoteGetter noteGetter = NoteGetter();
+
   Function() onNoteHeard;
   Function(int) noteFeedback;
   final List<int> lastDetectedNotes = [];
@@ -20,7 +22,7 @@ class NoteChecker {
 
   void _onPitchDetected() {
     noteNotifier.value =
-        NoteGetter().getNotefromFrequency(pitchGetter.pitchNotifier.value);
+        noteGetter.getNotefromFrequency(pitchGetter.pitchNotifier.value);
     // print(noteNotifier.value);
     noteFeedback(noteNotifier.value-noteToCheck);
     lastDetectedNotes.add(noteNotifier.value);

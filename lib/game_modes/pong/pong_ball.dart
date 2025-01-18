@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 
 class PongBall extends PositionComponent with HasVisibility {
   late CircleComponent ball;
-  double accel = 900;
-  double xOffset = 235;
+  double accel = 1000;
+  double xOffset = 320;
   // double _deformationFactor = 1.0;
   // static const double maxDeformation = 1;
 

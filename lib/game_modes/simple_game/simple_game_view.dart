@@ -282,6 +282,9 @@ class _SimpleGameViewState extends State<SimpleGameView> {
         //todo add rebuold code when ready...
         await Settings.saveSetting(Settings.tempoKey, newValue);
         setTempoSelector();
+        setState(() {
+          //
+        });
         // If you need to persist this change, you might want to call a method here
         // await scene.saveGhostNotesState(newValue);
       },

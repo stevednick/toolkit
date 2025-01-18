@@ -37,7 +37,9 @@ class PongController {
   PongController() {
     WakelockPlus.enable();
     setPlayers();
+    print("PongController created");
     noteChecker = NoteChecker(correctNoteHeard, getNoteDifference);
+
   }
 
   void startButtonPressed() {
@@ -104,8 +106,6 @@ class PongController {
   void startCountdown() async {
     gameBPM = await tempo.loadSavedTempo();
     startListener();
-    changeNote(1);
-    changeNote(0);
     resetTime();
     gameText.value = "";
     buttonText = "Wait";
@@ -145,12 +145,16 @@ class PongController {
   void correctNoteHeard() {
     if (_state == GameState.listening) {
       _incrementScore();
-      //_waitAndChangeNote(currentPlayer.value);
       _state = GameState.correctNoteHeard;
     }
   }
 
   void nextBeat(int beat) {
+    print("Next beat: $beat");
+    if (beat == -2) {
+      changeNote(0);
+      changeNote(1);
+    }
     if (mode.value == GameMode.countingDown) return;
     if (beat == 0 || beat == 2) {
       changeNote(currentPlayer.value);
@@ -158,20 +162,10 @@ class PongController {
       noteChecker.noteToCheck = players[currentPlayer.value].getNoteToCheck();
       _state = GameState.listening;
     }
-    // if (beat == 1 || beat == 3) {
-    //   changeNote(currentPlayer.value);
-    // }
   }
 
-  // void nextGo() {
-  //   changeNote(currentPlayer.value);
-
-  //   // gameText.value = "Player ${currentPlayer.value + 1}";
-  //   noteChecker.noteToCheck = players[currentPlayer.value].getNoteToCheck();
-
-  // }
-
   void changeNote(player) {
+    print("Changing note for player $player");
     players[player].currentNote.value = noteGenerator.randomNoteFromRange(
         players[
             player]); // There's definitely a more elegant way to set this up...

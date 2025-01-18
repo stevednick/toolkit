@@ -60,7 +60,7 @@ class KeySignatureDropdownState extends State<KeySignatureDropdown> {
                 .map<DropdownMenuEntry<KeySignature>>((KeySignature key) {
               return DropdownMenuEntry<KeySignature>(
                 value: key,
-                label: "${key.name} Major",
+                label: key.getLocalizedName(context),
               );
             }).toList(),
           );

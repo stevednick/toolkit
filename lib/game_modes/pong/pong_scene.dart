@@ -24,7 +24,6 @@ class PongScene extends FlameGame {
 
   PongScene(this.gameController, this.side) {
     getAndSetNote();
-    //addClef();
     gameController.players[side].score.addListener(() {
       tick.showTick();
     });
@@ -37,7 +36,6 @@ class PongScene extends FlameGame {
   FutureOr<void> onLoad() async {
     await super.onLoad();
     world.add(componentHolder);
-    //camera.viewfinder.visibleGameSize = viewSize;
     camera.viewfinder.zoom = 0.85;
     camera.viewfinder.anchor = Anchor.center;
     world.add(tick);
@@ -68,13 +66,6 @@ class PongScene extends FlameGame {
     super.onDispose();
     gameController.dispose();
   }
-
-  // void setBallPosition(double width){
-  //   if (side == 1) {
-  //     pongBall.position = Vector2(-320 - width, -70);
-  //     pongBall.xOffset = width+180;
-  //   }
-  // }
 
   void newNote(NoteData data) {
     componentHolder.children.toList().forEach((child) {

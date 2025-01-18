@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:toolkit/game_modes/incremental_game/incremental_game_controller.dart';
 import 'package:toolkit/game_modes/incremental_game/incremental_game_scene.dart';
 import 'package:toolkit/game_modes/incremental_game/models/unlockable_note.dart';
-import 'package:toolkit/game_modes/pong/pong_controller.dart';
 import 'package:toolkit/widgets/fade_text.dart';
 import 'package:toolkit/widgets/nice_button.dart';
 

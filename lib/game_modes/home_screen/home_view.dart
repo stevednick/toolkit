@@ -2,11 +2,29 @@ import 'package:flutter/material.dart';
 import 'package:toolkit/game_modes/home_screen/onboarding_screen.dart';
 import 'package:toolkit/game_modes/pong/pong_view.dart';
 import 'package:toolkit/game_modes/simple_game/simple_game_view.dart';
+import 'package:toolkit/widgets/language_selector.dart';
+import 'package:toolkit/widgets/pitch_selector_persistance.dart';
 import 'package:toolkit/widgets/widgets.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class HomeView extends StatelessWidget {
   const HomeView({super.key});
+
+  Widget _buildLocalizationDropdown(BuildContext context) {
+    return Positioned(
+      left: 70,
+      bottom: 70,
+      child: LanguageSelector(),
+    );
+  }
+
+    Widget _buildFrequencyDropdown(BuildContext context) {
+    return Positioned(
+      left: 70,
+      bottom: 112,
+      child: PitchSelector()
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -14,11 +32,13 @@ class HomeView extends StatelessWidget {
         backgroundColor: Colors.white,
         body: Stack(
           children: [
+            _buildLocalizationDropdown(context),
+            _buildFrequencyDropdown(context),
             Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text(
+                  Text(
                     "Horn Player's Toolkit",
                     style: TextStyle(fontSize: 25),
                   ),
@@ -43,11 +63,11 @@ class HomeView extends StatelessWidget {
                   ),
                   const HomeScreenNavigationButton(
                       route: PongView(), text: "Pong"),
-                //   const SizedBox(
-                //     height: 5,
-                //   ),
-                //   const HomeScreenNavigationButton(
-                //       route: IncrementalGameView(), text: "Incremental"),
+                    // const SizedBox(
+                    //   height: 5,
+                    // ),
+                    // const HomeScreenNavigationButton(
+                    //     route: IncrementalGameView(), text: "Incremental"),
                 ],
               ),
             ),
@@ -58,7 +78,7 @@ class HomeView extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Padding(
-                      padding: EdgeInsets.all(8.0),
+                      padding: EdgeInsets.all(16.0),
                       child: Icon(
                         Icons.feedback_outlined,
                         color: Colors.blue,

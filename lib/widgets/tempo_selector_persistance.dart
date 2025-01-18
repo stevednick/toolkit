@@ -23,21 +23,28 @@ class _TempoSelectorState extends State<TempoSelector> {
     widget.isActive.addListener((){
       button.isActive.value = widget.isActive.value;
     });
-    button = NiceButton(
-      text: 'Tempo: $_selectedTempo BPM',
-      onPressed: () {
-        _showTempoMenu(context);
-      },
-    );
-    super.initState();
+    setButton(_selectedTempo);
     _loadSavedTempo();
+    super.initState();
   }
 
   Future<void> _loadSavedTempo() async {
     _selectedTempo = await tempo.loadSavedTempo();
-    setState((){
-    });
+
+    setButton(_selectedTempo);
+
     widget.onTempoChanged(_selectedTempo);
+  }
+
+  void setButton(int selectedTempo){
+    setState(() {
+      button = NiceButton(
+        text: 'Tempo: $selectedTempo BPM',
+        onPressed: () {
+          _showTempoMenu(context);
+        },
+      );
+    });
   }
 
   @override
@@ -67,9 +74,9 @@ class _TempoSelectorState extends State<TempoSelector> {
       }).toList(),
     ).then((int? selectedTempo) {
       if (selectedTempo != null) {
-        setState(() {
-          _selectedTempo = selectedTempo;
-        });
+        _selectedTempo = selectedTempo;
+        setButton(selectedTempo);
+
         tempo.saveTempo(selectedTempo);
         widget.onTempoChanged(selectedTempo);
       }

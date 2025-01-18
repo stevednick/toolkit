@@ -58,7 +58,7 @@ class TranspositionDropDownState extends State<TranspositionDropDown> {
                     (Transposition key) {
               return DropdownMenuEntry<Transposition>(
                 value: key,
-                label: "Horn in ${key.name}",
+                label: key.getLocalizedName(context),
               );
             }).toList(),
           );

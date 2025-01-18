@@ -8,7 +8,7 @@ import 'package:toolkit/models/models.dart';
 import 'package:toolkit/tools/tools.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
-enum GameState { listening, correctNoteHeard }
+enum GameState { listening, correctNoteHeard, fadingIn}
 
 class SimpleGameController {
   ValueNotifier<NoteData> currentNote = ValueNotifier<NoteData>(NoteData.placeholderValue);
@@ -19,7 +19,7 @@ class SimpleGameController {
   ValueNotifier<GameMode> gameMode = ValueNotifier(GameMode.waitingToStart);
   ValueNotifier<String> gameText = ValueNotifier("Set your range.");
   ValueNotifier<String> feedbackText = ValueNotifier("");
-  Duration waitDuration = const Duration(seconds: 1);
+  Duration waitDuration = const Duration(milliseconds: 500);
   ValueNotifier<GameState> state = ValueNotifier(GameState.listening);
   bool showTempo = true;
 
@@ -41,6 +41,7 @@ class SimpleGameController {
 
   void correctNoteHeard() {
     if (state.value == GameState.listening) {
+      changeNote();
       triggerTick();
       _incrementScore();
       _waitAndChangeNote();
@@ -67,14 +68,18 @@ class SimpleGameController {
   }
 
   void _waitAndChangeNote() {
-    changeNote();
+
     Timer(waitDuration, () {
-      state.value = GameState.listening;
+
+      state.value = GameState.fadingIn;
+      Timer(waitDuration, () {
+        state.value = GameState.listening;
+      });
     });
   }
 
+
   void changeNote() {
-    print("GameController Changes Note");
     player.currentNote.value = noteGenerator.randomNoteFromRange(
         player, bigJumps: bigJumpsMode);
     noteChecker.noteToCheck = player.getNoteToCheck();

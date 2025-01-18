@@ -1,11 +1,12 @@
 import 'dart:async';
 import 'package:flame/components.dart';
+import 'package:flame/effects.dart';
 import 'package:flutter/material.dart';
 import 'package:toolkit/tools/config.dart';
 import 'package:toolkit/models/models.dart';
 import 'package:toolkit/tools/utils.dart';
 
-class Note extends PositionComponent with HasVisibility{
+class Note extends PositionComponent with HasVisibility implements OpacityProvider{
   late Asset crotchetSprite;
   late Asset invertedCrotchetSprite;
   //late Asset accidentalSprite;
@@ -23,9 +24,15 @@ class Note extends PositionComponent with HasVisibility{
 
   bool isSetUpComplete = false;
 
+  double _opacity = 1.0;
+
+  @override
+  double opacity;
+
   Note(this.noteData,
       {this.arrowShowing = false,
       this.isGhostNote = false,
+      this.opacity = 1.0,
       super.position,
       super.size,
       super.scale,
@@ -69,7 +76,58 @@ class Note extends PositionComponent with HasVisibility{
     changeNote(noteData);
   }
 
+  void setOpacity(double opacity) {
+    _opacity = opacity.clamp(0.0, 1.0);
+    for (var component in noteComponents.children) {
+      if (component is Asset) {
+        component.changeOpacity(_opacity);
+      }
+    }
+    for (var component in ledgerHolder.children) {
+      if (component is Asset) {
+        component.changeOpacity(_opacity);
+      }
+    }
+  }
+
+  Future<void> fadeIn({double duration = 1.0}) async {
+    for (var component in noteComponents.children) {
+      if (component is Asset) {
+        component.add(OpacityEffect.fadeIn(
+        EffectController(duration: duration)));
+      }
+    }
+    for (var component in ledgerHolder.children) {
+      if (component is Asset) {
+        component.add(OpacityEffect.fadeIn(EffectController(duration: duration)));
+      }
+    }
+  }
+
+  Future<void> fadeOut({double duration = 1.0}) async {
+    for (var component in noteComponents.children) {
+      if (component is Asset) {
+        component.add(OpacityEffect.fadeOut(EffectController(duration: duration)));
+      }
+    }
+    for (var component in ledgerHolder.children) {
+      if (component is Asset) {
+        component.add(OpacityEffect.fadeOut(EffectController(duration: duration)));
+      }
+    }
+  }
+
+  Future<void> fadeAndChangeNote(NoteData newNote, {double duration = 1.0}) async {
+    await fadeOut(duration: duration);
+    Future.delayed(Duration(milliseconds: (duration * 1000).toInt()), () {
+      changeNote(newNote);
+      fadeIn(duration: duration);
+    });
+  }
   void changeNote(NoteData newNote) {
+    if (newNote == NoteData.placeholderValue){
+      setOpacity(0);
+    }
     noteData = newNote;
     arrowSprite.isVisible = arrowShowing;
     crotchetSprite.isVisible = noteData.posOnStave <= 0;
@@ -93,13 +151,14 @@ class Note extends PositionComponent with HasVisibility{
     }
   }
 
-  void drawLedger(int p) {
+    void drawLedger(int p) {
     Color colour = isGhostNote ? Colors.grey : Colors.black;
-    RectangleComponent ledgerLine = RectangleComponent(
+    LedgerLine newLine = LedgerLine(
       size: Vector2(ledgerLength, lineWidth),
       paint: Paint()..color = colour,
-    )..position = Vector2(-13, -p / 2 * lineGap);
-    ledgerHolder.add(ledgerLine);
+      position: Vector2(-13, -p / 2 * lineGap),
+    );
+    ledgerHolder.add(newLine);
   }
 
   void positionCrotchetSprite() {
@@ -108,5 +167,25 @@ class Note extends PositionComponent with HasVisibility{
 
   void addArrow() {
     noteComponents.add(arrowSprite);
+  }
+}
+
+class LedgerLine extends RectangleComponent implements OpacityProvider {
+  double _opacity = 1.0;
+
+  LedgerLine({
+    required Vector2 super.size,
+    required Paint super.paint,
+    super.position,
+    super.priority,
+  });
+
+  @override
+  double get opacity => _opacity;
+
+  @override
+  set opacity(double value) {
+    _opacity = value.clamp(0.0, 1.0);
+    paint.color = paint.color.withOpacity(_opacity);
   }
 }

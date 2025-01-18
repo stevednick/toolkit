@@ -27,6 +27,7 @@ class Player {
     loadKeySignature();
     loadRange();
     _loadInstrumentAndTransposition();
+    print('Player created with key: $playerKey');
   }
 
   Future<KeySignature> loadKeySignature() async {
@@ -76,7 +77,6 @@ class Player {
           orElse: () => ClefSelection.treble,
         );
       }
-      // print(ClefSelection.values);
 
       return true;
     } catch (e) {

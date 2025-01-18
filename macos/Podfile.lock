@@ -6,6 +6,8 @@ PODS:
     - EZAudioClone/Core
     - TPCircularBuffer (= 1.1)
   - FlutterMacOS (1.0.0)
+  - mobile_scanner (6.0.2):
+    - FlutterMacOS
   - package_info_plus (0.0.1):
     - FlutterMacOS
   - pitch_detector_plus (0.0.1):
@@ -22,6 +24,7 @@ PODS:
 
 DEPENDENCIES:
   - FlutterMacOS (from `Flutter/ephemeral`)
+  - mobile_scanner (from `Flutter/ephemeral/.symlinks/plugins/mobile_scanner/macos`)
   - package_info_plus (from `Flutter/ephemeral/.symlinks/plugins/package_info_plus/macos`)
   - pitch_detector_plus (from `Flutter/ephemeral/.symlinks/plugins/pitch_detector_plus/macos`)
   - shared_preferences_foundation (from `Flutter/ephemeral/.symlinks/plugins/shared_preferences_foundation/darwin`)
@@ -36,6 +39,8 @@ SPEC REPOS:
 EXTERNAL SOURCES:
   FlutterMacOS:
     :path: Flutter/ephemeral
+  mobile_scanner:
+    :path: Flutter/ephemeral/.symlinks/plugins/mobile_scanner/macos
   package_info_plus:
     :path: Flutter/ephemeral/.symlinks/plugins/package_info_plus/macos
   pitch_detector_plus:
@@ -50,7 +55,8 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   EZAudioClone: fbe2d0b850d4e92e6204df43ec42f594b4b05453
   FlutterMacOS: 8f6f14fa908a6fb3fba0cd85dbd81ec4b251fb24
-  package_info_plus: fa739dd842b393193c5ca93c26798dff6e3d0e0c
+  mobile_scanner: 07710d6b9b2c220ae899de2d7ecf5d77ffa56333
+  package_info_plus: 12f1c5c2cfe8727ca46cbd0b26677728972d9a5b
   pitch_detector_plus: d877032f256d8843fcfd6c256009b66d66be3094
   shared_preferences_foundation: fcdcbc04712aee1108ac7fda236f363274528f78
   TPCircularBuffer: 4960a919e667280f7f38963d771f45871b64fe62

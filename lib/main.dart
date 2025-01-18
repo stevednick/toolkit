@@ -1,17 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:toolkit/game_modes/home_screen/home_view.dart';
 import 'package:toolkit/game_modes/home_screen/onboarding_screen.dart';
+import 'package:toolkit/localization/localization_provider.dart';
 import 'package:toolkit/models/asset.dart';
 import 'package:toolkit/tools/orientation_helpers.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  setOrientation(ScreenOrientation.landscapeOnly);
+  setOrientation(ScreenOrientation.landscapeRight);
   await AssetManager().initialize();
+  final localizationProvider = LocalizationProvider();
+  await localizationProvider.loadSavedLanguage();
 
   runApp(
-    MaterialApp(
+    ChangeNotifierProvider(create: (context) => LocalizationProvider(),
+    child: MaterialApp(
       debugShowCheckedModeBanner: false,
       //home: HomeView(),
       home: FutureBuilder<SharedPreferences>(
@@ -32,5 +37,7 @@ void main() async {
         },
       ),
     ),
+    )
+    
   );
 }

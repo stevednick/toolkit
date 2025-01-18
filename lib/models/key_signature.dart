@@ -1,4 +1,7 @@
 import 'package:flame/components.dart';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:toolkit/localization/localization_provider.dart';
 import 'package:toolkit/models/accidental.dart';
 import 'package:toolkit/models/asset.dart';
 import 'package:toolkit/models/clef.dart';
@@ -6,7 +9,7 @@ import 'package:toolkit/models/note_data.dart';
 import 'package:toolkit/tools/config.dart';
 
 class KeySignature {
-  // todo build little icon!
+  
   final String name;
   final int sharps;
   final int flats;
@@ -30,6 +33,11 @@ class KeySignature {
   final List<int> flatModifiers = [10, 3, 8, 1, 6, 11, 4];
 
   KeySignature({required this.name, required this.sharps, required this.flats});
+
+  String getLocalizedName(BuildContext context) {  // todo add major to name
+    final localization = Provider.of<LocalizationProvider>(context, listen: false);
+    return "${localization.translate(name)} ${localization.translate('Major')}";
+  }
 
   NoteData noteModifier(NoteData note,
       {bool rangeSelection = false, bool ghostNote = false}) {
@@ -140,7 +148,7 @@ class KeySignature {
     KeySignature(name: "A", sharps: 3, flats: 0),
     KeySignature(name: "Eb", sharps: 0, flats: 3),
     KeySignature(name: "E", sharps: 4, flats: 0),
-    KeySignature(name: "Ad", sharps: 0, flats: 4),
+    KeySignature(name: "Ab", sharps: 0, flats: 4),
     KeySignature(name: "B", sharps: 5, flats: 0),
     KeySignature(name: "Db", sharps: 0, flats: 5),
     KeySignature(name: "F#", sharps: 6, flats: 0),

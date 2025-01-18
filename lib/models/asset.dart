@@ -1,21 +1,22 @@
 import 'dart:async';
 import 'dart:ui';
 import 'package:flame/components.dart';
+import 'package:flame/effects.dart';
 import 'package:flutter/material.dart' hide Image;
 import 'package:flame/flame.dart';
 
-class Asset extends SpriteComponent with HasGameReference, HasVisibility {
+class Asset extends SpriteComponent with HasGameReference, HasVisibility implements OpacityProvider {
   final Vector2 pos;
   final Vector2 sca;
   final String imagePath;
   final Color colour;
 
-  //final Completer<void> _loadCompleter = Completer<void>();
+  double _opacity = 1.0;
 
   Asset(this.pos, this.sca, this.imagePath, this.colour);
 
   @override
-Future<void> onLoad() async {
+  Future<void> onLoad() async {
     final image = AssetManager().getImage(imagePath);
     sprite = Sprite(image);
     size = sca;
@@ -24,19 +25,38 @@ Future<void> onLoad() async {
     await super.onLoad();
   }
 
-  /// Waits for the asset to finish loading
-  //Future<void> get onLoaded => _loadCompleter.future;
+  @override
+  void render(Canvas canvas) {
+    if (sprite == null) return;
+
+    final renderPaint = Paint()
+      ..colorFilter = ColorFilter.mode(colour.withOpacity(_opacity), BlendMode.srcIn);
+
+    sprite!.render(
+      canvas,
+      size: size,
+      overridePaint: renderPaint,
+    );
+  }
+
+  @override
+  double get opacity => _opacity;
+
+  @override
+  set opacity(double value) {
+    _opacity = value.clamp(0.0, 1.0);
+  }
+
+  void changeColour(Color newColour) {
+    paint.color = newColour;
+  }
+
+  void changeOpacity(double opacity) {
+    _opacity = opacity.clamp(0.0, 1.0);
+  }
 
   void positionSprite() {
     position = pos;
-  }
-
-  void changePosition(Vector2 adjustment) {
-    position += adjustment;
-  }
-
-  void changeColour(Color colour) {
-    paint = Paint()..colorFilter = ColorFilter.mode(colour, BlendMode.srcIn);
   }
 
   static Asset createCrotchet({Color colour = Colors.black}) =>
