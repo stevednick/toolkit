@@ -15,29 +15,29 @@ void main() async {
   await localizationProvider.loadSavedLanguage();
 
   runApp(
-    ChangeNotifierProvider(create: (context) => LocalizationProvider(),
-    child: MaterialApp(
-      debugShowCheckedModeBanner: false,
-      //home: HomeView(),
-      home: FutureBuilder<SharedPreferences>(
-        future: SharedPreferences.getInstance(),
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            final hasSeenOnboarding =
-                snapshot.data!.getBool('hasSeenOnboarding') ?? false;
-            return hasSeenOnboarding
-                ? const HomeView()
-                : OnboardingScreen(onFinish: () {
-                    Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(builder: (_) => const HomeView()),
-                    );
-                  });
-          }
-          return const CircularProgressIndicator();
-        },
+    ChangeNotifierProvider(
+      create: (context) => LocalizationProvider(),
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        //home: HomeView(),
+        home: FutureBuilder<SharedPreferences>(
+          future: SharedPreferences.getInstance(),
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              final hasSeenOnboarding =
+                  snapshot.data!.getBool('hasSeenOnboarding') ?? false;
+              return hasSeenOnboarding
+                  ? HomeView()
+                  : OnboardingScreen(onFinish: () {
+                      Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(builder: (_) => HomeView()),
+                      );
+                    });
+            }
+            return const CircularProgressIndicator();
+          },
+        ),
       ),
     ),
-    )
-    
   );
 }

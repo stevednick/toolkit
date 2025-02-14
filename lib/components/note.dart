@@ -5,18 +5,46 @@ import 'package:flutter/material.dart';
 import 'package:toolkit/tools/config.dart';
 import 'package:toolkit/models/models.dart';
 import 'package:toolkit/tools/utils.dart';
+import 'package:toolkit/mixins/mixins.dart';
 
-class Note extends PositionComponent with HasVisibility implements OpacityProvider{
+class NoteSprites {
   late Asset crotchetSprite;
   late Asset invertedCrotchetSprite;
-  //late Asset accidentalSprite;
   late Asset sharpSprite;
   late Asset flatSprite;
   late Asset doubleSharpSprite;
   late Asset doubleFlatSprite;
   late Asset naturalSprite;
-  late NoteData noteData;
   late Asset arrowSprite;
+
+  NoteSprites(bool isGhostNote) {
+    Color colour = isGhostNote ? Colors.grey : Colors.black;
+    arrowSprite = Asset.createArrow();
+    crotchetSprite = Asset.createCrotchet(colour: colour);
+    invertedCrotchetSprite = Asset.createInvertedCrotchet(colour: colour);
+    sharpSprite = Asset.createSharp(colour: colour);
+    flatSprite = Asset.createFlat(colour: colour);
+    doubleSharpSprite = Asset.createDoubleSharp(colour: colour);
+    doubleFlatSprite = Asset.createDoubleFlat(colour: colour);
+    naturalSprite = Asset.createNatural(colour: colour);
+  }
+
+  void addTo(PositionComponent noteComponents) {
+    noteComponents
+      ..add(crotchetSprite)
+      ..add(invertedCrotchetSprite)
+      ..add(sharpSprite)
+      ..add(flatSprite)
+      ..add(doubleSharpSprite)
+      ..add(doubleFlatSprite)
+      ..add(arrowSprite)
+      ..add(naturalSprite);
+  }
+}
+
+class Note extends PositionComponent with HasVisibility, Fadeable implements OpacityProvider {
+  late NoteSprites noteSprites;
+  late NoteData noteData;
   PositionComponent noteComponents = PositionComponent();
   PositionComponent ledgerHolder = PositionComponent();
   final bool arrowShowing;
@@ -48,28 +76,11 @@ class Note extends PositionComponent with HasVisibility implements OpacityProvid
     super.onLoad();
     await setUp();
     isSetUpComplete = true;
-
   }
 
   Future<void> setUp() async {
-    Color colour = isGhostNote ? Colors.grey : Colors.black;
-    arrowSprite = Asset.createArrow();
-    crotchetSprite = Asset.createCrotchet(colour: colour);
-    invertedCrotchetSprite = Asset.createInvertedCrotchet(colour: colour);
-    sharpSprite = Asset.createSharp(colour: colour);
-    flatSprite = Asset.createFlat(colour: colour);
-    doubleSharpSprite = Asset.createDoubleSharp(colour: colour);
-    doubleFlatSprite = Asset.createDoubleFlat(colour: colour);
-    naturalSprite = Asset.createNatural(colour: colour);
-    noteComponents
-    ..add(crotchetSprite)
-    ..add(invertedCrotchetSprite)
-    ..add(sharpSprite)
-    ..add(flatSprite)
-    ..add(doubleSharpSprite)
-    ..add(doubleFlatSprite)
-    ..add(arrowSprite)
-    ..add(naturalSprite);
+    noteSprites = NoteSprites(isGhostNote);
+    noteSprites.addTo(noteComponents);
     add(noteComponents);
     add(ledgerHolder);
     positionCrotchetSprite();
@@ -90,33 +101,6 @@ class Note extends PositionComponent with HasVisibility implements OpacityProvid
     }
   }
 
-  Future<void> fadeIn({double duration = 1.0}) async {
-    for (var component in noteComponents.children) {
-      if (component is Asset) {
-        component.add(OpacityEffect.fadeIn(
-        EffectController(duration: duration)));
-      }
-    }
-    for (var component in ledgerHolder.children) {
-      if (component is Asset) {
-        component.add(OpacityEffect.fadeIn(EffectController(duration: duration)));
-      }
-    }
-  }
-
-  Future<void> fadeOut({double duration = 1.0}) async {
-    for (var component in noteComponents.children) {
-      if (component is Asset) {
-        component.add(OpacityEffect.fadeOut(EffectController(duration: duration)));
-      }
-    }
-    for (var component in ledgerHolder.children) {
-      if (component is Asset) {
-        component.add(OpacityEffect.fadeOut(EffectController(duration: duration)));
-      }
-    }
-  }
-
   Future<void> fadeAndChangeNote(NoteData newNote, {double duration = 1.0}) async {
     await fadeOut(duration: duration);
     Future.delayed(Duration(milliseconds: (duration * 1000).toInt()), () {
@@ -124,19 +108,20 @@ class Note extends PositionComponent with HasVisibility implements OpacityProvid
       fadeIn(duration: duration);
     });
   }
+
   void changeNote(NoteData newNote) {
-    if (newNote == NoteData.placeholderValue){
+    if (newNote == NoteData.placeholderValue) {
       setOpacity(0);
     }
     noteData = newNote;
-    arrowSprite.isVisible = arrowShowing;
-    crotchetSprite.isVisible = noteData.posOnStave <= 0;
-    invertedCrotchetSprite.isVisible = noteData.posOnStave > 0;
-    sharpSprite.isVisible = noteData.accidental == Accidental.sharp;
-    flatSprite.isVisible = noteData.accidental == Accidental.flat;
-    doubleSharpSprite.isVisible = noteData.accidental == Accidental.doubleSharp;
-    doubleFlatSprite.isVisible = noteData.accidental == Accidental.doubleFlat;
-    naturalSprite.isVisible = noteData.accidental == Accidental.natural;
+    noteSprites.arrowSprite.isVisible = arrowShowing;
+    noteSprites.crotchetSprite.isVisible = noteData.posOnStave <= 0;
+    noteSprites.invertedCrotchetSprite.isVisible = noteData.posOnStave > 0;
+    noteSprites.sharpSprite.isVisible = noteData.accidental == Accidental.sharp;
+    noteSprites.flatSprite.isVisible = noteData.accidental == Accidental.flat;
+    noteSprites.doubleSharpSprite.isVisible = noteData.accidental == Accidental.doubleSharp;
+    noteSprites.doubleFlatSprite.isVisible = noteData.accidental == Accidental.doubleFlat;
+    noteSprites.naturalSprite.isVisible = noteData.accidental == Accidental.natural;
     positionCrotchetSprite();
     drawLedgers();
   }
@@ -151,7 +136,7 @@ class Note extends PositionComponent with HasVisibility implements OpacityProvid
     }
   }
 
-    void drawLedger(int p) {
+  void drawLedger(int p) {
     Color colour = isGhostNote ? Colors.grey : Colors.black;
     LedgerLine newLine = LedgerLine(
       size: Vector2(ledgerLength, lineWidth),
@@ -166,8 +151,11 @@ class Note extends PositionComponent with HasVisibility implements OpacityProvid
   }
 
   void addArrow() {
-    noteComponents.add(arrowSprite);
+    noteComponents.add(noteSprites.arrowSprite);
   }
+
+  @override
+  List<PositionComponent> get fadeableComponents => [noteComponents, ledgerHolder];
 }
 
 class LedgerLine extends RectangleComponent implements OpacityProvider {

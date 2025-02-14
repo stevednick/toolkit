@@ -1,7 +1,7 @@
 name: toolkit
 description: "Made by horn players!"
 publish_to: 'none'
-version: 0.2.5+17
+version: 0.2.6+18
 
 environment:
   sdk: '>=3.2.6 <4.0.0'

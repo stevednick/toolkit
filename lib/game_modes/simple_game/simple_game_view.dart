@@ -10,6 +10,8 @@ import 'package:toolkit/game_modes/simple_game/simple_game_controller.dart';
 import 'package:toolkit/game_modes/simple_game/simple_game_scene.dart';
 import 'package:toolkit/models/models.dart';
 import 'package:toolkit/scenes/range_selection_scene.dart';
+import 'package:toolkit/tools/scaled_positioned.dart';
+import 'package:toolkit/tools/utils.dart';
 import 'package:toolkit/widgets/key_signature_dropdown.dart';
 import 'package:toolkit/widgets/widgets.dart';
 
@@ -25,6 +27,8 @@ class _SimpleGameViewState extends State<SimpleGameView> {
   late SimpleGameScene scene;
   late RangeSelectionScene rangeSelectionScene;
   late final EnhancedClefSelectionButton clefSelectionButton;
+
+  ScaleManager scaleManager = ScaleManager();
 
   late double width;
 
@@ -171,9 +175,10 @@ class _SimpleGameViewState extends State<SimpleGameView> {
   }
 
   Widget _buildScoreText() {
-    return Positioned(
+    return ScaledPositioned(
       top: 40,
       right: 40,
+      scaleFactor: scaleManager.scaleFactor(),
       child: Visibility(
         visible: gameController.gameMode.value == GameMode.running,
         child: ScoreText(
@@ -189,11 +194,14 @@ class _SimpleGameViewState extends State<SimpleGameView> {
       child: ValueListenableBuilder(
         valueListenable: gameController.gameText,
         builder: (context, text, child) {
-          return Padding(
-            padding: const EdgeInsets.all(20),
-            child: Text(
-              text,
-              style: const TextStyle(fontSize: 30),
+          return Transform.scale(
+            scale: scaleManager.scaleFactor(),
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Text(
+                text,
+                style: const TextStyle(fontSize: 30),
+              ),
             ),
           );
         },
@@ -202,9 +210,10 @@ class _SimpleGameViewState extends State<SimpleGameView> {
   }
 
   Widget _buildTranspositionDropDown() {
-    return Positioned(
+    return ScaledPositioned(
       top: 40,
       left: 40,
+      scaleFactor: scaleManager.scaleFactor(),
       child: gameController.gameMode.value == GameMode.waitingToStart
           ? TranspositionDropDown(
               key: _dropdownKey,
@@ -220,9 +229,10 @@ class _SimpleGameViewState extends State<SimpleGameView> {
   }
 
   Widget _buildKeySignatureDropdown() {
-    return Positioned(
+    return ScaledPositioned(
       top: 40,
       right: 40,
+      scaleFactor: scaleManager.scaleFactor(),
       child: KeySignatureDropdown(
           key: _keyDropDownKey,
           player: gameController.player, onChanged: () { 
@@ -247,26 +257,29 @@ class _SimpleGameViewState extends State<SimpleGameView> {
       builder: (context, note, child) {
         return Align(
           alignment: Alignment.bottomCenter,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              NiceButton(
-                text: gameController.gameMode.value == GameMode.waitingToStart
-                    ? "Start"
-                    : "End",
-                onPressed: () {
-                  setState(() {
-                    scene.onDispose();
-                    scene = SimpleGameScene(gameController);
-                    gameController.startButtonPressed();
-                    //setClefThresholdsButton();
-                  });
-                },
-              ),
-              const SizedBox(
-                height: 20,
-              ),
-            ],
+          child: Transform.scale(
+            scale: scaleManager.scaleFactor(),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                NiceButton(
+                  text: gameController.gameMode.value == GameMode.waitingToStart
+                      ? "Start"
+                      : "End",
+                  onPressed: () {
+                    setState(() {
+                      scene.onDispose();
+                      scene = SimpleGameScene(gameController);
+                      gameController.startButtonPressed();
+                      //setClefThresholdsButton();
+                    });
+                  },
+                ),
+                SizedBox(
+                  height: 20 * scaleManager.scaleFactor(),  
+                ),
+              ],
+            ),
           ),
         );
       },
@@ -357,49 +370,55 @@ class _SimpleGameViewState extends State<SimpleGameView> {
   Widget _buildSettingsButtons() {
     return Stack(
       children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(45, 10, 45, 10),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.end,
-            mainAxisSize: MainAxisSize.max,
-            children: [
-              _buildBigJumpSwitch(),
-              const SizedBox(
-                height: 5,
-              ),
-              _buildGhostNoteButton(),
-              const SizedBox(
-                height: 5,
-              ),
-              _buildTempoOnButton(),
-              const SizedBox(
-                height: 5,
-              ),
-              _buildTempoSelectorButton(),
-            ],
-          ),
-        ),
-        Align(
-          alignment: Alignment.bottomRight,
+        Transform.scale(
+          scale: scaleManager.scaleFactor(),
           child: Padding(
             padding: const EdgeInsets.fromLTRB(45, 10, 45, 10),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.end,
+              mainAxisSize: MainAxisSize.max,
               children: [
-                _buildLoadSaveButton(),
+                _buildBigJumpSwitch(),
                 const SizedBox(
                   height: 5,
                 ),
-                _buildClefSelectionButton(),
+                _buildGhostNoteButton(),
                 const SizedBox(
                   height: 5,
                 ),
-                _buildSettingsButton(),
+                _buildTempoOnButton(),
                 const SizedBox(
                   height: 5,
                 ),
-                _buildNoteSelectorButton(),
+                _buildTempoSelectorButton(),
               ],
+            ),
+          ),
+        ),
+        Align(
+          alignment: Alignment.bottomRight,
+          child: Transform.scale(
+            scale: scaleManager.scaleFactor(),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(45, 10, 45, 10),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  _buildLoadSaveButton(),
+                  const SizedBox(
+                    height: 5,
+                  ),
+                  _buildClefSelectionButton(),
+                  const SizedBox(
+                    height: 5,
+                  ),
+                  _buildSettingsButton(),
+                  const SizedBox(
+                    height: 5,
+                  ),
+                  _buildNoteSelectorButton(),
+                ],
+              ),
             ),
           ),
         ),
