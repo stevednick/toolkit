@@ -1,76 +1,99 @@
 import 'dart:async';
-
 import 'package:flame/components.dart';
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
-import 'package:toolkit/components/stave.dart';
-import 'package:toolkit/components/tick.dart';
+import 'package:toolkit/components/components.dart';
+import 'package:toolkit/tools/config.dart';
 import 'package:toolkit/game_modes/pong/pong_ball.dart';
 import 'package:toolkit/game_modes/pong/pong_controller.dart';
+import 'package:toolkit/models/models.dart';
 
-class PongScene extends FlameGame{
+class PongScene extends FlameGame {
   final PongController gameController;
-  double screenWidth = 1000;
-  final double width = 1200;
 
-  late List<Stave> staves;
-
+  final Vector2 viewSize = Vector2(300, 500);
+  final double staffWidth = 250;
+  int side;
+  late Note note;
+  late Asset clefSprite;
+  PositionComponent componentHolder = PositionComponent();
   PongBall pongBall = PongBall();
+  Tick tick = Tick();
 
-  List<Tick> ticks = [Tick(), Tick()];
+  NoteData noteData = NoteData.placeholderValue;
 
-  PongScene(this.gameController){
-    addStaves();
-    addListeners();
-    addPongBall();
-    addTicks();
+  PongScene(this.gameController, this.side) {
+    getAndSetNote();
+    gameController.players[side].score.addListener(() {
+      tick.showTick();
+    });
+    gameController.players[side].currentNote.addListener(() {
+      getAndSetNote();
+    });
   }
 
   @override
-  FutureOr<void> onLoad() {
-    camera.viewfinder.zoom = screenWidth / width;
+  FutureOr<void> onLoad() async {
+    await super.onLoad();
+    world.add(componentHolder);
+    camera.viewfinder.zoom = 0.85;
     camera.viewfinder.anchor = Anchor.center;
-    return super.onLoad();
+    world.add(tick);
+    tick.position = Vector2(150, -70);
+    for (int player = 0; player < 2; player++) {
+      drawLines();
+      newNote(noteData);
+    }
+    if (side == 1) {
+      world.add(pongBall);
+      pongBall.position = Vector2(-360, -70);
+    }
   }
+
   @override
-  void update(double dt){
-    gameController.update(dt);
-    pongBall.positionBall(gameController.time);
+  void update(double dt) {
+    if (side == 1) {
+      gameController.update(dt);
+      pongBall.positionBall(gameController.time);
+    }
+
+    // TODO: implement update
     super.update(dt);
   }
 
-  void addListeners(){
-    for (int i = 0; i < 2; i++) {
-      gameController.players[i].currentNote.addListener(() {
-        staves[i].changeNote(
-          gameController.players[i].currentNote.value,
-          0.4
-        );
-      });
-      gameController.players[i].score.addListener(() {
-        ticks[i].showTick();
-      });
+  @override
+  void onDispose() {
+    super.onDispose();
+    gameController.dispose();
+  }
+
+  void newNote(NoteData data) {
+    componentHolder.children.toList().forEach((child) {
+      child.removeFromParent();
+    });
+    noteData = data;
+    note = Note(noteData)..position = Vector2(40, 0);
+    componentHolder.add(note);
+    clefSprite = noteData.clef.sprite..positionSprite();
+    PositionComponent clefHolder = PositionComponent();
+    componentHolder.add(clefHolder);
+    clefHolder.add(clefSprite);
+    clefHolder.position = Vector2(-70, 0);
+  }
+
+  void drawLines() {
+    for (var i = -2; i < 3; i++) {
+      RectangleComponent newLine = RectangleComponent(
+        size: Vector2(staffWidth, lineWidth),
+        paint: Paint()..color = Colors.black,
+      )..position = Vector2(-staffWidth / 2, i * lineGap);
+      world.add(newLine);
     }
   }
 
-  Future<void> addStaves() async {
-    staves = [
-      Stave(gameController.players[0], 300)..position = Vector2(-300, 0),
-      Stave(gameController.players[1], 300)..position = Vector2(300, 0),
-    ];
-    world.addAll(staves);
-  }
-
-  void addPongBall(){
-    world.add(pongBall);
-    pongBall.position = Vector2(-160, -70);
-  }
-
-  void addTicks(){
-    for (int i = 0; i < 2; i++) {
-      world.add(ticks[i]);
-      ticks[i].position = Vector2(150 * (i * 2 - 1), -100);
-    }
+  void getAndSetNote() {
+    noteData = gameController.getNoteDataFromPlayer(side);
+    newNote(noteData);
   }
 
   @override

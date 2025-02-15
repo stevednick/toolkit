@@ -136,7 +136,6 @@ class PositionManager {
   final GameStateManager stateManager;
   final double staffWidth = 280;
   final double ghostNoteExtension = 130;
-  
   PositionManager(this.stateManager);
 
   Vector2 bouncyBallPosition() {

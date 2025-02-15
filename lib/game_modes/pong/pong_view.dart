@@ -1,14 +1,12 @@
 import 'dart:async';
-import 'dart:ui';
+import 'dart:math';
 
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import 'package:toolkit/game_modes/pong/pong_controller.dart';
-import 'package:toolkit/game_modes/pong/pong_scene.dart';
+import 'package:toolkit/game_modes/pong/pong_scene_new.dart';
 import 'package:toolkit/models/models.dart';
 import 'package:toolkit/scenes/range_selection_scene.dart';
-import 'package:toolkit/tools/scaled_positioned.dart';
-import 'package:toolkit/tools/utils.dart';
 import 'package:toolkit/widgets/widgets.dart';
 
 class PongView extends StatefulWidget {
@@ -28,8 +26,10 @@ class _PongViewState extends State<PongView>
   final TextStyle countdownTextStyle = const TextStyle(fontSize: 60);
   List<bool> showTicks = [false, false];
   late List<RangeSelectionScene> rangeSelectionScenes = [];
+
   double width = 1000;
-  ScaleManager scaleManager = ScaleManager();
+
+  late PongScaleManager scaleManager;
 
   @override
   void initState() {
@@ -77,11 +77,7 @@ class _PongViewState extends State<PongView>
   }
 
   void refreshScene() {
-    setState(() {
-      for (int i = 0; i < 2; i++) {
-        rangeSelectionScenes[i].changeNote(true);
-      }
-    });
+    setState(() {});
   }
 
   Widget _buildGameWidgets() {
@@ -105,7 +101,7 @@ class _PongViewState extends State<PongView>
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           _buildRangeSelectionScene(0),
-          SizedBox(width: 100 * scaleManager.scaleFactor()),
+          const SizedBox(width: 100),
           _buildRangeSelectionScene(1),
         ],
       ),
@@ -113,7 +109,6 @@ class _PongViewState extends State<PongView>
   }
 
   Widget _buildRangeSelectionScene(int playerIndex) {
-    print(width);
     return SizedBox(
       width: width / 3,
       height: 500,
@@ -135,37 +130,43 @@ class _PongViewState extends State<PongView>
   Widget _buildTranspositionDropDownForPlayer(
       int playerIndex, Alignment alignment) {
     final player = gameController.players[playerIndex];
-    return ScaledPositioned(
-      top: 30,
-      left: alignment == Alignment.topLeft ? 40: null,
-      right: alignment == Alignment.topRight ? 40: null,
-      scaleFactor: scaleManager.scaleFactor(),
-      child: gameController.mode.value == GameMode.waitingToStart ||
-              gameController.mode.value == GameMode.finished
-          ? TranspositionDropDown(player: player)
-          : Text(
-              "Horn in ${player.selectedInstrument.currentTransposition.name}",
-              style: const TextStyle(fontSize: 24),
-            ),
+    return Positioned(
+      top: 30 * scaleManager.scaleFactor(),
+      left: alignment == Alignment.topLeft ? 40 * scaleManager.scaleFactor(): null,
+      right: alignment == Alignment.topRight ? 40 * scaleManager.scaleFactor(): null,
+      child: Transform.scale(
+        scale: scaleManager.scaleFactor(),
+        child: gameController.mode.value == GameMode.waitingToStart ||
+                gameController.mode.value == GameMode.finished
+            ? TranspositionDropDown(player: player)
+            : Text(
+                "Horn in ${player.selectedInstrument.currentTransposition.name}",
+                style: const TextStyle(fontSize: 24),
+              ),
+      ),
     );
   }
 
   Widget _buildClefSelectionButton() {
     return Stack(
       children: [
-        ScaledPositioned(
-          bottom: 20,
-          left: 30,
-          scaleFactor: scaleManager.scaleFactor(),
-          child: EnhancedClefSelectionButton(
-              gameController.players[0], refreshScene),
+        Positioned(
+          bottom: 20 * scaleManager.scaleFactor(),
+          left: 30 * scaleManager.scaleFactor(),
+          child: Transform.scale(
+            scale: scaleManager.scaleFactor(),
+            child: EnhancedClefSelectionButton(
+                gameController.players[0], refreshScene),
+          ),
         ),
-        ScaledPositioned(
-          bottom: 20,
-          right: 30,
-          scaleFactor: scaleManager.scaleFactor(),
-          child: EnhancedClefSelectionButton(
-              gameController.players[1], refreshScene),
+        Positioned(
+          bottom: 20 * scaleManager.scaleFactor(),
+          right: 30 * scaleManager.scaleFactor(),
+          child: Transform.scale(
+            scale: scaleManager.scaleFactor(),
+            child: EnhancedClefSelectionButton(
+                gameController.players[1], refreshScene),
+          ),
         ),
       ],
     );
@@ -174,25 +175,29 @@ class _PongViewState extends State<PongView>
   Widget _buildScoreTexts() {
     return Stack(
       children: [
-        ScaledPositioned(
-          bottom: 30,
-          left: 170,
-          scaleFactor: scaleManager.scaleFactor(),
+        Positioned(
+          bottom: 30 * scaleManager.scaleFactor(),
+          left: 170 * scaleManager.scaleFactor(),
           child: Visibility(
             visible: gameController.mode.value != GameMode.waitingToStart,
-            child: ScoreText(
-              player: gameController.players[0],
+            child: Transform.scale(
+              scale: scaleManager.scaleFactor(),
+              child: ScoreText(
+                player: gameController.players[0],
+              ),
             ),
           ),
         ),
-        ScaledPositioned(
-          bottom: 30,
-          right: 170,
-          scaleFactor: scaleManager.scaleFactor(),
+        Positioned(
+          bottom: 30 * scaleManager.scaleFactor(),
+          right: 170 * scaleManager.scaleFactor(),
           child: Visibility(
             visible: gameController.mode.value != GameMode.waitingToStart,
-            child: ScoreText(
-              player: gameController.players[1],
+            child: Transform.scale(
+              scale: scaleManager.scaleFactor(),
+              child: ScoreText(
+                player: gameController.players[1],
+              ),
             ),
           ),
         ),
@@ -261,12 +266,14 @@ class _PongViewState extends State<PongView>
   }
 
   Widget _buildTempoSelectorButton() {
-    return ScaledPositioned(
-      left: 30,
-      bottom: 70,
-      scaleFactor: scaleManager.scaleFactor(),
-      child: TempoSelector(
-          onTempoChanged: (int newTempo) {}, keyString: 'pong_tempo'),
+    return Positioned(
+      left: 30 * scaleManager.scaleFactor(),
+      bottom: 70 * scaleManager.scaleFactor(),
+      child: Transform.scale(
+        scale: scaleManager.scaleFactor(),
+        child: TempoSelector(
+            onTempoChanged: (int newTempo) {}, keyString: 'pong_tempo'),
+      ),
     );
   }
 
@@ -281,7 +288,8 @@ class _PongViewState extends State<PongView>
 
   @override
   Widget build(BuildContext context) {
-    width = MediaQuery.of(context).size.width;
+    width = MediaQuery.sizeOf(context).width;
+    scaleManager = PongScaleManager(width);
     rangeSelectionScenes[0].width = width;
     rangeSelectionScenes[1].width = width;
     pongScene.screenWidth = width;
@@ -293,7 +301,7 @@ class _PongViewState extends State<PongView>
           _buildTranspositionDropDowns(),
           if (gameController.mode.value == GameMode.waitingToStart ||
               gameController.mode.value == GameMode.finished)
-          _buildMenuComponents(),
+            _buildMenuComponents(),
           _buildScoreTexts(),
           _buildPlayerText(),
           _buildCountdownText(),
@@ -302,5 +310,16 @@ class _PongViewState extends State<PongView>
         ],
       ),
     );
+  }
+}
+
+class PongScaleManager{
+  final double screenWidth;
+  final double minimumAcceptableWidth = 800;
+
+  PongScaleManager(this.screenWidth);
+
+  double scaleFactor(){
+    return min(screenWidth / minimumAcceptableWidth, 1);
   }
 }
