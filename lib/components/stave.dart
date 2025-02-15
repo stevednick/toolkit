@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
 import 'package:flutter/material.dart';
-import 'package:toolkit/components/note.dart';
+import 'package:toolkit/components/note/note.dart';
 import 'package:toolkit/models/asset.dart';
 import 'package:toolkit/models/key_signature.dart';
 import 'package:toolkit/models/note_data.dart';

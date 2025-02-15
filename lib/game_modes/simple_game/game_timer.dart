@@ -1,4 +1,4 @@
-import 'package:toolkit/components/bouncy_ball.dart';
+import 'package:toolkit/components/ball/bouncy_ball.dart';
 
 class GameTimer {
   double _gameTime = 0.0;

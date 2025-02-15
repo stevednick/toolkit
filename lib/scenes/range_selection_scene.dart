@@ -4,7 +4,7 @@ import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
-import 'package:toolkit/components/note.dart';
+import 'package:toolkit/components/note/note.dart';
 // import 'package:toolkit/models/highlight_box.dart';
 import 'package:toolkit/models/key_signature.dart';
 import 'package:toolkit/tools/config.dart';

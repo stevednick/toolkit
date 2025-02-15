@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flame/game.dart';
-import 'package:toolkit/components/note.dart';
+import 'package:toolkit/components/note/note.dart';
 import 'package:toolkit/game_modes/buzz_cave/buzz_cave_controller.dart';
 import 'package:toolkit/tools/tools.dart';
 

@@ -1,19 +1,13 @@
 import 'dart:math';
 import 'package:flame/components.dart';
-import 'package:flutter/material.dart';
+import 'package:toolkit/components/ball/ball.dart';
 
 class PongBall extends PositionComponent with HasVisibility {
-  late CircleComponent ball;
+  late Ball ball;
   double accel = 1000;
   double xOffset = 320;
-  // double _deformationFactor = 1.0;
-  // static const double maxDeformation = 1;
-
   PongBall() {
-    ball = CircleComponent(radius: 10);
-    ball.paint = Paint()
-      ..color = Colors.red
-      ..style = PaintingStyle.fill;
+    ball = Ball();
     add(ball);
   }
 
@@ -37,13 +31,6 @@ class PongBall extends PositionComponent with HasVisibility {
     } else {
       ball.position.x = (1 - pointInBeat.remainder(1)) * xOffset;
     }
-
-    // Calculate deformation based on position
-    // double normalizedPosition = ball.position.y / (accel / 2);
-    // _deformationFactor = 1.0 - (maxDeformation * (1.0 - (normalizedPosition - 1).abs()));
-
-    // Apply deformation
-    // ball.scale = Vector2(1 / _deformationFactor, _deformationFactor);
   }
   double fixedRemainder(double value){
     return (value+10).remainder(1);
