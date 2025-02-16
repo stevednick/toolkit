@@ -4,7 +4,7 @@ import 'package:toolkit/models/clef_selection.dart';
 import 'package:toolkit/models/clef_threshold.dart';
 
 import 'package:toolkit/models/instrument.dart';
-import 'package:toolkit/models/key_signature.dart';
+import 'package:toolkit/models/key_signature/key_signature.dart';
 import 'package:toolkit/models/note_data.dart';
 import 'package:toolkit/models/range.dart';
 

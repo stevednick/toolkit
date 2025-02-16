@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flame/components.dart';
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
+import 'package:toolkit/components/ball/bouncy_ball.dart';
 import 'package:toolkit/components/components.dart';
 import 'package:toolkit/game_modes/transposition_game/transposition_game_controller.dart';
 import 'package:toolkit/models/models.dart';

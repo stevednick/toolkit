@@ -1,6 +1,6 @@
 
 import 'package:flame/components.dart';
-import 'package:toolkit/models/key_signature.dart';
+import 'package:toolkit/models/key_signature/key_signature.dart';
 import 'package:toolkit/tools/config.dart';
 
 class StavePositionManager {

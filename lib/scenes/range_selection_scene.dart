@@ -6,7 +6,7 @@ import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import 'package:toolkit/components/note/note.dart';
 // import 'package:toolkit/models/highlight_box.dart';
-import 'package:toolkit/models/key_signature.dart';
+import 'package:toolkit/models/key_signature/key_signature.dart';
 import 'package:toolkit/tools/config.dart';
 import 'package:toolkit/models/asset.dart';
 import 'package:toolkit/models/clef.dart';

@@ -9,7 +9,7 @@ import 'package:toolkit/tools/config.dart';
 import 'package:toolkit/models/models.dart';
 import 'package:toolkit/tools/utils.dart';
 
-class Note extends PositionComponent with HasVisibility, Fadeable implements OpacityProvider {
+class Note extends PositionComponent with HasVisibility implements OpacityProvider {
   late NoteComponents noteComponents;
   late NoteData noteData;
   PositionComponent ledgerHolder = PositionComponent();
@@ -66,14 +66,6 @@ class Note extends PositionComponent with HasVisibility, Fadeable implements Opa
     }
   }
 
-  Future<void> fadeAndChangeNote(NoteData newNote, {double duration = 1.0}) async {
-    await fadeOut(duration: duration);
-    Future.delayed(Duration(milliseconds: (duration * 1000).toInt()), () {
-      changeNote(newNote);
-      fadeIn(duration: duration);
-    });
-  }
-
   void changeNote(NoteData newNote) {
     if (newNote == NoteData.placeholderValue) {
       setOpacity(0);
@@ -112,9 +104,5 @@ class Note extends PositionComponent with HasVisibility, Fadeable implements Opa
     noteComponents.add(noteComponents.arrowSprite);
   }
   
-  @override
-  // TODO: implement fadeableComponents
-  @override
-  List<PositionComponent> get fadeableComponents => [noteComponents, ledgerHolder];
 }
 

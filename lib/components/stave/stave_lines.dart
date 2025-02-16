@@ -1,6 +1,8 @@
 import 'package:flame/components.dart';
+import 'package:flame/effects.dart';
 import 'package:flutter/material.dart';
-import 'package:toolkit/components/stave.dart';
+import 'package:toolkit/components/stave/stave_position_manager.dart';
+import 'package:toolkit/models/asset.dart';
 import 'package:toolkit/tools/config.dart';
 
 class StaveLines extends PositionComponent {
@@ -19,5 +21,14 @@ class StaveLines extends PositionComponent {
       )..position = Vector2(positionManager.staffLinePosX(), i * lineGap);
       add(newLine);
     }
+  }
+
+    Future<void> sequentialFade(
+      Asset outSprite, Asset inSprite, double duration) async {
+    await outSprite
+        .add(OpacityEffect.fadeOut(EffectController(duration: duration)));
+    await inSprite.add(OpacityEffect.fadeIn(DelayedEffectController(
+        EffectController(duration: duration),
+        delay: duration)));
   }
 }

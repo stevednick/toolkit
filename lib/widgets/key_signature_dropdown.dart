@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:toolkit/models/key_signature.dart';
+import 'package:toolkit/models/key_signature/key_signature.dart';
 import 'package:toolkit/models/player.dart';
 
 class KeySignatureDropdown extends StatefulWidget {

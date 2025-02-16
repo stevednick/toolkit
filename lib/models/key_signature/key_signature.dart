@@ -5,6 +5,7 @@ import 'package:toolkit/localization/localization_provider.dart';
 import 'package:toolkit/models/accidental.dart';
 import 'package:toolkit/models/asset.dart';
 import 'package:toolkit/models/clef.dart';
+import 'package:toolkit/models/key_signature/key_signature_component.dart';
 import 'package:toolkit/models/note_data.dart';
 import 'package:toolkit/tools/config.dart';
 
@@ -105,38 +106,11 @@ class KeySignature {
     return spacing * (sharps + flats) + 20;
   }
 
-  PositionComponent displayKeySignature(Clef clef) {
-    final double spacing = 27;
-    final List<int> sharpPositions = [10, 7, 11, 8, 5, 9, 6];
-    final List<int> flatPositions = [6, 9, 5, 8, 4, 7, 3];
-    PositionComponent holder = PositionComponent();
-    for (int i = 0; i < sharps; i++) {
-      Asset sharp = Asset.createSharp();
-      PositionComponent sharpHolder = PositionComponent()
-        ..position = Vector2(
-            spacing * i,
-            -lineGap *
-                (sharpPositions[i] +
-                    clef.offset -
-                    (clef.name == "Bass" ? 14 : 0)) /
-                2);
-      sharpHolder.add(sharp);
-      holder.add(sharpHolder);
-    }
-    for (int i = 0; i < flats; i++) {
-      Asset flat = Asset.createFlat();
-      PositionComponent flatHolder = PositionComponent()
-        ..position = Vector2(
-            spacing * i,
-            -lineGap *
-                (flatPositions[i] +
-                    clef.offset -
-                    (clef.name == "Bass" ? 14 : 0)) /
-                2);
-      flatHolder.add(flat);
-      holder.add(flatHolder);
-    }
-    return holder;
+  KeySignatureComponent displayKeySignature(Clef clef){
+    KeySignatureComponent keySignatureComponent = KeySignatureComponent(sharps, flats);
+    keySignatureComponent.displayKeySignature(clef);
+    //holder.add(keySignatureComponent);
+    return keySignatureComponent;
   }
 
   static List<KeySignature> keySignatures = [
