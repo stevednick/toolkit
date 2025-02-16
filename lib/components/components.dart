@@ -5,5 +5,5 @@ export 'note.dart';
 export 'note/ledger_line.dart';
 export 'note/note.dart';
 export 'note/note_components.dart';
-export 'stave.dart';
+export 'stave/stave.dart';
 export 'tick.dart';

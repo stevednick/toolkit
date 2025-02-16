@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flame/components.dart';
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
-import 'package:toolkit/components/stave.dart';
+import 'package:toolkit/components/stave/stave.dart';
 import 'package:toolkit/game_modes/pong/pong_ball.dart';
 import 'package:toolkit/game_modes/pong/pong_controller.dart';
 
