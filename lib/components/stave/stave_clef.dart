@@ -22,23 +22,12 @@ class StaveClef extends PositionComponent {
     bassClefSprite.opacity = 0;
   }
 
-  Future<void> sequentialFade(
-      Asset outSprite, Asset inSprite, double duration) async {
-    await outSprite
-        .add(OpacityEffect.fadeOut(EffectController(duration: duration)));
-    await inSprite.add(OpacityEffect.fadeIn(DelayedEffectController(
-        EffectController(duration: duration),
-        delay: duration)));
-  }
-
   Future<void> changeClef(
-      NoteData currentNoteData, NoteData newNote, double fadeDuration) async {
+      NoteData currentNoteData, NoteData newNote) async {
     if (clefChanges(currentNoteData, newNote)) {
-      if (newNote.clef.name == 'Bass') {
-        await sequentialFade(trebleClefSprite, bassClefSprite, fadeDuration);
-      } else {
-        await sequentialFade(bassClefSprite, trebleClefSprite, fadeDuration);
-      }
+      print('Clef changed');
+      bassClefSprite.isVisible = newNote.clef.name == 'Bass';
+      trebleClefSprite.isVisible = newNote.clef.name == 'Treble';
     }
   }
 

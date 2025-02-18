@@ -1,52 +1,78 @@
 import 'package:flame/components.dart';
-import 'package:flame/effects.dart';
 import 'package:toolkit/models/asset.dart';
 import 'package:toolkit/models/clef.dart';
+import 'package:toolkit/models/key_signature/key_signature.dart';
+import 'package:toolkit/models/key_signature/key_signature_builder_data.dart';
 import 'package:toolkit/tools/config.dart';
-import 'package:toolkit/tools/utils.dart';
+import 'package:logging/logging.dart';
 
-class KeySignatureComponent extends PositionComponent implements OpacityProvider{
-
-  final int sharps;
-  final int flats;
-
-  KeySignatureComponent(this.sharps, this.flats);
+class KeySignatureComponent extends PositionComponent {
+  static const double ACCIDENTAL_SPACING = 27;
+  static const int BASS_CLEF_OFFSET = 14;
   
-  void displayKeySignature(Clef clef){
-    Utils.removeAllChildren(this);
-    final double spacing = 27;
-    final List<int> sharpPositions = [10, 7, 11, 8, 5, 9, 6];
-    final List<int> flatPositions = [6, 9, 5, 8, 4, 7, 3];
-    PositionComponent holder = PositionComponent();
-    for (int i = 0; i < sharps; i++) {
-      Asset sharp = Asset.createSharp();
-      PositionComponent sharpHolder = PositionComponent()
-        ..position = Vector2(
-            spacing * i,
-            -lineGap *
-                (sharpPositions[i] +
-                    clef.offset -
-                    (clef.name == "Bass" ? 14 : 0)) /
-                2);
-      sharpHolder.add(sharp);
-      holder.add(sharpHolder);
-    }
-    for (int i = 0; i < flats; i++) {
-      Asset flat = Asset.createFlat();
-      PositionComponent flatHolder = PositionComponent()
-        ..position = Vector2(
-            spacing * i,
-            -lineGap *
-                (flatPositions[i] +
-                    clef.offset -
-                    (clef.name == "Bass" ? 14 : 0)) /
-                2);
-      flatHolder.add(flat);
-      holder.add(flatHolder);
-    }
-    add(holder);
+  final KeySignature keySignature;
+  final KeySignatureBuilderData data = KeySignatureBuilderData();
+  final Logger _logger = Logger('KeySignatureComponent');
+
+  late final PositionComponent trebleHolder;
+  late final PositionComponent bassHolder;
+  
+  KeySignatureComponent(this.keySignature) {
+    setUp();
   }
 
-  @override
-  double opacity = 0;
+  void setUp() {
+    bassHolder = buildKeySignatureForClef(Clef.bass());
+    trebleHolder = buildKeySignatureForClef(Clef.treble());
+    add(bassHolder);
+    add(trebleHolder);
+    displayKeySignature(Clef.neutral());
+  }
+
+  PositionComponent buildKeySignatureForClef(Clef clef) {
+    PositionComponent holder = PositionComponent();
+    
+    try {
+      _buildAccidentals(holder, clef, keySignature.sharps, data.sharpPositions, Asset.createSharp, 'Sharp');
+      _buildAccidentals(holder, clef, keySignature.flats, data.flatPositions, Asset.createFlat, 'Flat');
+    } catch (e) {
+      _logger.warning('Error building key signature for ${clef.name} clef: $e');
+    }
+    
+    return holder;
+  }
+  
+  void _buildAccidentals(PositionComponent holder, Clef clef, int count, List<int> positions, Asset Function() createAsset, String accidentalType) {
+    for (int i = 0; i < count; i++) {
+      PositionComponent positionComponent = PositionComponent();
+      double xPos = ACCIDENTAL_SPACING * i;
+      double yPos = -lineGap * (positions[i] + clef.offset - (clef.name == "Bass" ? BASS_CLEF_OFFSET : 0)) / 2;
+      
+      Asset accidental = createAsset();
+
+      positionComponent.add(accidental);
+      
+      positionComponent.position = Vector2(xPos, yPos);
+
+      holder.add(positionComponent);
+    
+    }
+  }
+  
+  void displayKeySignature(Clef clef) {
+    _setVisibility(trebleHolder, clef.name == "Treble");
+    _setVisibility(bassHolder, clef.name == "Bass");
+    _logger.info('Displaying key signature for ${clef.name} clef');
+  }
+  
+  void _setVisibility(PositionComponent holder, bool isVisible) {
+    for (var component in holder.children) {
+      for (var asset in component.children) {
+        if (asset is Asset) {
+          asset.isVisible = isVisible;
+          _logger.info('Set visibility of ${component.runtimeType} to $isVisible');
+        }
+      }
+    }
+  }
 }

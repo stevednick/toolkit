@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:toolkit/game_modes/pong/pong_controller.dart';
 import 'package:toolkit/game_modes/pong/pong_scene_new.dart';
 import 'package:toolkit/models/models.dart';
-import 'package:toolkit/scenes/range_selection_scene.dart';
+import 'package:toolkit/scenes/range_selection_scene/range_selection_scene.dart';
 import 'package:toolkit/widgets/widgets.dart';
 
 class PongView extends StatefulWidget {
@@ -290,8 +290,8 @@ class _PongViewState extends State<PongView>
   Widget build(BuildContext context) {
     width = MediaQuery.sizeOf(context).width;
     scaleManager = PongScaleManager(width);
-    rangeSelectionScenes[0].width = width;
-    rangeSelectionScenes[1].width = width;
+    rangeSelectionScenes[0].setWidth(width);
+    rangeSelectionScenes[1].setWidth(width);
     pongScene.screenWidth = width;
     return Scaffold(
       backgroundColor: Colors.white,

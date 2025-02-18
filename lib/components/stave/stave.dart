@@ -7,6 +7,9 @@ import 'package:toolkit/components/stave/stave_key_signature.dart';
 import 'package:toolkit/components/stave/stave_lines.dart';
 import 'package:toolkit/components/stave/stave_note_changer.dart';
 import 'package:toolkit/components/stave/stave_position_manager.dart';
+import 'package:toolkit/models/key_signature/key_signature.dart';
+import 'package:toolkit/models/key_signature/key_signature_component.dart';
+import 'package:toolkit/models/key_signature/key_signature_note_modifier.dart';
 import 'package:toolkit/models/note_data.dart';
 import 'package:toolkit/models/player.dart';
 import 'package:toolkit/tools/note_generator.dart';
@@ -28,9 +31,11 @@ class Stave extends PositionComponent {
   late Note note;
   PositionComponent noteHolder = PositionComponent();
 
-  late StaveClef clef;
+  late KeySignatureComponent keySignatureComponent;
 
-  late StaveKeySignature keySignature;
+  late KeySignatureNoteModifier keySignatureNoteModifier;
+
+  late StaveClef clef;
 
   late Note ghostNote;
   PositionComponent ghostNoteHolder = PositionComponent();
@@ -44,7 +49,9 @@ class Stave extends PositionComponent {
     positionManager = StavePositionManager(player.keySignature, showGhostNotes, displaySize);
     staveLines = StaveLines(positionManager);
     clef = StaveClef(positionManager);
-
+    keySignatureComponent = KeySignatureComponent(player.keySignature);
+    keySignatureComponent.position = positionManager.keySignatureHolderPosition();
+    keySignatureNoteModifier = KeySignatureNoteModifier(player.keySignature);
     build();
     return super.onLoad();
   }
@@ -52,14 +59,11 @@ class Stave extends PositionComponent {
   void build() {
     add(staveLines);
     add(clef);
-
+    add(keySignatureComponent);
     addGhostNote();
     addNote();
-
-    keySignature = StaveKeySignature(player, positionManager, currentNoteData);
-    add(keySignature);
     scale = Vector2(positionManager.scaleFactor(), positionManager.scaleFactor());
-    noteChanger = StaveNoteChanger(note, keySignature, clef);
+    noteChanger = StaveNoteChanger(note, clef, keySignatureComponent, keySignatureNoteModifier);
   }
 
   void changeNote(NoteData newNote, double fadeDuration) {
@@ -97,6 +101,8 @@ class Stave extends PositionComponent {
     }
 
     NoteData d = noteGenerator.noteFromNumber(num, currentNoteData.clef);
+    d = keySignatureNoteModifier.modifyNote(d, ghostNote: true); 
+
     print("$num, $noteToCheck");
     if (num == noteToCheck) {
       d = currentNoteData;

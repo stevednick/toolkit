@@ -9,7 +9,7 @@ import 'package:toolkit/game_modes/simple_game/load_and_save_view.dart';
 import 'package:toolkit/game_modes/simple_game/simple_game_controller.dart';
 import 'package:toolkit/game_modes/simple_game/simple_game_scene.dart';
 import 'package:toolkit/models/models.dart';
-import 'package:toolkit/scenes/range_selection_scene.dart';
+import 'package:toolkit/scenes/range_selection_scene/range_selection_scene.dart';
 import 'package:toolkit/widgets/key_signature_dropdown.dart';
 import 'package:toolkit/widgets/widgets.dart';
 
@@ -409,8 +409,8 @@ class _SimpleGameViewState extends State<SimpleGameView> {
 
   @override
   Widget build(BuildContext context) {
-    width = MediaQuery.sizeOf(context).width;
-    rangeSelectionScene.width = width;
+    width = MediaQuery.sizeOf(context).width;// todo add width back... 
+    rangeSelectionScene.setWidth(width); 
     scene.width = width;
     return Scaffold(
       backgroundColor: Colors.white,

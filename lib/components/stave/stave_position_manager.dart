@@ -1,10 +1,12 @@
 
 import 'package:flame/components.dart';
 import 'package:toolkit/models/key_signature/key_signature.dart';
+import 'package:toolkit/models/key_signature/key_signature_builder_data.dart';
 import 'package:toolkit/tools/config.dart';
 
 class StavePositionManager {
   final KeySignature keySignature;
+  final KeySignatureBuilderData data = KeySignatureBuilderData();
   final double staffWidth = 280;
   final double ghostNoteExtension = 130;
   final double size;
@@ -12,15 +14,16 @@ class StavePositionManager {
   StavePositionManager(this.keySignature, this.showGhostNotes, this.size);
 
   Vector2 staffLineSize() {
+
     return Vector2(
         staffWidth +
             (showGhostNotes ? ghostNoteExtension : 0) +
-            keySignature.clefOffset(),
+            data.clefOffset(keySignature),
         lineWidth);
   }
 
   double staffLinePosX() {
-    return 20 - staffWidth / 2 - keySignature.clefOffset();
+    return 20 - staffWidth / 2 - data.clefOffset(keySignature);
   }
 
   Vector2 notePosition() {
@@ -36,11 +39,11 @@ class StavePositionManager {
   }
 
   Vector2 clefHolderPosition() {
-    return Vector2(-70 - keySignature.clefOffset(), 0);
+    return Vector2(-70 - data.clefOffset(keySignature), 0);
   }
 
   Vector2 keySignatureHolderPosition() {
-    return Vector2(25 - keySignature.clefOffset(), 0);
+    return Vector2(25 - data.clefOffset(keySignature), 0);
   }
 
   double scaleFactor() {
@@ -48,6 +51,6 @@ class StavePositionManager {
     return size /
         ((staffWidth +
                 (showGhostNotes ? ghostNoteExtension : 0) +
-                keySignature.clefOffset()));
+                data.clefOffset(keySignature)));
   }
 }

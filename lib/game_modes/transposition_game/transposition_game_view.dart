@@ -7,7 +7,7 @@ import 'package:toolkit/game_modes/home_screen/note_selector_view.dart';
 import 'package:toolkit/game_modes/transposition_game/transposition_game_controller.dart';
 import 'package:toolkit/game_modes/transposition_game/transposition_game_scene.dart';
 import 'package:toolkit/models/models.dart';
-import 'package:toolkit/scenes/range_selection_scene.dart';
+import 'package:toolkit/scenes/range_selection_scene/range_selection_scene.dart';
 import 'package:toolkit/widgets/widgets.dart';
 
 class TranspositionGameView extends StatefulWidget {

@@ -1,7 +1,7 @@
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import 'package:toolkit/models/models.dart';
-import 'package:toolkit/scenes/range_selection_scene.dart';
+import 'package:toolkit/scenes/range_selection_scene/range_selection_scene.dart';
 
 class AdvancedOptionsView extends StatefulWidget {
   final Player player;

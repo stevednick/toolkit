@@ -5,6 +5,7 @@ import 'package:toolkit/models/clef_threshold.dart';
 
 import 'package:toolkit/models/instrument.dart';
 import 'package:toolkit/models/key_signature/key_signature.dart';
+import 'package:toolkit/models/key_signature/key_signatures.dart';
 import 'package:toolkit/models/note_data.dart';
 import 'package:toolkit/models/range.dart';
 
@@ -32,7 +33,7 @@ class Player {
 
   Future<KeySignature> loadKeySignature() async {
     int keySigInt = await loadKeySignatureInt();
-    keySignature = KeySignature.keySignatures[keySigInt];
+    keySignature = KeySignatures.list[keySigInt];
     return keySignature;
   }
 

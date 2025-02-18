@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:toolkit/models/key_signature/key_signature.dart';
+import 'package:toolkit/models/key_signature/key_signature_selector_data.dart';
+import 'package:toolkit/models/key_signature/key_signatures.dart';
 import 'package:toolkit/models/player.dart';
 
 class KeySignatureDropdown extends StatefulWidget {
@@ -14,6 +16,8 @@ class KeySignatureDropdown extends StatefulWidget {
 
 class KeySignatureDropdownState extends State<KeySignatureDropdown> {
   late Future<int> _futureCurrentKeySignature;
+
+  final KeySignatureSelectorData keySignatureSelectorData = KeySignatureSelectorData();
 
   @override
   void initState() {
@@ -46,21 +50,21 @@ class KeySignatureDropdownState extends State<KeySignatureDropdown> {
           return DropdownMenu<KeySignature>(
             enableFilter: false,
             enableSearch: false,
-            initialSelection: KeySignature.keySignatures[snapshot.data!],
+            initialSelection: KeySignatures.list[snapshot.data!],
             requestFocusOnTap: false,
             onSelected: (KeySignature? newKey) {
               if (newKey != null) {
                 setState(() {
-                  widget.player.saveKeySignature(KeySignature.keySignatures.indexOf(newKey));
+                  widget.player.saveKeySignature(KeySignatures.list.indexOf(newKey));
                   widget.onChanged();
                 });
               }
             },
-            dropdownMenuEntries: KeySignature.keySignatures
+            dropdownMenuEntries: KeySignatures.list
                 .map<DropdownMenuEntry<KeySignature>>((KeySignature key) {
               return DropdownMenuEntry<KeySignature>(
                 value: key,
-                label: key.getLocalizedName(context),
+                label: keySignatureSelectorData.getLocalizedName(context, key.name)
               );
             }).toList(),
           );
