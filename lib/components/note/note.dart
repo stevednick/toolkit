@@ -4,7 +4,6 @@ import 'package:flame/effects.dart';
 import 'package:flutter/material.dart';
 import 'package:toolkit/components/note/ledger_line.dart';
 import 'package:toolkit/components/note/note_components.dart';
-import 'package:toolkit/mixins/fadeable.dart';
 import 'package:toolkit/tools/config.dart';
 import 'package:toolkit/models/models.dart';
 import 'package:toolkit/tools/utils.dart';

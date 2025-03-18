@@ -2,14 +2,17 @@ import 'dart:async';
 import 'package:flame/components.dart';
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:toolkit/components/ball/bouncy_ball.dart';
 import 'package:toolkit/components/components.dart';
-import 'package:toolkit/components/stave/stave.dart';
 import 'package:toolkit/game_modes/simple_game/simple_game_controller.dart';
+import 'package:toolkit/game_modes/simple_game/state_management/simple_game_state.dart';
+import 'package:toolkit/game_modes/simple_game/state_management/simple_game_state_manager.dart';
 import 'package:toolkit/models/models.dart';
 import 'package:toolkit/tools/tools.dart';
 
 class SimpleGameScene extends FlameGame {
+  late SimpleGameStateManager gameStateManager;
   final SimpleGameController gameController;
   final GameStateManager stateManager = GameStateManager();
 
@@ -38,9 +41,14 @@ class SimpleGameScene extends FlameGame {
   bool fadeClef = false;
   bool initialNoteLoaded = false;
 
+  WidgetRef ref;
+
   SimpleGameScene(
     this.gameController,
-  );
+    this.ref,
+  ) {
+    gameStateManager = ref.read(simpleGameStateProvider.notifier);
+  }
 
   @override
   FutureOr<void> onLoad() async {
@@ -51,12 +59,11 @@ class SimpleGameScene extends FlameGame {
         initialNoteLoaded = true;
       }
     });
-    gameController.state.addListener(() {
-      if (gameController.state.value == GameState.correctNoteHeard) {
-        queueNewNote(gameController.player.currentNote.value);
-        tick.showTick();
-      }
-    });
+    // gameController.state.addListener(() {
+    //   if (gameController.state.value == GameState.correctNoteHeard) {
+
+    //   }
+    // });
 
     stateManager.showGhostNotes = //  todo Move loading to state manager?
         await Settings.getSetting(Settings.ghostNoteString);
@@ -65,9 +72,8 @@ class SimpleGameScene extends FlameGame {
     await buildAllElements();
     gameController.noteChecker.noteNotifier.addListener(() {
       if (stateManager.showGhostNotes) {
-        stave.showGhostNote(
-            gameController.noteChecker.noteNotifier.value,
-            gameController.player.currentNote.value.noteNum);
+        stave.showGhostNote(gameController.noteChecker.noteNotifier.value,
+            gameController.currentNote.value.noteNum);
       }
     });
     //camera.viewfinder.zoom =
@@ -76,10 +82,28 @@ class SimpleGameScene extends FlameGame {
     loadComplete = true;
     gameController.changeNote();
     beatSeconds = await tempo.loadBeatSeconds();
-    stave = Stave(gameController.player, width/screenWidthRatio,
+    stave = Stave(gameController.player, width / screenWidthRatio,
         showGhostNotes: stateManager.showGhostNotes);
     world.add(stave);
-    bouncyBall.position = Vector2(stave.positionManager.notePosition().x + 30, -55); 
+    bouncyBall.position =
+        Vector2(stave.positionManager.notePosition().x + 30, -55);
+  }
+
+  @override
+  Future<void> onMount() async {
+    super.onMount();
+
+    // Listen for changes in the game state, but only trigger when necessary
+    ref.listenManual<SimpleGameState>(
+      simpleGameStateProvider,
+      (previous, next) {
+        if (previous?.gameState != next.gameState) {
+          if (next.gameState != GameState.correctNoteHeard) return;
+          queueNewNote(gameController.player.currentNote.value);
+          tick.showTick();
+        }
+      },
+    );
   }
 
   Future<void> buildAllElements() async {

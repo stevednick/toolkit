@@ -2,27 +2,33 @@ import 'dart:async';
 
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:toolkit/game_modes/home_screen/advanced_options_view.dart';
 import 'package:toolkit/game_modes/home_screen/note_selector_view.dart';
 import 'package:toolkit/game_modes/simple_game/game_options.dart';
 import 'package:toolkit/game_modes/simple_game/load_and_save_view.dart';
 import 'package:toolkit/game_modes/simple_game/simple_game_controller.dart';
 import 'package:toolkit/game_modes/simple_game/simple_game_scene.dart';
-import 'package:toolkit/game_modes/simple_game/simple_game_score_text.dart';
-import 'package:toolkit/game_modes/simple_game/timing/timing_displayer.dart';
+import 'package:toolkit/game_modes/simple_game/state_management/simple_game_state_manager.dart';
+import 'package:toolkit/game_modes/simple_game/widgets/simple_game_key_signature_dropdown.dart';
+import 'package:toolkit/game_modes/simple_game/widgets/simple_game_main_text.dart';
+import 'package:toolkit/game_modes/simple_game/widgets/simple_game_score_text.dart';
+import 'package:toolkit/game_modes/simple_game/widgets/simple_game_timing_text.dart';
+import 'package:toolkit/game_modes/simple_game/widgets/simple_game_transposition_dropdown.dart';
 import 'package:toolkit/models/models.dart';
 import 'package:toolkit/scenes/range_selection/range_selection.dart';
 import 'package:toolkit/widgets/key_signature_dropdown.dart';
 import 'package:toolkit/widgets/widgets.dart';
 
-class SimpleGameView extends StatefulWidget {
-  const SimpleGameView({super.key});
-
+class SimpleGameView extends ConsumerStatefulWidget {
+  late bool isTimeTrialMode;
+  SimpleGameView({super.key, required this.isTimeTrialMode});
   @override
   _SimpleGameViewState createState() => _SimpleGameViewState();
 }
 
-class _SimpleGameViewState extends State<SimpleGameView> {
+class _SimpleGameViewState extends ConsumerState<SimpleGameView> {
+  final ProviderContainer container = ProviderContainer();
   late final SimpleGameController gameController;
   late SimpleGameScene scene;
   late RangeSelectionScene rangeSelectionScene;
@@ -41,6 +47,7 @@ class _SimpleGameViewState extends State<SimpleGameView> {
   late final NiceButton clefThresholdsButton = NiceButton(
     text: "Clef Thresholds",
     onPressed: () {
+      final provider = ref.watch(simpleGameStateProvider);
       Navigator.push(
         context,
         MaterialPageRoute(
@@ -61,9 +68,14 @@ class _SimpleGameViewState extends State<SimpleGameView> {
       onTempoChanged: (int newTempo) {},
       keyString: 'simple_game_tempo',
     );
-
-    gameController = SimpleGameController(triggerTick);
-    scene = SimpleGameScene(gameController);
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await Future.delayed(Duration(milliseconds: 10)); // Short delay
+      ref
+          .read(simpleGameStateProvider.notifier)
+          .setIsTimeTrialMode(widget.isTimeTrialMode);
+    });
+    gameController = SimpleGameController(triggerTick, ref);
+    scene = SimpleGameScene(gameController, ref);
     rangeSelectionScene = RangeSelectionScene(gameController.player);
     // _dropdownKey = GlobalKey<TranspositionDropDownState>();
     // _keyDropDownKey = GlobalKey<KeySignatureDropdownState>();
@@ -74,7 +86,7 @@ class _SimpleGameViewState extends State<SimpleGameView> {
   }
 
   Future<void> setTempoSelector() async {
-    tempoSelector.isActive.value = true; // Temp fix to just leave it on.. 
+    tempoSelector.isActive.value = true; // Temp fix to just leave it on..
     // tempoSelector.isActive.value = await Settings.getSetting(Settings.tempoKey);
     // print("Tempo Selector is active: ${tempoSelector.isActive.value}");
   }
@@ -89,6 +101,7 @@ class _SimpleGameViewState extends State<SimpleGameView> {
   }
 
   Future<void> fetchGameOptions() async {
+    final provider = ref.watch(simpleGameStateProvider);
     ClefSelection clefSelection =
         await gameController.player.getClefSelection();
     List<bool> noteActivations =
@@ -139,6 +152,7 @@ class _SimpleGameViewState extends State<SimpleGameView> {
   }
 
   Widget _buildLoadSaveButton() {
+    final provider = ref.watch(simpleGameStateProvider);
     return NiceButton(
       onPressed: () async {
         await fetchGameOptions();
@@ -166,99 +180,22 @@ class _SimpleGameViewState extends State<SimpleGameView> {
   }
 
   Widget _buildGameScene() {
+    final gameMode = ref
+        .watch(simpleGameStateProvider)
+        .gameMode; // Get the gameMode from the provider
     return Center(
       child: FractionallySizedBox(
         widthFactor: screenWidthRatio,
         child: GameWidget(
-          game: gameController.gameMode.value != GameMode.waitingToStart
-              ? scene
-              : rangeSelectionScene,
+          game:
+              gameMode != GameMode.waitingToStart ? scene : rangeSelectionScene,
         ),
-      ),
-    );
-  }
-
-  Widget _buildTimerText() {
-    TimingDisplayer timingDisplayer = TimingDisplayer();
-    return Positioned(
-      top: 80,
-      right: 40,
-      child: ValueListenableBuilder(
-        valueListenable: gameController.timingManager.currentTime,
-        builder: (context, time, child) {
-          return Text(
-            timingDisplayer.formatTime(time),
-            style: const TextStyle(fontSize: 30),
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildScoreText() {
-    return Positioned(
-      top: 40,
-      right: 40,
-      child: Visibility(
-        visible: gameController.gameMode.value == GameMode.running,
-        child: SimpleGameScoreText(
-          scoreManager: gameController.scoreManager,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildGameText() {
-    return Align(
-      alignment: Alignment.topCenter,
-      child: ValueListenableBuilder(
-        valueListenable: gameController.gameText,
-        builder: (context, text, child) {
-          return Padding(
-            padding: const EdgeInsets.all(20),
-            child: Text(
-              text,
-              style: const TextStyle(fontSize: 30),
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildTranspositionDropDown() {
-    return Positioned(
-      top: 40,
-      left: 40,
-      child: gameController.gameMode.value == GameMode.waitingToStart
-          ? TranspositionDropDown(
-              player: gameController.player,
-            )
-          : Text(
-              "Horn in ${gameController.player.selectedInstrument.currentTransposition.name}",
-              style: const TextStyle(
-                fontSize: 30,
-              ),
-            ),
-    );
-  }
-
-  Widget _buildKeySignatureDropdown() {
-    return Positioned(
-      top: 40,
-      right: 40,
-      child: KeySignatureDropdown(
-        player: gameController.player,
-        onChanged: () {
-          setState(() {
-            rangeSelectionScene = RangeSelectionScene(gameController.player);
-          });
-        },
       ),
     );
   }
 
   Widget _buildClefSelectionButton() {
+    final provider = ref.watch(simpleGameStateProvider);
     return EnhancedClefSelectionButton(
       key: _clefButtonKey,
       gameController.player,
@@ -267,6 +204,7 @@ class _SimpleGameViewState extends State<SimpleGameView> {
   }
 
   Widget _buildStartButton() {
+    final gameMode = ref.watch(simpleGameStateProvider).gameMode;
     return ValueListenableBuilder(
       valueListenable: gameController.noteChecker.noteNotifier,
       builder: (context, note, child) {
@@ -276,13 +214,11 @@ class _SimpleGameViewState extends State<SimpleGameView> {
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               NiceButton(
-                text: gameController.gameMode.value == GameMode.waitingToStart
-                    ? "Start"
-                    : "End",
+                text: gameMode == GameMode.waitingToStart ? "Start" : "End",
                 onPressed: () {
                   setState(() {
                     scene.onDispose();
-                    scene = SimpleGameScene(gameController);
+                    scene = SimpleGameScene(gameController, ref);
                     gameController.startButtonPressed();
                     //setClefThresholdsButton();
                   });
@@ -349,6 +285,7 @@ class _SimpleGameViewState extends State<SimpleGameView> {
       padding: const EdgeInsets.all(8.0),
       child: BackButton(
         onPressed: () {
+          ref.read(simpleGameStateProvider.notifier).reset();
           gameController.dispose();
           Navigator.pop(context);
         },
@@ -356,18 +293,17 @@ class _SimpleGameViewState extends State<SimpleGameView> {
     );
   }
 
-Widget _buildTempoSelectorButton() {
-  return ValueListenableBuilder<bool>(
-    valueListenable: tempoSelector.isActive,
-    builder: (context, isActive, child) {
-      return TempoSelector(
-        onTempoChanged: (int newTempo) {},
-        keyString: 'simple_game_tempo',
-      );
-    },
-  );
-}
-
+  Widget _buildTempoSelectorButton() {
+    return ValueListenableBuilder<bool>(
+      valueListenable: tempoSelector.isActive,
+      builder: (context, isActive, child) {
+        return TempoSelector(
+          onTempoChanged: (int newTempo) {},
+          keyString: 'simple_game_tempo',
+        );
+      },
+    );
+  }
 
   Widget _buildGhostNoteButton() {
     // Todo, add rebuild code when ready...
@@ -442,6 +378,7 @@ Widget _buildTempoSelectorButton() {
 
   @override
   Widget build(BuildContext context) {
+    final gameMode = ref.watch(simpleGameStateProvider).gameMode;
     width = MediaQuery.sizeOf(context).width; // todo add width back...
     rangeSelectionScene.setWidth(width * screenWidthRatio);
     scene.width = width;
@@ -450,14 +387,16 @@ Widget _buildTempoSelectorButton() {
       body: Stack(
         children: [
           _buildGameScene(),
-          _buildTimerText(),
-          _buildScoreText(),
-          _buildGameText(),
-          _buildTranspositionDropDown(),
-          if (gameController.gameMode.value == GameMode.waitingToStart)
-            _buildKeySignatureDropdown(),
-          if (gameController.gameMode.value == GameMode.waitingToStart)
-            _buildSettingsButtons(),
+          SimpleGameTimingText(),
+          SimpleGameScoreText(),
+          SimpleGameMainText(),
+          SimpleGameTranspositionDropdown(player: gameController.player),
+          if (gameMode == GameMode.waitingToStart) SimpleGameKeySignatureDropdown(player: gameController.player, onChanged: (){
+            setState(() {
+               rangeSelectionScene = RangeSelectionScene(gameController.player);
+            });
+          }),
+          if (gameMode == GameMode.waitingToStart) _buildSettingsButtons(),
           _buildStartButton(),
           //_buildTickAndFeedbackText(),
           _buildBackButton(),

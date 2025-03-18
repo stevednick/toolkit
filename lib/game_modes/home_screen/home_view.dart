@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:toolkit/game_modes/home_screen/onboarding_screen.dart';
-import 'package:toolkit/game_modes/home_screen/stave_icon_list.dart';
-import 'package:toolkit/game_modes/incremental/example_screen.dart';
-import 'package:toolkit/game_modes/incremental_game_old/incremental_game_view.dart';
 import 'package:toolkit/game_modes/pong/pong_view.dart';
 import 'package:toolkit/game_modes/simple_game/simple_game_view.dart';
 import 'package:toolkit/widgets/language_selector.dart';
@@ -60,8 +57,13 @@ class HomeView extends StatelessWidget {
                   const SizedBox(
                     height: 30,
                   ),
-                  const HomeScreenNavigationButton(
-                      route: SimpleGameView(), text: "Simple Game"),
+                  HomeScreenNavigationButton(
+                      route: SimpleGameView(isTimeTrialMode: false,), text: "Simple Game"),
+                  const SizedBox(
+                    height: 5,
+                  ),
+                  HomeScreenNavigationButton(
+                      route: SimpleGameView(isTimeTrialMode: true,), text: "Time Trial"),
                   const SizedBox(
                     height: 5,
                   ),

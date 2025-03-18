@@ -4,7 +4,7 @@ import 'package:toolkit/models/note_data.dart';
 import 'package:toolkit/models/player/player.dart';
 
 class StaveIconList extends StatelessWidget {
-  late  Player player;
+  late Player player;
   
   StaveIconList({
     super.key, 

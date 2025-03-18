@@ -1,5 +1,4 @@
 import 'package:flame/components.dart';
-import 'package:flame/effects.dart';
 import 'package:toolkit/components/stave/stave_position_manager.dart';
 import 'package:toolkit/models/asset.dart';
 import 'package:toolkit/models/note_data.dart';
