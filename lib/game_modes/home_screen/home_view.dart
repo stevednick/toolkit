@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:toolkit/game_modes/home_screen/onboarding_screen.dart';
+import 'package:toolkit/game_modes/home_screen/stave_icon_list.dart';
+import 'package:toolkit/game_modes/incremental/example_screen.dart';
+import 'package:toolkit/game_modes/incremental_game_old/incremental_game_view.dart';
 import 'package:toolkit/game_modes/pong/pong_view.dart';
 import 'package:toolkit/game_modes/simple_game/simple_game_view.dart';
 import 'package:toolkit/widgets/language_selector.dart';
@@ -8,6 +11,7 @@ import 'package:toolkit/widgets/widgets.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class HomeView extends StatelessWidget {
+  
   const HomeView({super.key});
 
   Widget _buildLocalizationDropdown(BuildContext context) {
@@ -66,8 +70,9 @@ class HomeView extends StatelessWidget {
                     // const SizedBox(
                     //   height: 5,
                     // ),
-                    // const HomeScreenNavigationButton(
-                    //     route: IncrementalGameView(), text: "Incremental"),
+                    // HomeScreenNavigationButton(
+                    //   route: ExampleScreen(), text: "Stave Icon Test"),
+                    //   //route: IncrementalGameView(), text: "Incremental"),
                 ],
               ),
             ),

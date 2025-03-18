@@ -3,10 +3,12 @@ import 'package:flame/effects.dart';
 
 mixin Fadeable on PositionComponent {
   List<PositionComponent> get fadeableComponents;
+  List<PositionComponent> get noteComponents;
 
-  Future<void> fadeIn({double duration = 1.0}) async {
+  Future<void> fadeIn({double duration = 1.0, bool fadeNotes = false}) async {
     add(OpacityEffect.fadeIn(EffectController(duration: duration)));
-    for (var component in fadeableComponents) {
+    List<PositionComponent> componentsToFade = fadeNotes ? noteComponents : fadeableComponents;
+    for (var component in componentsToFade) {
       if (component is OpacityProvider) {
         component.add(OpacityEffect.fadeIn(EffectController(duration: duration)));
       }
@@ -18,9 +20,10 @@ mixin Fadeable on PositionComponent {
     }
   }
 
-  Future<void> fadeOut({double duration = 1.0}) async {
+  Future<void> fadeOut({double duration = 1.0, bool fadeNotes = false}) async {
     add(OpacityEffect.fadeOut(EffectController(duration: duration)));
-    for (var component in fadeableComponents) {
+    List<PositionComponent> componentsToFade = fadeNotes ? noteComponents : fadeableComponents;
+    for (var component in componentsToFade) {
       if (component is OpacityProvider) {
         component.add(OpacityEffect.fadeOut(EffectController(duration: duration)));
       }

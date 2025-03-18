@@ -23,6 +23,7 @@ class Tick extends PositionComponent{
 
   @override
   void update(double dt) {
+
     displayTime += dt;
     if (displayTime < showTime){
       image.opacity = 1;

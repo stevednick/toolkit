@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class NiceButton extends StatefulWidget {
   final Function() onPressed;
   final String text;
-  final ValueNotifier<bool> isActive = ValueNotifier(true);
+  ValueNotifier<bool> isActive = ValueNotifier(true);
 
   NiceButton({
     super.key,
@@ -20,6 +20,7 @@ class _NiceButtonState extends State<NiceButton> {
   @override
   void initState() {
     widget.isActive.addListener((){
+      print(widget.isActive.value);
       _updateButtonState();
     });
   

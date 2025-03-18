@@ -4,6 +4,7 @@
 
 list(APPEND FLUTTER_PLUGIN_LIST
   flutter_audio_capture
+  gtk
   pitch_detector_plus
   url_launcher_linux
 )

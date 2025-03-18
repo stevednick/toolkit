@@ -7,7 +7,7 @@ import 'package:toolkit/components/components.dart';
 import 'package:toolkit/models/models.dart';
 import 'package:toolkit/tools/tools.dart';
 
-import 'package:toolkit/game_modes/incremental_game/incremental_game.dart';
+import 'package:toolkit/game_modes/incremental_game_old/incremental_game.dart';
 
 class IncrementalGameScene extends FlameGame {
   final IncrementalGameController gameController;

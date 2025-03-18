@@ -152,6 +152,7 @@ class PongController {
   void nextBeat(int beat) {
     print("Next beat: $beat");
     if (beat == -2) {
+      
       changeNote(0);
       changeNote(1);
     }

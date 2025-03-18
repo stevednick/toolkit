@@ -18,16 +18,21 @@ class _TempoSelectorState extends State<TempoSelector> {
   late Tempo tempo = Tempo(key: widget.keyString);
   late NiceButton button;
 
-  @override
-  void initState() {
-    widget.isActive.addListener((){
-      button.isActive.value = widget.isActive.value;
-    });
-    setButton(_selectedTempo);
-    _loadSavedTempo();
-    super.initState();
-  }
+@override
+void initState() {
+  super.initState();
 
+  widget.isActive.addListener(() {
+    if (mounted) {
+      setState(() {
+        button.isActive.value = widget.isActive.value;
+      });
+    }
+  });
+
+  setButton(_selectedTempo);
+  _loadSavedTempo();
+}
   Future<void> _loadSavedTempo() async {
     _selectedTempo = await tempo.loadSavedTempo();
 
@@ -44,6 +49,7 @@ class _TempoSelectorState extends State<TempoSelector> {
           _showTempoMenu(context);
         },
       );
+      button.isActive.value = widget.isActive.value;
     });
   }
 

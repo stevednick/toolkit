@@ -3,15 +3,13 @@ import 'dart:async';
 import 'package:flame/components.dart';
 import 'package:toolkit/components/note/note.dart';
 import 'package:toolkit/components/stave/stave_clef.dart';
-import 'package:toolkit/components/stave/stave_key_signature.dart';
 import 'package:toolkit/components/stave/stave_lines.dart';
 import 'package:toolkit/components/stave/stave_note_changer.dart';
 import 'package:toolkit/components/stave/stave_position_manager.dart';
-import 'package:toolkit/models/key_signature/key_signature.dart';
 import 'package:toolkit/models/key_signature/key_signature_component.dart';
 import 'package:toolkit/models/key_signature/key_signature_note_modifier.dart';
 import 'package:toolkit/models/note_data.dart';
-import 'package:toolkit/models/player.dart';
+import 'package:toolkit/models/player/player.dart';
 import 'package:toolkit/tools/note_generator.dart';
 
 class Stave extends PositionComponent {

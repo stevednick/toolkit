@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:toolkit/localization/localization_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:toolkit/providers/language_provider.dart';
 
 class Transposition {
   final String name;
@@ -59,10 +59,8 @@ class Transposition {
         orElse: () => Transposition.f);
   }
 
-  String getLocalizedName(BuildContext context) {
-    // todo add major to name
-    final localization =
-        Provider.of<LocalizationProvider>(context, listen: false);
+    String getLocalizedName(WidgetRef ref) {
+    final localization = ref.read(languageProvider.notifier);
     return "Horn in ${localization.translate(name)} $octave";
   }
 }

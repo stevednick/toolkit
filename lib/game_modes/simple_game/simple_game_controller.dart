@@ -4,6 +4,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:toolkit/game_modes/simple_game/scoring/simple_game_score_manager.dart';
+import 'package:toolkit/game_modes/simple_game/timing/simple_game_timing_manager.dart';
 import 'package:toolkit/models/models.dart';
 import 'package:toolkit/tools/tools.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
@@ -23,6 +25,11 @@ class SimpleGameController {
   ValueNotifier<GameState> state = ValueNotifier(GameState.listening);
   bool showTempo = true;
 
+  bool timeTrialMode = true;
+
+  final SimpleGameScoreManager scoreManager = SimpleGameScoreManager();
+  final SimpleGameTimingManager timingManager = SimpleGameTimingManager();
+
   bool bigJumpsMode = false;
   Function() triggerTick;
 
@@ -39,6 +46,17 @@ class SimpleGameController {
     //
   }
 
+  void update(double dt) {
+    if (!timeTrialMode){
+      return;
+    }
+    if (timingManager.updateTimeAndCheckIfFinished(dt)){
+      gameMode.value = GameMode.waitingToStart;
+      gameText.value = "Game Over";
+      noteChecker.dispose();
+    }
+  }
+
   void correctNoteHeard() {
     if (state.value == GameState.listening) {
       changeNote();
@@ -51,7 +69,8 @@ class SimpleGameController {
 
   void startButtonPressed() {
     if (gameMode.value == GameMode.waitingToStart) {
-      player.score.value = 0;
+      
+      scoreManager.resetScore();
       gameText.value = "Play the note.";
       noteChecker.initialize();
       gameMode.value = GameMode.running;
@@ -86,7 +105,7 @@ class SimpleGameController {
   }
 
   void _incrementScore() {
-    player.score.value++;
+    scoreManager.addScore(1);
   }
 
   void dispose() {

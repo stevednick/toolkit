@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:toolkit/components/components.dart';
 import 'package:toolkit/models/models.dart';
 import 'package:toolkit/tools/tools.dart';
-import 'package:toolkit/tools/config.dart';
 
 class NoteIcon extends FlameGame {
 

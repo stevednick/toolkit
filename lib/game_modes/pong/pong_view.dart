@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:toolkit/game_modes/pong/pong_controller.dart';
 import 'package:toolkit/game_modes/pong/pong_scene_new.dart';
 import 'package:toolkit/models/models.dart';
-import 'package:toolkit/scenes/range_selection_scene/range_selection_scene.dart';
+import 'package:toolkit/scenes/range_selection/range_selection_scene.dart';
 import 'package:toolkit/widgets/widgets.dart';
 
 class PongView extends StatefulWidget {
@@ -27,15 +27,19 @@ class _PongViewState extends State<PongView>
   List<bool> showTicks = [false, false];
   late List<RangeSelectionScene> rangeSelectionScenes = [];
 
-  double width = 1000;
+  double sceneWidthRatio = 0.33;
 
   late PongScaleManager scaleManager;
 
   @override
   void initState() {
     super.initState();
-    
+
     initializeGameElements();
+  }
+
+  double scaledValue(double value) {
+    return value * scaleManager.scaleFactor();
   }
 
   Future<void> initializeGameElements() async {
@@ -56,7 +60,6 @@ class _PongViewState extends State<PongView>
       triggerTick(1);
     });
     pongScene = PongScene(gameController);
-    
   }
 
   void triggerTick(int side) {
@@ -80,6 +83,12 @@ class _PongViewState extends State<PongView>
     setState(() {});
   }
 
+  void reloadRangeSelection(int i) {
+    setState(() {
+      rangeSelectionScenes[i] = RangeSelectionScene(gameController.players[i]);
+    });
+  }
+
   Widget _buildGameWidgets() {
     return gameController.mode.value == GameMode.running ||
             gameController.mode.value == GameMode.countingDown
@@ -101,7 +110,9 @@ class _PongViewState extends State<PongView>
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           _buildRangeSelectionScene(0),
-          const SizedBox(width: 100),
+          SizedBox(
+            width: MediaQuery.sizeOf(context).width * 0.1,
+          ),
           _buildRangeSelectionScene(1),
         ],
       ),
@@ -110,7 +121,7 @@ class _PongViewState extends State<PongView>
 
   Widget _buildRangeSelectionScene(int playerIndex) {
     return SizedBox(
-      width: width / 3,
+      width: MediaQuery.sizeOf(context).width / 3,
       height: 500,
       child: GameWidget(
         game: rangeSelectionScenes[playerIndex],
@@ -131,9 +142,9 @@ class _PongViewState extends State<PongView>
       int playerIndex, Alignment alignment) {
     final player = gameController.players[playerIndex];
     return Positioned(
-      top: 30 * scaleManager.scaleFactor(),
-      left: alignment == Alignment.topLeft ? 40 * scaleManager.scaleFactor(): null,
-      right: alignment == Alignment.topRight ? 40 * scaleManager.scaleFactor(): null,
+      top: scaledValue(30),
+      left: alignment == Alignment.topLeft ? scaledValue(40) : null,
+      right: alignment == Alignment.topRight ? scaledValue(40) : null,
       child: Transform.scale(
         scale: scaleManager.scaleFactor(),
         child: gameController.mode.value == GameMode.waitingToStart ||
@@ -151,21 +162,23 @@ class _PongViewState extends State<PongView>
     return Stack(
       children: [
         Positioned(
-          bottom: 20 * scaleManager.scaleFactor(),
-          left: 30 * scaleManager.scaleFactor(),
+          bottom: scaledValue(20),
+          left: scaledValue(30),
           child: Transform.scale(
             scale: scaleManager.scaleFactor(),
-            child: EnhancedClefSelectionButton(
-                gameController.players[0], refreshScene),
+            child: EnhancedClefSelectionButton(gameController.players[0], () {
+              reloadRangeSelection(0);
+            }),
           ),
         ),
         Positioned(
-          bottom: 20 * scaleManager.scaleFactor(),
-          right: 30 * scaleManager.scaleFactor(),
+          bottom: scaledValue(20),
+          right: scaledValue(30),
           child: Transform.scale(
             scale: scaleManager.scaleFactor(),
-            child: EnhancedClefSelectionButton(
-                gameController.players[1], refreshScene),
+            child: EnhancedClefSelectionButton(gameController.players[1], () {
+              reloadRangeSelection(1);
+            }),
           ),
         ),
       ],
@@ -176,8 +189,8 @@ class _PongViewState extends State<PongView>
     return Stack(
       children: [
         Positioned(
-          bottom: 30 * scaleManager.scaleFactor(),
-          left: 170 * scaleManager.scaleFactor(),
+          bottom: scaledValue(30),
+          left: scaledValue(170),
           child: Visibility(
             visible: gameController.mode.value != GameMode.waitingToStart,
             child: Transform.scale(
@@ -189,8 +202,8 @@ class _PongViewState extends State<PongView>
           ),
         ),
         Positioned(
-          bottom: 30 * scaleManager.scaleFactor(),
-          right: 170 * scaleManager.scaleFactor(),
+          bottom: scaledValue(30),
+          right: scaledValue(170),
           child: Visibility(
             visible: gameController.mode.value != GameMode.waitingToStart,
             child: Transform.scale(
@@ -212,7 +225,7 @@ class _PongViewState extends State<PongView>
         return Align(
           alignment: const Alignment(0, -0.9),
           child: Transform.scale(
-            scale: scaleManager.scaleFactor(), 
+            scale: scaleManager.scaleFactor(),
             child: Text(
               gameController.gameText.value,
               style: playerTextStyle,
@@ -266,9 +279,10 @@ class _PongViewState extends State<PongView>
   }
 
   Widget _buildTempoSelectorButton() {
+    // todo finish transferring over to scaleValue();
     return Positioned(
-      left: 30 * scaleManager.scaleFactor(),
-      bottom: 70 * scaleManager.scaleFactor(),
+      left: scaledValue(30),
+      bottom: scaledValue(70),
       child: Transform.scale(
         scale: scaleManager.scaleFactor(),
         child: TempoSelector(
@@ -288,10 +302,10 @@ class _PongViewState extends State<PongView>
 
   @override
   Widget build(BuildContext context) {
-    width = MediaQuery.sizeOf(context).width;
+    double width = MediaQuery.sizeOf(context).width;
     scaleManager = PongScaleManager(width);
-    rangeSelectionScenes[0].setWidth(width);
-    rangeSelectionScenes[1].setWidth(width);
+    rangeSelectionScenes[0].setWidth(width / 3);
+    rangeSelectionScenes[1].setWidth(width / 3);
     pongScene.screenWidth = width;
     return Scaffold(
       backgroundColor: Colors.white,
@@ -313,13 +327,13 @@ class _PongViewState extends State<PongView>
   }
 }
 
-class PongScaleManager{
+class PongScaleManager {
   final double screenWidth;
   final double minimumAcceptableWidth = 800;
 
   PongScaleManager(this.screenWidth);
 
-  double scaleFactor(){
+  double scaleFactor() {
     return min(screenWidth / minimumAcceptableWidth, 1);
   }
 }

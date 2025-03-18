@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:toolkit/models/clef_selection.dart';
-import 'package:toolkit/models/player.dart';
+import 'package:toolkit/models/player/player.dart';
 
 class ClefSelectionButton extends StatefulWidget {
   final Player player;

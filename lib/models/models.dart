@@ -6,7 +6,7 @@ export 'clef_threshold.dart';
 export 'game_mode.dart';
 export 'instrument.dart';
 export 'note_data.dart';
-export 'player.dart';
+export 'player/player.dart';
 export 'range.dart';
 export '../tools/settings.dart';
 export 'tempo.dart';

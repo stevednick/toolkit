@@ -1,7 +1,7 @@
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import 'package:toolkit/models/models.dart';
-import 'package:toolkit/scenes/range_selection_scene/range_selection_scene.dart';
+import 'package:toolkit/scenes/range_selection/range_selection_scene.dart';
 
 class AdvancedOptionsView extends StatefulWidget {
   final Player player;
@@ -12,6 +12,11 @@ class AdvancedOptionsView extends StatefulWidget {
 }
 
 class _AdvancedOptionsViewState extends State<AdvancedOptionsView> {
+  late RangeSelectionScene rangeSelectionScene;
+  late double width;
+
+  _AdvancedOptionsViewState();
+
   Widget _buildMainText() {
     return const Align(
       alignment: Alignment.topCenter,
@@ -27,13 +32,13 @@ class _AdvancedOptionsViewState extends State<AdvancedOptionsView> {
 
   Widget _buildClefThresholdsScene() {
     return Center(
-      child: SizedBox(
-        width: 300,
-        height: 500,
-        child: GameWidget(
-            game: RangeSelectionScene(widget.player, isClefThresholds: true)),
+        child: SizedBox(
+      width: MediaQuery.sizeOf(context).width/3,
+      height: 500,
+      child: GameWidget(
+        game: rangeSelectionScene,
       ),
-    );
+    ));
   }
 
   Widget _buildBackButton() {
@@ -43,9 +48,12 @@ class _AdvancedOptionsViewState extends State<AdvancedOptionsView> {
     );
   }
 
-
   @override
   Widget build(BuildContext context) {
+    rangeSelectionScene =
+        RangeSelectionScene(widget.player, isClefThresholds: true);
+    width = MediaQuery.sizeOf(context).width; // todo add width back...
+    rangeSelectionScene.setWidth(width/3);
     return Scaffold(
       backgroundColor: Colors.white,
       body: Stack(

@@ -1,31 +1,28 @@
 import 'package:flame/events.dart';
 import 'package:flame/game.dart';
 import 'package:flame/input.dart';
+import 'package:toolkit/scenes/range_selection/range_selection_position_manager.dart';
 
 class DragHandler {
   final Function(bool isTop, bool up) onValueChange;
-  final List<Vector2> dragBoxStarts;
-  final Vector2 dragBoxSize;
+  final RangeSelectionPositionManager positionManager;
   final double dragCutOff;
-  final double clefOffset;
 
   List<bool> isDragging = [false, false];
   double dragValue = 0;
 
   DragHandler({
     required this.onValueChange,
-    required this.dragBoxStarts,
-    required this.dragBoxSize,
+    required this.positionManager,
     this.dragCutOff = 25,
-    this.clefOffset = 0,
   });
 
   void onVerticalDragStart(DragStartInfo info) {
     Vector2 pos = info.eventPosition.widget;
     for (var i = 0; i < 2; i++) {
-      if (pos.x > dragBoxStarts[i].x &&
-          pos.x < dragBoxStarts[i].x + dragBoxSize.x + (i == 1 ? clefOffset + 100 : 0)) {
-        if (pos.y > dragBoxStarts[i].y && pos.y < dragBoxStarts[i].y + dragBoxSize.y) {
+      if (pos.x > positionManager.dragBoxStart()[i].x &&
+          pos.x < positionManager.dragBoxStart()[i].x + positionManager.dragBoxSize().x) {
+        if (pos.y > positionManager.dragBoxStart()[i].y && pos.y < positionManager.dragBoxStart()[i].y + positionManager.dragBoxSize().y) {
           isDragging[i] = true;
           dragValue = 0;
         }

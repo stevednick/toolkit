@@ -1,69 +1,51 @@
 import 'package:flutter/material.dart';
-import 'package:toolkit/models/player.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:toolkit/models/player/player.dart';
 import 'package:toolkit/models/transposition.dart';
+import 'package:toolkit/providers/transposition_provider.dart';
 
-class TranspositionDropDown extends StatefulWidget {
+// The drop-down widget with Riverpod
+class TranspositionDropDown extends ConsumerWidget {
   final Player player;
 
   const TranspositionDropDown({super.key, required this.player});
 
   @override
-  State<TranspositionDropDown> createState() => TranspositionDropDownState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Read the current transposition from the provider
+    final currentTransposition = ref.watch(transpositionProvider);
 
-class TranspositionDropDownState extends State<TranspositionDropDown> {
-  late Future<Transposition> _futureCurrentTransposition;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadCurrentTransposition();
-  }
-
-  void _loadCurrentTransposition(){
-    _futureCurrentTransposition =
-        widget.player.selectedInstrument.loadCurrentTransposition();
-  }
-
-   void refresh() {
-    print("Drop Down Refreshed!");
-    setState(() {
-      _loadCurrentTransposition();
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return FutureBuilder<Transposition>(
-      future: _futureCurrentTransposition,
+    return FutureBuilder<void>(
+      future: ref.read(transpositionProvider.notifier).loadCurrentTransposition(player),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const CircularProgressIndicator();
+          return const Center(child: CircularProgressIndicator());
         } else if (snapshot.hasError) {
-          return Text('Error: ${snapshot.error}');
-        } else if (snapshot.hasData) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        } else if (snapshot.connectionState == ConnectionState.done) {
           return DropdownMenu<Transposition>(
             enableFilter: false,
             enableSearch: false,
-            initialSelection: snapshot.data,
+            initialSelection: currentTransposition,
             requestFocusOnTap: false,
             onSelected: (Transposition? newKey) {
-              setState(() {
-                widget.player.saveInstrumentAndTransposition(newKey!);
-              });
+              if (newKey != null) {
+                ref.read(transpositionProvider.notifier).setTransposition(newKey, player);
+                player.saveInstrumentAndTransposition(newKey);
+              }
             },
-            dropdownMenuEntries: widget
-                .player.selectedInstrument.availableTranspositions
+            dropdownMenuEntries: player.selectedInstrument.availableTranspositions
                 .map<DropdownMenuEntry<Transposition>>(
-                    (Transposition key) {
-              return DropdownMenuEntry<Transposition>(
-                value: key,
-                label: key.getLocalizedName(context),
-              );
-            }).toList(),
+                  (Transposition key) {
+                    return DropdownMenuEntry<Transposition>(
+                      value: key,
+                      label: key.getLocalizedName(ref),
+                    );
+                  },
+                ).toList(),
           );
         } else {
-          return const Text('No transpositions available');
+          return const Center(child: Text('No transpositions available'));
         }
       },
     );

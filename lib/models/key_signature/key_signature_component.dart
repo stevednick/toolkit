@@ -1,4 +1,5 @@
 import 'package:flame/components.dart';
+import 'package:flame/effects.dart';
 import 'package:toolkit/models/asset.dart';
 import 'package:toolkit/models/clef.dart';
 import 'package:toolkit/models/key_signature/key_signature.dart';
@@ -6,7 +7,7 @@ import 'package:toolkit/models/key_signature/key_signature_builder_data.dart';
 import 'package:toolkit/tools/config.dart';
 import 'package:logging/logging.dart';
 
-class KeySignatureComponent extends PositionComponent {
+class KeySignatureComponent extends PositionComponent implements OpacityProvider {
   static const double ACCIDENTAL_SPACING = 27;
   static const int BASS_CLEF_OFFSET = 14;
   
@@ -71,6 +72,29 @@ class KeySignatureComponent extends PositionComponent {
         if (asset is Asset) {
           asset.isVisible = isVisible;
           _logger.info('Set visibility of ${component.runtimeType} to $isVisible');
+        }
+      }
+    }
+  }
+
+  double _opacity = 1;
+
+  @override
+  double get opacity => _opacity;
+
+  @override
+  set opacity(double value) {
+    _opacity = value;
+    _setOpacity(trebleHolder, value);
+    _setOpacity(bassHolder, value);
+  }
+
+  void _setOpacity(PositionComponent holder, double opacity) {
+    for (var component in holder.children) {
+      for (var asset in component.children) {
+        if (asset is Asset) {
+          asset.opacity = opacity;
+          _logger.info('Set opacity of ${component.runtimeType} to $opacity');
         }
       }
     }

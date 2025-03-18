@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:toolkit/models/player.dart';
+import 'package:toolkit/models/player/player.dart';
 
 class ScoreText extends StatelessWidget {
   const ScoreText({super.key, required this.player});

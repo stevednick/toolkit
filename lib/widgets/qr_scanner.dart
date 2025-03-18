@@ -3,7 +3,8 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:toolkit/game_modes/simple_game/game_options.dart';
 import 'package:toolkit/models/clef_selection.dart';
 import 'package:toolkit/models/note_data.dart';
-import 'package:toolkit/models/player.dart';
+import 'package:toolkit/models/player/options_saver.dart';
+import 'package:toolkit/models/player/player.dart';
 import 'package:toolkit/models/transposition.dart';
 import 'package:toolkit/widgets/nice_button.dart';
 import 'dart:convert';
@@ -12,6 +13,7 @@ class QrScanner extends StatefulWidget {
   const QrScanner({super.key, required this.player});
 
   final Player player;
+  
 
   @override
   State<QrScanner> createState() => _QrScannerState();
@@ -21,11 +23,13 @@ class _QrScannerState extends State<QrScanner> {
   GameOptions? gameOptions;
   MobileScannerController? _controller;
   bool dataSeen = false;
+  late OptionsSaver optionsSaver;
 
   @override
   void initState() {
     super.initState();
     _controller = MobileScannerController();
+    optionsSaver = OptionsSaver(widget.player);
   }
 
   @override
@@ -35,31 +39,14 @@ class _QrScannerState extends State<QrScanner> {
   }
 
   Future<void> saveOptions(GameOptions options) async {
-    try {
-      widget.player.clefSelection = ClefSelection.values[options.cS];
-      for (int i = 0; i < options.nS.length; i++) {
-        NoteData.octave[i].isActive = options.nS[i];
-        await NoteData.octave[i].saveIsActive();
-      }
-      await widget.player.clefThreshold
-        ..trebleClefThreshold = options.tCT
-        ..bassClefThreshold = options.bCT
-        ..saveValues();
-      await widget.player.range
-        ..top = options.t
-        ..bottom = options.b
-        ..saveValues();
-      await widget.player.saveKeySignature(options.kS);
-      await widget.player.saveInstrumentAndTransposition(
-        Transposition.getByName(options.tr) ?? widget.player.selectedInstrument.currentTransposition,
-      );
+    if(await optionsSaver.saveOptions(options)) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Options saved successfully'), backgroundColor: Colors.green),
       );
-    } catch (error) {
-      print("Error saving options: $error");
+    } else {
+      print("Error saving options");
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error saving options: $error'), backgroundColor: Colors.red),
+        SnackBar(content: Text('Error saving options.'), backgroundColor: Colors.red),
       );
     }
   }

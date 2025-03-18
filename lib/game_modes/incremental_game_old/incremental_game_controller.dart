@@ -3,9 +3,9 @@ import 'dart:math';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:toolkit/game_modes/incremental_game/models/incremental_formulas.dart';
-import 'package:toolkit/game_modes/incremental_game/models/models.dart';
-import 'package:toolkit/game_modes/incremental_game/models/unlockable_note.dart';
+import 'package:toolkit/game_modes/incremental_game_old/models/incremental_formulas.dart';
+import 'package:toolkit/game_modes/incremental_game_old/models/models.dart';
+import 'package:toolkit/game_modes/incremental_game_old/models/unlockable_note.dart';
 import 'package:toolkit/models/models.dart';
 import 'package:toolkit/tools/tools.dart';
 

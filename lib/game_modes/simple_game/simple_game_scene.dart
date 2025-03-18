@@ -79,13 +79,14 @@ class SimpleGameScene extends FlameGame {
     stave = Stave(gameController.player, width/screenWidthRatio,
         showGhostNotes: stateManager.showGhostNotes);
     world.add(stave);
+    bouncyBall.position = Vector2(stave.positionManager.notePosition().x + 30, -55); 
   }
 
   Future<void> buildAllElements() async {
     world.add(tick);
     tick.position = Vector2(250, -90);
     currentNoteData = gameController.currentNote.value;
-    bouncyBall.position = positionManager.bouncyBallPosition();
+
     world.add(bouncyBall);
     bouncyBall.isVisible = stateManager.showBall;
   }
@@ -108,6 +109,7 @@ class SimpleGameScene extends FlameGame {
       gameTime += dt; // todo extract this timing shit.
       while (gameTime > beatSeconds) {
         gameTime -= beatSeconds;
+        bouncyBall.bounce();
       }
       if (gameTime < 0) {
         gameTime = 0;
@@ -118,6 +120,7 @@ class SimpleGameScene extends FlameGame {
 
   @override
   void update(double dt) {
+    gameController.update(dt);
     changeNote();
     updateBallPosition(dt);
     super.update(dt);
@@ -140,6 +143,6 @@ class PositionManager {
   PositionManager(this.stateManager);
 
   Vector2 bouncyBallPosition() {
-    return Vector2(120, -70);
+    return Vector2(130, -50);
   }
 }

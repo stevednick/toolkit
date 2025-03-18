@@ -4,6 +4,7 @@ import 'package:flame/components.dart';
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import 'package:toolkit/components/stave/stave.dart';
+import 'package:toolkit/components/tick.dart';
 import 'package:toolkit/game_modes/pong/pong_ball.dart';
 import 'package:toolkit/game_modes/pong/pong_controller.dart';
 
@@ -14,12 +15,20 @@ class PongScene extends FlameGame{
 
   late List<Stave> staves;
 
+  final List<Vector2> tickPositions = [
+    Vector2(-120, -120),
+    Vector2(80, -120),
+  ];
+
   PongBall pongBall = PongBall();
+
+  Tick tick = Tick();
 
   PongScene(this.gameController){
     addStaves();
     addListeners();
     addPongBall();
+    addTick();
   }
 
   @override
@@ -37,15 +46,18 @@ class PongScene extends FlameGame{
   }
 
   void addListeners(){
-    print("Adding listeners");
-    gameController.players[0].currentNote.addListener(() {
-      print("Note changed");
-      staves[0].changeNote(gameController.players[0].currentNote.value, 0.4);
-      
-    });
-    gameController.players[1].currentNote.addListener(() {
-      staves[1].changeNote(gameController.players[1].currentNote.value, 0.4);
-    });
+    for (int i = 0; i < gameController.players.length; i++) {
+      gameController.players[i].currentNote.addListener(() {
+        staves[i].changeNote(
+          gameController.players[i].currentNote.value,
+          0.4,
+        );
+      });
+      gameController.players[i].score.addListener(() {
+        tick.position = tickPositions[i];
+        tick.showTick();
+      });
+    }
   }
 
   Future<void> addStaves() async {
@@ -59,6 +71,11 @@ class PongScene extends FlameGame{
   void addPongBall(){
     world.add(pongBall);
     pongBall.position = Vector2(-160, -70);
+  }
+
+  void addTick(){
+    world.add(tick);
+    tick.position = tickPositions[0];
   }
 
   @override

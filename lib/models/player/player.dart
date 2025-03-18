@@ -9,7 +9,7 @@ import 'package:toolkit/models/key_signature/key_signatures.dart';
 import 'package:toolkit/models/note_data.dart';
 import 'package:toolkit/models/range.dart';
 
-import 'transposition.dart';
+import '../transposition.dart';
 
 class Player {
   final String playerKey;
