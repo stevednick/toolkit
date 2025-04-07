@@ -23,7 +23,7 @@ class ClefSelectionButtonState extends State<ClefSelectionButton> {
   }
 
   Future<void> setMode() async {
-    print("Set Mode called");
+    //print("Set Mode called");
     ClefSelection selection = await widget.player.getClefSelection();
     setState(() {
       mode = (ClefSelection.values.indexOf(selection));

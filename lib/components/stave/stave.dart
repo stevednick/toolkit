@@ -101,7 +101,7 @@ class Stave extends PositionComponent {
     NoteData d = noteGenerator.noteFromNumber(num, currentNoteData.clef);
     d = keySignatureNoteModifier.modifyNote(d, ghostNote: true); 
 
-    print("$num, $noteToCheck");
+    //("$num, $noteToCheck");
     if (num == noteToCheck) {
       d = currentNoteData;
     }

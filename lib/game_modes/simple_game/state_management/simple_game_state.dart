@@ -1,6 +1,5 @@
 import 'package:toolkit/game_modes/simple_game/simple_game_controller.dart';
 import 'package:toolkit/models/game_mode.dart';
-import 'package:toolkit/models/player/player.dart';
 
 class SimpleGameState {
 

@@ -24,7 +24,7 @@ class StaveClef extends PositionComponent {
   Future<void> changeClef(
       NoteData currentNoteData, NoteData newNote) async {
     if (clefChanges(currentNoteData, newNote)) {
-      print('Clef changed');
+      //print('Clef changed');
       bassClefSprite.isVisible = newNote.clef.name == 'Bass';
       trebleClefSprite.isVisible = newNote.clef.name == 'Treble';
     }

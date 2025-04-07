@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:toolkit/game_modes/simple_game/scoring/simple_game_score_manager.dart';
 import 'package:toolkit/game_modes/simple_game/state_management/score_state_manager.dart';
 import 'package:toolkit/game_modes/simple_game/state_management/simple_game_state_manager.dart';
 import 'package:toolkit/game_modes/simple_game/state_management/timer_state_manager.dart';
@@ -19,14 +18,15 @@ class SimpleGameController {
   late TimerStateManager timerStateManager;
 
   ValueNotifier<NoteData> currentNote =
-      ValueNotifier<NoteData>(NoteData.placeholderValue);
-  final NoteGenerator noteGenerator = NoteGenerator();
+      ValueNotifier<NoteData>(NoteData.placeholderValue); // Where?
+  final NoteGenerator noteGenerator =
+      NoteGenerator(); // Think about all this shit...
   late NoteChecker noteChecker;
-  late Player player;
-  final String playerKey = "SimpleTestKey";
-  //ValueNotifier<String> gameText = ValueNotifier("Set your range.");
-  //ValueNotifier<String> feedbackText = ValueNotifier("");
-  Duration waitDuration = const Duration(milliseconds: 500);
+  late Player player; // Deconstruct + sort elements.
+  final String playerKey =
+      "SimpleTestKey"; // Need master key for all game elements,
+  Duration waitDuration =
+      const Duration(milliseconds: 500); // Animation stuff in scene?
 
   bool showTempo = true;
 
@@ -42,7 +42,7 @@ class SimpleGameController {
     player = Player(playerKey: playerKey);
     noteChecker = NoteChecker(
       correctNoteHeard,
-      noteFeedback,
+      noteFeedback, // Redundant atm?
     );
   }
 
@@ -51,19 +51,36 @@ class SimpleGameController {
   }
 
   void update(double dt) {
+    // Manage ball and game timing from where?
     // Delay the state update after the frame is rendered
+    if (ref.read(simpleGameStateProvider).gameMode != GameMode.running && ref.read(simpleGameStateProvider).gameMode != GameMode.countingDown) return;
     if (!ref.read(simpleGameStateProvider).isTimeTrialMode) return;
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       timerStateManager.decrementTime(dt);
+      if (ref.read(simpleGameStateProvider).gameMode == GameMode.countingDown) {
+        gameStateManager.setGameText(
+            "${ref.read(timerStateProvider).timeRemaining.toInt() + 1}");
+      }
       if (ref.read(timerStateProvider).timeRemaining <= 0) {
-        gameStateManager.setGameMode(GameMode.waitingToStart);
-        gameStateManager.setGameText("Game Over");
-        noteChecker.dispose();
+        if (ref.read(simpleGameStateProvider).gameMode ==
+            GameMode.countingDown) {
+          gameStateManager.setGameText("Play the Note.");
+          ref.read(timerStateProvider.notifier).resetTime();
+          gameStateManager.setGameMode(GameMode.running);
+          noteChecker.initialize();
+
+        } else {
+          gameStateManager.setGameMode(GameMode.finished);
+          gameStateManager.setGameText("Game Over");
+          noteChecker.dispose();
+        }
       }
     });
   }
 
   void correctNoteHeard() {
+    // Where tp house this stuff?
     if (ref.read(simpleGameStateProvider).gameState == GameState.listening) {
       changeNote();
       triggerTick();
@@ -71,19 +88,29 @@ class SimpleGameController {
       _waitAndChangeNote();
       gameStateManager.setGameState(GameState.correctNoteHeard);
       timerStateManager.addTime(2);
-      
     }
   }
 
   void startButtonPressed() {
+    // ??
     if (ref.read(simpleGameStateProvider).gameMode == GameMode.waitingToStart) {
       gameStateManager.reset();
-      timerStateManager.resetTime();
+      ref.read(simpleGameScoreProvider.notifier).reset();
       gameStateManager.setGameText("Play the note.");
-      noteChecker.initialize();
-      gameStateManager.setGameMode(GameMode.running);
+      
+      if (ref.read(simpleGameStateProvider).isTimeTrialMode) {
+        gameStateManager.setGameMode(GameMode.countingDown);
+        timerStateManager.startCountdown();
+      } else {
+        gameStateManager.setGameMode(GameMode.running);
+        timerStateManager.resetTime();
+        noteChecker.initialize();
+
+      }
+
       //changeNote();
-    } else if (ref.read(simpleGameStateProvider).gameMode == GameMode.running) {
+    } else if (ref.read(simpleGameStateProvider).gameMode == GameMode.running ||
+        ref.read(simpleGameStateProvider).gameMode == GameMode.finished) {
       gameStateManager.setGameMode(GameMode.waitingToStart);
       gameStateManager.setGameText("Set your range.");
       noteChecker.dispose();
@@ -95,6 +122,7 @@ class SimpleGameController {
   }
 
   void _waitAndChangeNote() {
+    // ??
     Timer(waitDuration, () {
       gameStateManager.setGameState(GameState.fadingIn);
       Timer(waitDuration, () {
@@ -104,6 +132,7 @@ class SimpleGameController {
   }
 
   void changeNote() {
+    // ??
     player.currentNote.value =
         noteGenerator.randomNoteFromRange(player, bigJumps: bigJumpsMode);
     noteChecker.noteToCheck = player.getNoteToCheck();
@@ -120,6 +149,7 @@ class SimpleGameController {
   }
 
   NoteData getNoteDataFromPlayer() {
+    // ?
     return player.currentNote.value;
   }
 }

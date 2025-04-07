@@ -6,10 +6,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:toolkit/game_modes/home_screen/advanced_options_view.dart';
 import 'package:toolkit/game_modes/home_screen/note_selector_view.dart';
 import 'package:toolkit/game_modes/simple_game/game_options.dart';
+import 'package:toolkit/game_modes/simple_game/game_over_popup.dart';
 import 'package:toolkit/game_modes/simple_game/load_and_save_view.dart';
+import 'package:toolkit/game_modes/simple_game/scoring/difficulty_manager.dart';
+import 'package:toolkit/game_modes/simple_game/scoring/score_displayer.dart';
 import 'package:toolkit/game_modes/simple_game/simple_game_controller.dart';
 import 'package:toolkit/game_modes/simple_game/simple_game_scene.dart';
+import 'package:toolkit/game_modes/simple_game/state_management/score_state_manager.dart';
 import 'package:toolkit/game_modes/simple_game/state_management/simple_game_state_manager.dart';
+import 'package:toolkit/game_modes/simple_game/state_management/single_game_high_scores_manager.dart';
+import 'package:toolkit/game_modes/simple_game/state_management/timer_state_manager.dart';
+import 'package:toolkit/game_modes/simple_game/time_trial_intro_popup.dart';
 import 'package:toolkit/game_modes/simple_game/widgets/simple_game_key_signature_dropdown.dart';
 import 'package:toolkit/game_modes/simple_game/widgets/simple_game_main_text.dart';
 import 'package:toolkit/game_modes/simple_game/widgets/simple_game_score_text.dart';
@@ -17,7 +24,6 @@ import 'package:toolkit/game_modes/simple_game/widgets/simple_game_timing_text.d
 import 'package:toolkit/game_modes/simple_game/widgets/simple_game_transposition_dropdown.dart';
 import 'package:toolkit/models/models.dart';
 import 'package:toolkit/scenes/range_selection/range_selection.dart';
-import 'package:toolkit/widgets/key_signature_dropdown.dart';
 import 'package:toolkit/widgets/widgets.dart';
 
 class SimpleGameView extends ConsumerStatefulWidget {
@@ -28,13 +34,23 @@ class SimpleGameView extends ConsumerStatefulWidget {
 }
 
 class _SimpleGameViewState extends ConsumerState<SimpleGameView> {
-  final ProviderContainer container = ProviderContainer();
+  //final ProviderContainer container = ProviderContainer();
   late final SimpleGameController gameController;
   late SimpleGameScene scene;
   late RangeSelectionScene rangeSelectionScene;
+
   late final EnhancedClefSelectionButton clefSelectionButton;
 
-  late final TempoSelector tempoSelector;
+  late final DifficultyManager difficultyManager; // Does this need to be here?
+
+  final GlobalKey<TimeTrialIntroPopupState> timeTrialPopupKey = GlobalKey();
+  late final TimeTrialIntroPopup timeTrialIntroPopup;
+
+  bool _hasGameOverBeenShown = false;
+
+  //bool _resetHighScorePressed = false;
+
+  late final TempoSelector tempoSelector; 
 
   late double width;
 
@@ -44,6 +60,8 @@ class _SimpleGameViewState extends ConsumerState<SimpleGameView> {
   // late GlobalKey<KeySignatureDropdownState> _keyDropDownKey;
   final GlobalKey<EnhancedClefSelectionButtonState> _clefButtonKey =
       GlobalKey();
+
+
   late final NiceButton clefThresholdsButton = NiceButton(
     text: "Clef Thresholds",
     onPressed: () {
@@ -57,7 +75,7 @@ class _SimpleGameViewState extends ConsumerState<SimpleGameView> {
     },
   );
 
-  GameOptions? gameOptions;
+  GameOptions? gameOptions; // Can this move? 
 
   bool showTick = false;
 
@@ -68,27 +86,85 @@ class _SimpleGameViewState extends ConsumerState<SimpleGameView> {
       onTempoChanged: (int newTempo) {},
       keyString: 'simple_game_tempo',
     );
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {  // What about this?
       await Future.delayed(Duration(milliseconds: 10)); // Short delay
       ref
           .read(simpleGameStateProvider.notifier)
           .setIsTimeTrialMode(widget.isTimeTrialMode);
     });
+    timeTrialIntroPopup = TimeTrialIntroPopup(key: timeTrialPopupKey); // Modify popup for Simple Game as well. 
     gameController = SimpleGameController(triggerTick, ref);
     scene = SimpleGameScene(gameController, ref);
-    rangeSelectionScene = RangeSelectionScene(gameController.player);
-    // _dropdownKey = GlobalKey<TranspositionDropDownState>();
-    // _keyDropDownKey = GlobalKey<KeySignatureDropdownState>();
+    rangeSelectionScene = RangeSelectionScene(gameController.player); 
     clefSelectionButton =
-        EnhancedClefSelectionButton(gameController.player, refreshScene);
+        EnhancedClefSelectionButton(gameController.player, refreshScene); 
     setTempoSelector();
     setClefThresholdsButton();
+    difficultyManager = DifficultyManager(player: gameController.player); // 
+    //testGetDifficulty();
+  }
+
+  // Future<void> testGetDifficulty() async {
+  //   final d = await difficultyManager.calculateDifficulty();
+  //   print("d: $d");
+  // }
+
+  Future<void> showGameOverDialog() async {
+    final difficulty = await difficultyManager.calculateDifficulty();
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return GameOverPopup(
+          notesPlayed: ref.read(simpleGameScoreProvider).score.toInt(),
+          difficultyLevel: difficulty,
+          onPlayAgain: () {
+            Navigator.of(context).pop();
+            restartGameFromGameOverScreen();
+          },
+          onExit: () {
+            Navigator.of(context).pop();
+            backToMenuFromGameOverScreen();
+          },
+        );
+      },
+    );
+  }
+
+  void restartGameFromGameOverScreen() {  // Can these be tidied/simplified?
+    setState(() {
+      ref.read(simpleGameScoreProvider.notifier).reset();
+      ref.read(simpleGameStateProvider.notifier).reset();
+      _hasGameOverBeenShown = false;
+      scene.onDispose();
+      scene = SimpleGameScene(gameController, ref);
+      gameController.startButtonPressed();
+    });
+  }
+
+  void backToMenuFromGameOverScreen() {
+    setState(() {
+      //gameController.startButtonPressed();
+      ref.read(simpleGameScoreProvider.notifier).reset();
+      ref.read(simpleGameStateProvider.notifier).reset();
+      ref.read(timerStateProvider.notifier).resetTime();
+      scene.onDispose();
+      scene = SimpleGameScene(gameController, ref);
+    });
+  }
+
+  void endGame() {
+    gameController.startButtonPressed();
+    scene.onDispose();
+    scene = SimpleGameScene(gameController, ref);
   }
 
   Future<void> setTempoSelector() async {
-    tempoSelector.isActive.value = true; // Temp fix to just leave it on..
-    // tempoSelector.isActive.value = await Settings.getSetting(Settings.tempoKey);
-    // print("Tempo Selector is active: ${tempoSelector.isActive.value}");
+    setState(
+      () {
+        tempoSelector.isActive.value = true;
+      },
+    );
   }
 
   Future<void> setClefThresholdsButton() async {
@@ -101,7 +177,6 @@ class _SimpleGameViewState extends ConsumerState<SimpleGameView> {
   }
 
   Future<void> fetchGameOptions() async {
-    final provider = ref.watch(simpleGameStateProvider);
     ClefSelection clefSelection =
         await gameController.player.getClefSelection();
     List<bool> noteActivations =
@@ -151,8 +226,63 @@ class _SimpleGameViewState extends ConsumerState<SimpleGameView> {
     super.dispose();
   }
 
+  Future<void> _showResetHighScoreDialog() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Reset High Score?'),
+          content: const Text('This cannot be undone!'),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('No'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('Yes'),
+              onPressed: () {
+                final SingleGameHighScoresManager highScoresManager = SingleGameHighScoresManager();
+                setState(() {
+                  highScoresManager.resetScores();
+                });
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildHighScoreResetButton() {
+    return NiceButton(
+        onPressed: () async {
+          await _showResetHighScoreDialog();
+        },
+        text: "Reset Score");
+  }
+
+Widget _buildHighScoreText() {
+  final ScoreDisplayer displayer = ScoreDisplayer();
+  final SingleGameHighScoresManager highScoresManager = SingleGameHighScoresManager();
+  
+  return FutureBuilder(
+    future: highScoresManager.init(),
+    builder: (context, snapshot) {
+      if (snapshot.connectionState == ConnectionState.waiting) {
+        return Text("High Score: Loading...");
+      }
+      return Text(
+        "High ${displayer.displayScore(highScoresManager.bestScore)}",
+        style: TextStyle(fontSize: 16),
+      );
+    },
+  );
+}
   Widget _buildLoadSaveButton() {
-    final provider = ref.watch(simpleGameStateProvider);
     return NiceButton(
       onPressed: () async {
         await fetchGameOptions();
@@ -195,7 +325,6 @@ class _SimpleGameViewState extends ConsumerState<SimpleGameView> {
   }
 
   Widget _buildClefSelectionButton() {
-    final provider = ref.watch(simpleGameStateProvider);
     return EnhancedClefSelectionButton(
       key: _clefButtonKey,
       gameController.player,
@@ -217,10 +346,8 @@ class _SimpleGameViewState extends ConsumerState<SimpleGameView> {
                 text: gameMode == GameMode.waitingToStart ? "Start" : "End",
                 onPressed: () {
                   setState(() {
-                    scene.onDispose();
-                    scene = SimpleGameScene(gameController, ref);
-                    gameController.startButtonPressed();
-                    //setClefThresholdsButton();
+                    _hasGameOverBeenShown = false;
+                    endGame();
                   });
                 },
               ),
@@ -323,6 +450,20 @@ class _SimpleGameViewState extends ConsumerState<SimpleGameView> {
     );
   }
 
+  Widget _buildInfoButton() {
+    return Positioned(
+      bottom: 3,
+      right: 170,
+      child: IconButton(
+          onPressed: () async {
+            setState(() {
+              timeTrialPopupKey.currentState?.openPopup();
+            });
+          },
+          icon: const Icon(Icons.help_outline)),
+    );
+  }
+
   Widget _buildSettingsButtons() {
     return Stack(
       children: [
@@ -332,6 +473,16 @@ class _SimpleGameViewState extends ConsumerState<SimpleGameView> {
             mainAxisAlignment: MainAxisAlignment.end,
             mainAxisSize: MainAxisSize.max,
             children: [
+              if (ref.watch(simpleGameStateProvider).isTimeTrialMode) ...[
+                _buildHighScoreText(),
+                const SizedBox(
+                  height: 5,
+                ),
+                _buildHighScoreResetButton(),
+                const SizedBox(
+                  height: 5,
+                ),
+              ],
               _buildBigJumpSwitch(),
               const SizedBox(
                 height: 5,
@@ -340,11 +491,13 @@ class _SimpleGameViewState extends ConsumerState<SimpleGameView> {
               const SizedBox(
                 height: 5,
               ),
-              _buildTempoOnButton(),
-              const SizedBox(
-                height: 5,
-              ),
-              _buildTempoSelectorButton(),
+              if (!ref.watch(simpleGameStateProvider).isTimeTrialMode) ...[
+                _buildTempoOnButton(),
+                const SizedBox(
+                  height: 5,
+                ),
+                _buildTempoSelectorButton(),
+              ]
             ],
           ),
         ),
@@ -379,6 +532,16 @@ class _SimpleGameViewState extends ConsumerState<SimpleGameView> {
   @override
   Widget build(BuildContext context) {
     final gameMode = ref.watch(simpleGameStateProvider).gameMode;
+
+    // Listen for the game over state
+    if (gameMode == GameMode.finished && !_hasGameOverBeenShown) {
+      // Show the game over popup or screen
+      _hasGameOverBeenShown = true;
+      Future.delayed(Duration.zero, () {
+        showGameOverDialog();
+      });
+    }
+
     width = MediaQuery.sizeOf(context).width; // todo add width back...
     rangeSelectionScene.setWidth(width * screenWidthRatio);
     scene.width = width;
@@ -391,15 +554,23 @@ class _SimpleGameViewState extends ConsumerState<SimpleGameView> {
           SimpleGameScoreText(),
           SimpleGameMainText(),
           SimpleGameTranspositionDropdown(player: gameController.player),
-          if (gameMode == GameMode.waitingToStart) SimpleGameKeySignatureDropdown(player: gameController.player, onChanged: (){
-            setState(() {
-               rangeSelectionScene = RangeSelectionScene(gameController.player);
-            });
-          }),
+          if (gameMode == GameMode.waitingToStart)
+            SimpleGameKeySignatureDropdown(
+                player: gameController.player,
+                onChanged: () {
+                  setState(() {
+                    rangeSelectionScene =
+                        RangeSelectionScene(gameController.player);
+                  });
+                }),
           if (gameMode == GameMode.waitingToStart) _buildSettingsButtons(),
           _buildStartButton(),
           //_buildTickAndFeedbackText(),
           _buildBackButton(),
+          if (ref.watch(simpleGameStateProvider).isTimeTrialMode)
+            timeTrialIntroPopup,
+          if (ref.watch(simpleGameStateProvider).isTimeTrialMode)
+            _buildInfoButton(),
         ],
       ),
     );

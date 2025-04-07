@@ -27,8 +27,8 @@ class Player {
     clefSelection = ClefSelection.treble; // Default to treble
     loadKeySignature();
     loadRange();
-    _loadInstrumentAndTransposition();
-    print('Player created with key: $playerKey');
+    loadInstrumentAndTransposition();
+    //('Player created with key: $playerKey');
   }
 
   Future<KeySignature> loadKeySignature() async {
@@ -57,7 +57,7 @@ class Player {
     }
   }
 
-  Future<bool> _loadInstrumentAndTransposition() async {
+  Future<bool> loadInstrumentAndTransposition() async {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
 
@@ -113,7 +113,7 @@ class Player {
   }
 
   Future<ClefSelection> getClefSelection() async{
-    await _loadInstrumentAndTransposition();
+    await loadInstrumentAndTransposition();
     return clefSelection;
   }
 

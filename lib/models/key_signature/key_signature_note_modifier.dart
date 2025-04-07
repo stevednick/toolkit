@@ -17,7 +17,7 @@ class KeySignatureNoteModifier {
 
   NoteData modifyNote(NoteData note,
       {bool rangeSelection = false, bool ghostNote = false}) {
-        print("Note: $note");
+        //print("Note: $note");
     for (int i = 0; i < key.sharps; i++) {
       if (NoteData.wrapAround(note.noteNum, 12) == sharpModifiers[i]) {
         if (note.accidental != Accidental.sharp) {

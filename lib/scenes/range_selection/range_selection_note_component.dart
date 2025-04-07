@@ -35,8 +35,8 @@ class RangeSelectionNoteComponent extends PositionComponent{
   }
 
   Vector2 noteOffset(List<NoteData> noteData, int i){
-    print(noteData[0].clef.name);
-    print(noteData[1].clef.name);
+    // print(noteData[0].clef.name);
+    // print(noteData[1].clef.name);
     if (i == 1) {
         return (noteData[0].clef.name != noteData[1].clef.name)
             ? Vector2(positionManager.clefOffset(), 0)

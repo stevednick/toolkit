@@ -13,30 +13,30 @@ import 'package:toolkit/tools/tools.dart';
 
 class SimpleGameScene extends FlameGame {
   late SimpleGameStateManager gameStateManager;
-  final SimpleGameController gameController;
+  final SimpleGameController gameController;  // can this be removed altogether?
   final GameStateManager stateManager = GameStateManager();
 
   final NoteGenerator noteGenerator = NoteGenerator();
 
   bool loadComplete = false;
 
-  NoteData currentNoteData = NoteData.placeholderValue;
-  late NoteData nextNote;
-  bool noteChangeQueued = false;
+  NoteData currentNoteData = NoteData.placeholderValue;  // Tgis needs to move to state Manager
+  late NoteData nextNote; // ?
+  bool noteChangeQueued = false; // ?
 
-  late Stave stave;
+  late Stave stave; // Stays
 
   double width = 1000;
   double screenWidthRatio = 3;
 
-  late PositionManager positionManager;
+  late PositionManager positionManager; // ?
 
   Tick tick = Tick();
 
   final BouncyBall bouncyBall = BouncyBall();
-  Tempo tempo = Tempo(key: 'simple_game_tempo');
-  double beatSeconds = 1000;
-  double gameTime = 0;
+  Tempo tempo = Tempo(key: 'simple_game_tempo'); // Move
+  double beatSeconds = 1000; // Move
+  double gameTime = 0; // Move
 
   bool fadeClef = false;
   bool initialNoteLoaded = false;
@@ -53,35 +53,31 @@ class SimpleGameScene extends FlameGame {
   @override
   FutureOr<void> onLoad() async {
     await super.onLoad();
-    gameController.player.currentNote.addListener(() {
+    gameController.player.currentNote.addListener(() { // Extract
       if (!initialNoteLoaded) {
         queueNewNote(gameController.player.currentNote.value);
         initialNoteLoaded = true;
       }
     });
-    // gameController.state.addListener(() {
-    //   if (gameController.state.value == GameState.correctNoteHeard) {
-
-    //   }
-    // });
 
     stateManager.showGhostNotes = //  todo Move loading to state manager?
         await Settings.getSetting(Settings.ghostNoteString);
     stateManager.showBall = await Settings.getSetting(Settings.tempoKey);
+    if (ref.watch(simpleGameStateProvider).isTimeTrialMode){
+      stateManager.showBall = false;
+    }
     positionManager = PositionManager(stateManager);
     await buildAllElements();
-    gameController.noteChecker.noteNotifier.addListener(() {
+    gameController.noteChecker.noteNotifier.addListener(() { // Move
       if (stateManager.showGhostNotes) {
         stave.showGhostNote(gameController.noteChecker.noteNotifier.value,
             gameController.currentNote.value.noteNum);
       }
     });
-    //camera.viewfinder.zoom =
-    //    positionManager.scaleFactor(width, screenWidthRatio);
     camera.viewfinder.anchor = Anchor.center;
     loadComplete = true;
-    gameController.changeNote();
-    beatSeconds = await tempo.loadBeatSeconds();
+    gameController.changeNote(); // Move
+    beatSeconds = await tempo.loadBeatSeconds(); // Move
     stave = Stave(gameController.player, width / screenWidthRatio,
         showGhostNotes: stateManager.showGhostNotes);
     world.add(stave);
@@ -92,15 +88,14 @@ class SimpleGameScene extends FlameGame {
   @override
   Future<void> onMount() async {
     super.onMount();
-
     // Listen for changes in the game state, but only trigger when necessary
-    ref.listenManual<SimpleGameState>(
+    ref.listenManual<SimpleGameState>(  // Is there a better way to do this?
       simpleGameStateProvider,
       (previous, next) {
         if (previous?.gameState != next.gameState) {
           if (next.gameState != GameState.correctNoteHeard) return;
           queueNewNote(gameController.player.currentNote.value);
-          tick.showTick();
+          tick.showTick(); 
         }
       },
     );
@@ -109,18 +104,18 @@ class SimpleGameScene extends FlameGame {
   Future<void> buildAllElements() async {
     world.add(tick);
     tick.position = Vector2(250, -90);
-    currentNoteData = gameController.currentNote.value;
+    currentNoteData = gameController.currentNote.value; // Move
 
     world.add(bouncyBall);
     bouncyBall.isVisible = stateManager.showBall;
   }
 
-  void queueNewNote(NoteData newNoteData) {
+  void queueNewNote(NoteData newNoteData) { // Move
     nextNote = newNoteData;
     noteChangeQueued = true;
   }
 
-  Future<void> changeNote() async {
+  Future<void> changeNote() async { // Move
     if (loadComplete && noteChangeQueued) {
       currentNoteData = nextNote;
       stave.changeNote(currentNoteData, 0.5);
@@ -128,7 +123,7 @@ class SimpleGameScene extends FlameGame {
     }
   }
 
-  void updateBallPosition(double dt) {
+  void updateBallPosition(double dt) { // ??
     if (stateManager.showBall) {
       gameTime += dt; // todo extract this timing shit.
       while (gameTime > beatSeconds) {
@@ -143,9 +138,9 @@ class SimpleGameScene extends FlameGame {
   }
 
   @override
-  void update(double dt) {
-    gameController.update(dt);
-    changeNote();
+  void update(double dt) {  // Updates useful, how/where to share?
+    gameController.update(dt); 
+    changeNote(); // Move
     updateBallPosition(dt);
     super.update(dt);
   }
@@ -154,12 +149,12 @@ class SimpleGameScene extends FlameGame {
   Color backgroundColor() => Colors.white;
 }
 
-class GameStateManager {
+class GameStateManager { // No longer needed, extract/delete
   bool showGhostNotes = true;
   bool showBall = false;
 }
 
-class PositionManager {
+class PositionManager { // Hmm
   //final KeySignature keySignature;
   final GameStateManager stateManager;
   final double staffWidth = 280;

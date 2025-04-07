@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
-// import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:toolkit/game_modes/simple_game/game_options.dart';
 import 'package:toolkit/game_modes/simple_game/saving_and_loading/saved_states_list_view.dart';
-// import 'package:toolkit/game_modes/simple_game/saving_and_loading/server_loader.dart';
-// import 'package:toolkit/game_modes/simple_game/saving_and_loading/server_saver.dart';
 import 'package:toolkit/models/player/player.dart';
 import 'package:toolkit/widgets/qr_code_generator.dart';
 import 'package:toolkit/widgets/qr_scanner.dart';

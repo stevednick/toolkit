@@ -166,7 +166,7 @@ class PongController {
   }
 
   void changeNote(player) {
-    print("Changing note for player $player");
+    //print("Changing note for player $player");
     players[player].currentNote.value = noteGenerator.randomNoteFromRange(
         players[
             player]); // There's definitely a more elegant way to set this up...
