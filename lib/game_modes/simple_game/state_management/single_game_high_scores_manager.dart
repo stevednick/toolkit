@@ -14,9 +14,6 @@ class SingleGameHighScoresManager {
   final String bestNotesString = "single_player_best_notes";
   final String bestScoreString = "single_player_best_score";
 
-  final String difficultyScorePrefix = "single_player_difficulty_score_";
-  final String difficultyNotesPrefix = "single_player_difficulty_notes_";
-
   SharedPreferences? _prefs;
   bool _isInitialized = false;
 
@@ -29,18 +26,7 @@ class SingleGameHighScoresManager {
     }
   }
 
-  Future<double> getHighScore(double difficultyLevel) async {
-    await init();
-    //String key = "highScoreKey";
-    return _prefs?.getDouble(bestScoreString) ?? 0.0;
-  }
-
-  Future<int> getBestNotes(double difficultyLevel) async {
-    await init();
-    return _prefs?.getInt(bestNotesString) ?? 0;
-  }
-
-Future<void> saveHighScore(double difficultyLevel, double score) async {
+Future<void> saveHighScore(double score) async {
   await init();
 
   double storedBestScore = _prefs?.getDouble(bestScoreString) ?? 0.0; // Load latest saved score
@@ -54,7 +40,7 @@ Future<void> saveHighScore(double difficultyLevel, double score) async {
     print("Score was not high enough to update.");
   }
 }
-Future<void> saveBestNotes(double difficultyLevel, int notes) async {
+Future<void> saveBestNotes(int notes) async {
   await init();
 
   int storedBestNotes = _prefs?.getInt(bestNotesString) ?? 0; // Load latest saved value
@@ -68,7 +54,6 @@ Future<void> saveBestNotes(double difficultyLevel, int notes) async {
     print("Notes count was not high enough to update.");
   }
 }
-
 
   Future<void> resetScores() async {
     await init();

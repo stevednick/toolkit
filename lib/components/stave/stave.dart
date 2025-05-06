@@ -60,7 +60,7 @@ class Stave extends PositionComponent {
     add(keySignatureComponent);
     addGhostNote();
     addNote();
-    scale = Vector2(positionManager.scaleFactor(), positionManager.scaleFactor());
+    scale = positionManager.scaleMultiplier();
     noteChanger = StaveNoteChanger(note, clef, keySignatureComponent, keySignatureNoteModifier);
   }
 

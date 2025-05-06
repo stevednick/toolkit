@@ -62,12 +62,9 @@ class SimpleGameScene extends FlameGame {
 
     stateManager.showGhostNotes = //  todo Move loading to state manager?
         await Settings.getSetting(Settings.ghostNoteString);
-    stateManager.showBall = await Settings.getSetting(Settings.tempoKey);
-    if (ref.watch(simpleGameStateProvider).isTimeTrialMode){
-      stateManager.showBall = false;
-    }
+    
     positionManager = PositionManager(stateManager);
-    await buildAllElements();
+    currentNoteData = gameController.currentNote.value;
     gameController.noteChecker.noteNotifier.addListener(() { // Move
       if (stateManager.showGhostNotes) {
         stave.showGhostNote(gameController.noteChecker.noteNotifier.value,
@@ -81,8 +78,24 @@ class SimpleGameScene extends FlameGame {
     stave = Stave(gameController.player, width / screenWidthRatio,
         showGhostNotes: stateManager.showGhostNotes);
     world.add(stave);
-    bouncyBall.position =
-        Vector2(stave.positionManager.notePosition().x + 30, -55);
+    await setUpBall();
+    setUpTick();
+  }
+
+  Future<void> setUpBall() async {
+    stateManager.showBall = await Settings.getSetting(Settings.tempoKey);
+    if (ref.watch(simpleGameStateProvider).isTimeTrialMode){
+      stateManager.showBall = false;
+    }
+    world.add(bouncyBall);
+    bouncyBall.isVisible = stateManager.showBall;
+    bouncyBall.position = stave.positionManager.ballPosition();
+    bouncyBall.scale = stave.positionManager.scaleMultiplier();
+  }
+
+  void setUpTick(){
+    world.add(tick);
+    tick.position = Vector2(250, -90);
   }
 
   @override
@@ -101,20 +114,12 @@ class SimpleGameScene extends FlameGame {
     );
   }
 
-  Future<void> buildAllElements() async {
-    world.add(tick);
-    tick.position = Vector2(250, -90);
-    currentNoteData = gameController.currentNote.value; // Move
-
-    world.add(bouncyBall);
-    bouncyBall.isVisible = stateManager.showBall;
-  }
-
   void queueNewNote(NoteData newNoteData) { // Move
     nextNote = newNoteData;
     noteChangeQueued = true;
   }
 
+  // Extract This Stuff, thought required! 
   Future<void> changeNote() async { // Move
     if (loadComplete && noteChangeQueued) {
       currentNoteData = nextNote;
@@ -123,6 +128,7 @@ class SimpleGameScene extends FlameGame {
     }
   }
 
+  // Extract This! 
   void updateBallPosition(double dt) { // ??
     if (stateManager.showBall) {
       gameTime += dt; // todo extract this timing shit.

@@ -48,16 +48,14 @@ class _SimpleGameViewState extends ConsumerState<SimpleGameView> {
 
   bool _hasGameOverBeenShown = false;
 
-  //bool _resetHighScorePressed = false;
 
   late final TempoSelector tempoSelector; 
 
   late double width;
 
   final double screenWidthRatio = 0.33;
+  double difficultyMultiplier = 1;
 
-  // late GlobalKey<TranspositionDropDownState> _dropdownKey;
-  // late GlobalKey<KeySignatureDropdownState> _keyDropDownKey;
   final GlobalKey<EnhancedClefSelectionButtonState> _clefButtonKey =
       GlobalKey();
 
@@ -65,7 +63,6 @@ class _SimpleGameViewState extends ConsumerState<SimpleGameView> {
   late final NiceButton clefThresholdsButton = NiceButton(
     text: "Clef Thresholds",
     onPressed: () {
-      final provider = ref.watch(simpleGameStateProvider);
       Navigator.push(
         context,
         MaterialPageRoute(
@@ -101,13 +98,7 @@ class _SimpleGameViewState extends ConsumerState<SimpleGameView> {
     setTempoSelector();
     setClefThresholdsButton();
     difficultyManager = DifficultyManager(player: gameController.player); // 
-    //testGetDifficulty();
   }
-
-  // Future<void> testGetDifficulty() async {
-  //   final d = await difficultyManager.calculateDifficulty();
-  //   print("d: $d");
-  // }
 
   Future<void> showGameOverDialog() async {
     final difficulty = await difficultyManager.calculateDifficulty();
@@ -214,7 +205,6 @@ class _SimpleGameViewState extends ConsumerState<SimpleGameView> {
   }
 
   void clefSelectionButtonPressed() {
-    //refreshScene();
     rangeSelectionScene.noteManager.changeNote(true);
     setClefThresholdsButton();
   }
@@ -294,8 +284,6 @@ Widget _buildHighScoreText() {
               player: gameController.player,
               refreshScene: () {
                 setState(() {
-                  // _dropdownKey.currentState?.refresh();
-                  // _keyDropDownKey.currentState?.refresh();
                   _clefButtonKey.currentState?.setMode();
                   rangeSelectionScene =
                       RangeSelectionScene(gameController.player);
@@ -344,7 +332,8 @@ Widget _buildHighScoreText() {
             children: [
               NiceButton(
                 text: gameMode == GameMode.waitingToStart ? "Start" : "End",
-                onPressed: () {
+                onPressed: () async {
+                  difficultyMultiplier = await difficultyManager.calculateDifficulty();
                   setState(() {
                     _hasGameOverBeenShown = false;
                     endGame();
@@ -372,8 +361,6 @@ Widget _buildHighScoreText() {
         setState(() {
           setTempoSelector();
         });
-        // If you need to persist this change, you might want to call a method here
-        // await scene.saveGhostNotesState(newValue);
       },
       text: "Show Beat",
     );
@@ -433,18 +420,12 @@ Widget _buildHighScoreText() {
   }
 
   Widget _buildGhostNoteButton() {
-    // Todo, add rebuild code when ready...
     return FutureBuilderToggle(
       getInitialState: () {
         return Settings.getSetting(Settings.ghostNoteString);
       },
       onToggle: (newValue) async {
         await Settings.saveSetting(Settings.ghostNoteString, newValue);
-        // scene.onDispose();
-        // scene = SimpleGameScene(gameController);
-        //scene.showGhostNotes = newValue;
-        //await scene.setSettings();
-        //scene.rebuildQueued = true;
       },
       text: 'Ghost Notes',
     );
@@ -533,16 +514,14 @@ Widget _buildHighScoreText() {
   Widget build(BuildContext context) {
     final gameMode = ref.watch(simpleGameStateProvider).gameMode;
 
-    // Listen for the game over state
     if (gameMode == GameMode.finished && !_hasGameOverBeenShown) {
-      // Show the game over popup or screen
       _hasGameOverBeenShown = true;
       Future.delayed(Duration.zero, () {
         showGameOverDialog();
       });
     }
 
-    width = MediaQuery.sizeOf(context).width; // todo add width back...
+    width = MediaQuery.sizeOf(context).width; 
     rangeSelectionScene.setWidth(width * screenWidthRatio);
     scene.width = width;
     return Scaffold(
@@ -551,7 +530,7 @@ Widget _buildHighScoreText() {
         children: [
           _buildGameScene(),
           SimpleGameTimingText(),
-          SimpleGameScoreText(),
+          SimpleGameScoreText(difficultyMultiplier: difficultyMultiplier,),
           SimpleGameMainText(),
           SimpleGameTranspositionDropdown(player: gameController.player),
           if (gameMode == GameMode.waitingToStart)

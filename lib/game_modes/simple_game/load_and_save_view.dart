@@ -7,12 +7,12 @@ import 'package:toolkit/widgets/qr_scanner.dart';
 import 'package:toolkit/widgets/widgets.dart';
 
 class LoadAndSaveView extends StatefulWidget {
-  late GameOptions gameOptions;
-  late Player player;
+  final GameOptions gameOptions;
+  final Player player;
   final Function() refreshScene;
   // final ServerSaver serverSaver = ServerSaver();
   // final ServerLoader serverLoader = ServerLoader();
-  LoadAndSaveView(
+  const LoadAndSaveView(
       {super.key,
       required this.gameOptions,
       required this.player,

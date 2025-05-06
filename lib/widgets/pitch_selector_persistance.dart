@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:toolkit/models/tempo.dart';
 import 'package:toolkit/tools/note_getter.dart';
 import 'package:toolkit/widgets/nice_button.dart';
 

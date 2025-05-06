@@ -41,14 +41,13 @@ Future<void> _loadHighScores() async {
     });
 
     double currentScore = widget.notesPlayed * widget.difficultyLevel;
-    bool updated = false;
 
     if (currentScore > (overallHighScore ?? 0)) {
       setState(() {
         isHighScore = true;
       });
       highScoresManager.bestScore = currentScore;
-      await highScoresManager.saveHighScore(widget.difficultyLevel, currentScore);
+      await highScoresManager.saveHighScore(currentScore);
     }
 
     if (widget.notesPlayed > (overallBestNotes ?? 0)) {
@@ -56,7 +55,7 @@ Future<void> _loadHighScores() async {
         isHighNotes = true;
       });
       highScoresManager.bestNotes = widget.notesPlayed;
-      await highScoresManager.saveBestNotes(widget.difficultyLevel, widget.notesPlayed);
+      await highScoresManager.saveBestNotes(widget.notesPlayed);
 
     }
   } catch (e) {

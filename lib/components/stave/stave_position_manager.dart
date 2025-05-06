@@ -47,10 +47,17 @@ class StavePositionManager {
   }
 
   double scaleFactor() {
-    // Move this to pos Man
     return size /
         ((staffWidth +
                 (showGhostNotes ? ghostNoteExtension : 0) +
                 data.clefOffset(keySignature)));
+  }
+
+  Vector2 scaleMultiplier() {
+    return Vector2(scaleFactor(), scaleFactor());
+  }
+
+  Vector2 ballPosition() {
+    return Vector2(ghostNotePosition().x - notePosition().x - 30, -68) * scaleFactor();
   }
 }

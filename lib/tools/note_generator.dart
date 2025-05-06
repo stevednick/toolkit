@@ -1,6 +1,5 @@
 import 'dart:math';
 import 'package:toolkit/models/models.dart';
-import 'package:toolkit/models/transposition_file.dart';
 
 class NoteGenerator {
   // todo Next sort out the list for random selection..
@@ -25,9 +24,7 @@ class NoteGenerator {
     for (int i = -100; i <= 100; i++) {
       fullRange.add(NoteData.findFirstChoiceByNumber(i, Clef.neutral()));
     }
-    //fullRange = TranspositionFile.majorScale.notes;
   }
-
 
 
   bool checkValidChange(Player player, bool isTop, bool isUp) {
@@ -144,27 +141,20 @@ class QuarterElementSelector<T> {
   bool _isHighTurn = true;
 
   T? getAlternatingQuarterElement(List<T> list) {
-    // Check if the list has at least 4 elements
     if (list.length < 4) {
-      // print('The list must have at least 4 elements.');
       return null;
     }
 
-    // Calculate the size of a quarter
     final quarterSize = list.length ~/ 4;
 
     int randomIndex;
     if (_isHighTurn) {
-      // Select a random element from the top quarter
       randomIndex = _random.nextInt(quarterSize);
     } else {
-      // Select a random element from the bottom quarter
       randomIndex = list.length - quarterSize + _random.nextInt(quarterSize);
     }
 
-    // Toggle the turn for the next call
     _isHighTurn = !_isHighTurn;
-
     return list[randomIndex];
   }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:toolkit/tools/shared_prefs_manager.dart';
 
 class OnboardingScreen extends StatefulWidget {
   final VoidCallback onFinish;
@@ -135,8 +136,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   void _onGetStarted() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('hasSeenOnboarding', true);
+    await SharedPrefsManager.save('hasSeenOnboarding', true);
     widget.onFinish();
   }
 }

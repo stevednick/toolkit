@@ -11,7 +11,6 @@ class DebugBox extends PositionComponent {
         size = s;
     this.position = position;
   }
-
   @override
   void render(Canvas canvas) {
     super.render(canvas);

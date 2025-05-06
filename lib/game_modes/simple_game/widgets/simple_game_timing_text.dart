@@ -12,16 +12,38 @@ class SimpleGameTimingText extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final timerProvider = ref.watch(timerStateProvider);
-    final provider = ref.watch(simpleGameStateProvider);
+    final gameState = ref.watch(simpleGameStateProvider);
+
+    final isRunning = gameState.gameMode == GameMode.running &&
+        gameState.isTimeTrialMode == true;
+
+    final isUrgent = timerProvider.timeRemaining <= 5.0;
+
     return Positioned(
       top: 80,
       right: 40,
       child: Visibility(
-        visible: provider.gameMode == GameMode.running &&
-            provider.isTimeTrialMode == true,
-        child: Text(
-          timingDisplayer.formatTime(timerProvider.timeRemaining),
-          style: const TextStyle(fontSize: 30),
+        visible: isRunning,
+        child: TweenAnimationBuilder<double>(
+          tween: Tween<double>(
+            begin: 1.0,
+            end: isUrgent ? 1.3 : 1.0,
+          ),
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+          builder: (context, scale, child) {
+            return Transform.scale(
+              scale: scale,
+              child: Text(
+                timingDisplayer.formatTime(timerProvider.timeRemaining),
+                style: TextStyle(
+                  fontSize: 30,
+                  color: isUrgent ? Colors.red : Colors.black,
+                  fontWeight: isUrgent ? FontWeight.bold : FontWeight.normal,
+                ),
+              ),
+            );
+          },
         ),
       ),
     );

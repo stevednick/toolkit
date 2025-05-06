@@ -6,7 +6,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:toolkit/game_modes/simple_game/state_management/score_state_manager.dart';
 import 'package:toolkit/game_modes/simple_game/state_management/simple_game_state_manager.dart';
 import 'package:toolkit/game_modes/simple_game/state_management/timer_state_manager.dart';
-import 'package:toolkit/game_modes/simple_game/timing/simple_game_timing_manager.dart';
 import 'package:toolkit/models/models.dart';
 import 'package:toolkit/tools/tools.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
@@ -96,18 +95,17 @@ class SimpleGameController {
     if (ref.read(simpleGameStateProvider).gameMode == GameMode.waitingToStart) {
       gameStateManager.reset();
       ref.read(simpleGameScoreProvider.notifier).reset();
-      gameStateManager.setGameText("Play the note.");
       
       if (ref.read(simpleGameStateProvider).isTimeTrialMode) {
         gameStateManager.setGameMode(GameMode.countingDown);
         timerStateManager.startCountdown();
       } else {
+        gameStateManager.setGameText("Play the note.");
         gameStateManager.setGameMode(GameMode.running);
         timerStateManager.resetTime();
         noteChecker.initialize();
 
       }
-
       //changeNote();
     } else if (ref.read(simpleGameStateProvider).gameMode == GameMode.running ||
         ref.read(simpleGameStateProvider).gameMode == GameMode.finished) {
