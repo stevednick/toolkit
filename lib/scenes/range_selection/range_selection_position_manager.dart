@@ -1,7 +1,6 @@
 import 'package:flame/components.dart';
 import 'package:toolkit/models/key_signature/key_signature.dart';
 import 'package:toolkit/models/key_signature/key_signature_builder_data.dart';
-import 'package:toolkit/components/debug/debug_box.dart';
 
 class RangeSelectionPositionManager extends PositionComponent {
   final KeySignatureBuilderData data = KeySignatureBuilderData();
@@ -43,9 +42,4 @@ class RangeSelectionPositionManager extends PositionComponent {
   List<Vector2> notePositions = [Vector2(-75, 0), Vector2(150, 0)];
   List<Vector2> clefPositions = [Vector2(-170, 0), Vector2(50, 0)];
 
-  void addDebugBoxes() {
-    for (int i = 0; i < 2; i++) {
-      add(DebugBox(dragBoxStart()[i], dragBoxSize()));
-    }
-  }
 }

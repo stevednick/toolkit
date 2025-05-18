@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:toolkit/components/ball/bouncy_ball.dart';
 import 'package:toolkit/components/components.dart';
 import 'package:toolkit/game_modes/simple_game/simple_game_controller.dart';
+import 'package:toolkit/game_modes/simple_game/state_management/current_note_manager.dart';
 import 'package:toolkit/game_modes/simple_game/state_management/simple_game_state.dart';
 import 'package:toolkit/game_modes/simple_game/state_management/simple_game_state_manager.dart';
 import 'package:toolkit/models/models.dart';
@@ -14,6 +15,7 @@ import 'package:toolkit/tools/tools.dart';
 class SimpleGameScene extends FlameGame {
   late SimpleGameStateManager gameStateManager;
   final SimpleGameController gameController;  // can this be removed altogether?
+  final ProviderContainer container;
   final GameStateManager stateManager = GameStateManager();
 
   final NoteGenerator noteGenerator = NoteGenerator();
@@ -37,38 +39,43 @@ class SimpleGameScene extends FlameGame {
   Tempo tempo = Tempo(key: 'simple_game_tempo'); // Move
   double beatSeconds = 1000; // Move
   double gameTime = 0; // Move
-
   bool fadeClef = false;
   bool initialNoteLoaded = false;
 
-  WidgetRef ref;
+  ProviderSubscription<NoteState>? noteListener;
+
+  //WidgetRef ref;
 
   SimpleGameScene(
     this.gameController,
-    this.ref,
+    this.container,
   ) {
-    gameStateManager = ref.read(simpleGameStateProvider.notifier);
+    gameStateManager = container.read(simpleGameStateProvider.notifier);
   }
 
   @override
   FutureOr<void> onLoad() async {
     await super.onLoad();
-    gameController.player.currentNote.addListener(() { // Extract
-      if (!initialNoteLoaded) {
-        queueNewNote(gameController.player.currentNote.value);
-        initialNoteLoaded = true;
-      }
-    });
+    noteListener = container.listen<NoteState>(
+      noteStateProvider,
+      (prev, next) {
+        if (next.currentNote != prev?.currentNote) {
+          queueNewNote(next.currentNote);
+          initialNoteLoaded = true;
+
+        }
+      },
+    );
 
     stateManager.showGhostNotes = //  todo Move loading to state manager?
         await Settings.getSetting(Settings.ghostNoteString);
     
     positionManager = PositionManager(stateManager);
-    currentNoteData = gameController.currentNote.value;
+    currentNoteData = container.read(noteStateProvider).currentNote;
     gameController.noteChecker.noteNotifier.addListener(() { // Move
       if (stateManager.showGhostNotes) {
         stave.showGhostNote(gameController.noteChecker.noteNotifier.value,
-            gameController.currentNote.value.noteNum);
+            container.read(noteStateProvider).currentNote.noteNum);
       }
     });
     camera.viewfinder.anchor = Anchor.center;
@@ -84,7 +91,7 @@ class SimpleGameScene extends FlameGame {
 
   Future<void> setUpBall() async {
     stateManager.showBall = await Settings.getSetting(Settings.tempoKey);
-    if (ref.watch(simpleGameStateProvider).isTimeTrialMode){
+    if (container.read(simpleGameStateProvider).isTimeTrialMode){
       stateManager.showBall = false;
     }
     world.add(bouncyBall);
@@ -102,12 +109,13 @@ class SimpleGameScene extends FlameGame {
   Future<void> onMount() async {
     super.onMount();
     // Listen for changes in the game state, but only trigger when necessary
-    ref.listenManual<SimpleGameState>(  // Is there a better way to do this?
+    container.listen<SimpleGameState>(  // Is there a better way to do this?
       simpleGameStateProvider,
       (previous, next) {
         if (previous?.gameState != next.gameState) {
           if (next.gameState != GameState.correctNoteHeard) return;
-          queueNewNote(gameController.player.currentNote.value);
+          gameController.changeNote();
+          // queueNewNote(gameController.player.currentNote.value);
           tick.showTick(); 
         }
       },
@@ -115,6 +123,7 @@ class SimpleGameScene extends FlameGame {
   }
 
   void queueNewNote(NoteData newNoteData) { // Move
+  print("Note Queues");
     nextNote = newNoteData;
     noteChangeQueued = true;
   }

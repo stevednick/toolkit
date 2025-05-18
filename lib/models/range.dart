@@ -1,4 +1,4 @@
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:toolkit/tools/shared_prefs_manager.dart';
 
 class Range {
   late int top;
@@ -12,27 +12,19 @@ class Range {
   }
 
   Future<void> loadValues() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    top = prefs.getInt(topKey) ?? 8;       // Load 'top' from SharedPreferences, or default to 8
-    bottom = prefs.getInt(bottomKey) ?? 0; // Load 'bottom' from SharedPreferences, or default to 0
-    // print("Values Loaded");
-    // print('$top, $bottom');
+    top = await SharedPrefsManager.load<int>(topKey) ?? 15;
+    bottom = await SharedPrefsManager.load<int>(bottomKey) ?? 0;
   }
 
   Future<List<int>> getValues() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    top = prefs.getInt(topKey) ?? 8;       // Load 'top' from SharedPreferences, or default to 8
-    bottom = prefs.getInt(bottomKey) ?? 0; // Load 'bottom' from SharedPreferences, or default to 0
-    // print("Values Loaded");
-    // print('$top, $bottom');
+    await loadValues();
     return [top, bottom];
   }
 
 
   Future<void> saveValues() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setInt(topKey, top);       // Save 'top' to SharedPreferences
-    await prefs.setInt(bottomKey, bottom); // Save 'bottom' to SharedPreferences
+    await SharedPrefsManager.save<int>(topKey, top);
+    await SharedPrefsManager.save<int>(bottomKey, bottom);
   }
 
   void increment(bool isTop, bool incrementUp) async {

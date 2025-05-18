@@ -1,14 +1,22 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:toolkit/tools/shared_prefs_manager.dart';
 
 class LanguageProvider extends StateNotifier<String> {
   static const String _languageKey = 'selected_language';
-  late SharedPreferences _prefs;
+
 
   String get currentLanguage => _languageKey;
 
   final Map<String, Map<String, String>> localizedValues = {
     'en': {
+      'C Alto': 'C Alto',
+      'Bb Alto': 'B♭ Alto',
+      'A Alto': 'A Alto',
+      'B Basso': 'B Basso',
+      'Bb Basso': 'B♭ Basso',
+      'A Basso': 'A Basso',
+      'Ab Basso': 'A♭ Basso',
       'Cb': 'C♭',
       'C': 'C',
       'C#': 'C#',
@@ -27,6 +35,13 @@ class LanguageProvider extends StateNotifier<String> {
       'Major': 'major',
     },
     'de': {
+      'C Alto': 'C Alto',
+      'Bb Alto': 'Bes Alto',
+      'A Alto': 'A Alto',
+      'B Basso': 'B Basso',
+      'Bb Basso': 'Bes Basso',
+      'A Basso': 'A Basso',
+      'Ab Basso': 'As Basso',
       'Cb': 'Ces',
       'C': 'C',
       'C#': 'Cis',
@@ -45,6 +60,13 @@ class LanguageProvider extends StateNotifier<String> {
       'Major': 'Dur',
     },
     'it': {
+      'C Alto': 'Do Alto',
+      'Bb Alto': 'Si♭ Alto',
+      'A Alto': 'La Alto',
+      'B Basso': 'Si Basso',
+      'Bb Basso': 'Si♭ Basso',
+      'A Basso': 'La Basso',
+      'Ab Basso': 'La♭ Basso',
       'Cb': 'Do♭',
       'C': 'Do',
       'C#': 'Do#',
@@ -68,17 +90,16 @@ class LanguageProvider extends StateNotifier<String> {
     _loadSavedLanguage();
   }
 
-  Future<void> _loadSavedLanguage() async {
-    _prefs = await SharedPreferences.getInstance();
-    final savedLanguage = _prefs.getString(_languageKey) ?? 'en';
+  Future<void> _loadSavedLanguage() async { 
+    final savedLanguage = await SharedPrefsManager.load<String>(_languageKey) ?? 'en';
     state = savedLanguage; // Triggers UI rebuild
   }
 
-  void changeLanguage(String newLanguage) {
+  Future<void> changeLanguage(String newLanguage) async {
     if (localizedValues.containsKey(newLanguage)) {
       print('Changing language to $newLanguage');
       state = newLanguage; // This updates the UI
-      _prefs.setString(_languageKey, newLanguage);
+      await SharedPrefsManager.save<String>(_languageKey, newLanguage);
     }
   }
 
@@ -86,7 +107,6 @@ class LanguageProvider extends StateNotifier<String> {
     return localizedValues[state]?[key] ?? key;
   }
 }
-
 
 final languageProvider = StateNotifierProvider<LanguageProvider, String>(
   (ref) => LanguageProvider(),

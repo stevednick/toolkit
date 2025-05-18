@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:toolkit/models/transposition.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:toolkit/tools/shared_prefs_manager.dart';
 
 class Instrument {
   final String name;
@@ -43,15 +44,12 @@ class Instrument {
 
   // Save the current transposition to persistent storage
   Future<void> _saveTransposition() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setString('$playerKey-$name-transposition', currentTransposition.name);
+    await SharedPrefsManager.save<String>('$playerKey-$name-transposition', currentTransposition.name);
   }
 
   // Load the transposition from persistent storage
   Future<void> _loadTransposition() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? savedTransposition = prefs.getString('$playerKey-$name-transposition');
-    
+    String? savedTransposition = await SharedPrefsManager.load<String>('$playerKey-$name-transposition');
     if (savedTransposition != null) {
       currentTransposition = Transposition.transpositions.firstWhere(
         (transposition) => transposition.name == savedTransposition,

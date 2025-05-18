@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
+import 'package:toolkit/game_modes/home_screen/home_view.dart';
 import 'package:toolkit/game_modes/pong/pong_controller.dart';
 import 'package:toolkit/game_modes/pong/pong_scene_new.dart';
 import 'package:toolkit/models/models.dart';
@@ -320,7 +321,16 @@ class _PongViewState extends State<PongView>
           _buildPlayerText(),
           _buildCountdownText(),
           _buildStartButton(),
-          const BackButton(),
+          BackButton(
+            onPressed: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => HomeView(),
+                ),
+              );
+            },
+          ),
         ],
       ),
     );

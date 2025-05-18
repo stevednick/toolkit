@@ -12,7 +12,7 @@ class HomeScreenNavigationButton extends StatelessWidget {
     return NiceButton(
       text: text,
       onPressed: () {
-        Navigator.push(
+        Navigator.pushReplacement(
           context,
           MaterialPageRoute(
             builder: (context) => route,

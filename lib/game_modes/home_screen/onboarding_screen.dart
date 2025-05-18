@@ -136,7 +136,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   void _onGetStarted() async {
-    await SharedPrefsManager.save('hasSeenOnboarding', true);
+    await SharedPrefsManager.save<bool>('hasSeenOnboarding', true);
     widget.onFinish();
   }
 }

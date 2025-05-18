@@ -4,6 +4,7 @@ import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:toolkit/game_modes/home_screen/advanced_options_view.dart';
+import 'package:toolkit/game_modes/home_screen/home_view.dart';
 import 'package:toolkit/game_modes/home_screen/note_selector_view.dart';
 import 'package:toolkit/game_modes/simple_game/game_options.dart';
 import 'package:toolkit/game_modes/simple_game/game_over_popup.dart';
@@ -48,8 +49,9 @@ class _SimpleGameViewState extends ConsumerState<SimpleGameView> {
 
   bool _hasGameOverBeenShown = false;
 
+  late final TempoSelector tempoSelector;
 
-  late final TempoSelector tempoSelector; 
+  late final ProviderContainer container;
 
   late double width;
 
@@ -58,7 +60,6 @@ class _SimpleGameViewState extends ConsumerState<SimpleGameView> {
 
   final GlobalKey<EnhancedClefSelectionButtonState> _clefButtonKey =
       GlobalKey();
-
 
   late final NiceButton clefThresholdsButton = NiceButton(
     text: "Clef Thresholds",
@@ -72,7 +73,7 @@ class _SimpleGameViewState extends ConsumerState<SimpleGameView> {
     },
   );
 
-  GameOptions? gameOptions; // Can this move? 
+  GameOptions? gameOptions; // Can this move?
 
   bool showTick = false;
 
@@ -83,21 +84,32 @@ class _SimpleGameViewState extends ConsumerState<SimpleGameView> {
       onTempoChanged: (int newTempo) {},
       keyString: 'simple_game_tempo',
     );
-    WidgetsBinding.instance.addPostFrameCallback((_) async {  // What about this?
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      // What about this?
       await Future.delayed(Duration(milliseconds: 10)); // Short delay
       ref
           .read(simpleGameStateProvider.notifier)
           .setIsTimeTrialMode(widget.isTimeTrialMode);
     });
-    timeTrialIntroPopup = TimeTrialIntroPopup(key: timeTrialPopupKey); // Modify popup for Simple Game as well. 
+    timeTrialIntroPopup = TimeTrialIntroPopup(
+        key: timeTrialPopupKey); // Modify popup for Simple Game as well.
     gameController = SimpleGameController(triggerTick, ref);
-    scene = SimpleGameScene(gameController, ref);
-    rangeSelectionScene = RangeSelectionScene(gameController.player); 
+    // or pass in manually
+
+    //scene = SimpleGameScene(gameController, ref);
+    rangeSelectionScene = RangeSelectionScene(gameController.player);
     clefSelectionButton =
-        EnhancedClefSelectionButton(gameController.player, refreshScene); 
+        EnhancedClefSelectionButton(gameController.player, refreshScene);
     setTempoSelector();
     setClefThresholdsButton();
-    difficultyManager = DifficultyManager(player: gameController.player); // 
+    difficultyManager = DifficultyManager(player: gameController.player);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    container = ProviderScope.containerOf(context);
+    scene = SimpleGameScene(gameController, container);
   }
 
   Future<void> showGameOverDialog() async {
@@ -122,13 +134,14 @@ class _SimpleGameViewState extends ConsumerState<SimpleGameView> {
     );
   }
 
-  void restartGameFromGameOverScreen() {  // Can these be tidied/simplified?
+  void restartGameFromGameOverScreen() {
+    // Can these be tidied/simplified?
     setState(() {
       ref.read(simpleGameScoreProvider.notifier).reset();
       ref.read(simpleGameStateProvider.notifier).reset();
       _hasGameOverBeenShown = false;
       scene.onDispose();
-      scene = SimpleGameScene(gameController, ref);
+      scene = SimpleGameScene(gameController, container);
       gameController.startButtonPressed();
     });
   }
@@ -140,14 +153,14 @@ class _SimpleGameViewState extends ConsumerState<SimpleGameView> {
       ref.read(simpleGameStateProvider.notifier).reset();
       ref.read(timerStateProvider.notifier).resetTime();
       scene.onDispose();
-      scene = SimpleGameScene(gameController, ref);
+      scene = SimpleGameScene(gameController, container);
     });
   }
 
   void endGame() {
     gameController.startButtonPressed();
     scene.onDispose();
-    scene = SimpleGameScene(gameController, ref);
+    scene = SimpleGameScene(gameController, container);
   }
 
   Future<void> setTempoSelector() async {
@@ -234,7 +247,8 @@ class _SimpleGameViewState extends ConsumerState<SimpleGameView> {
             TextButton(
               child: const Text('Yes'),
               onPressed: () {
-                final SingleGameHighScoresManager highScoresManager = SingleGameHighScoresManager();
+                final SingleGameHighScoresManager highScoresManager =
+                    SingleGameHighScoresManager();
                 setState(() {
                   highScoresManager.resetScores();
                 });
@@ -255,23 +269,25 @@ class _SimpleGameViewState extends ConsumerState<SimpleGameView> {
         text: "Reset Score");
   }
 
-Widget _buildHighScoreText() {
-  final ScoreDisplayer displayer = ScoreDisplayer();
-  final SingleGameHighScoresManager highScoresManager = SingleGameHighScoresManager();
-  
-  return FutureBuilder(
-    future: highScoresManager.init(),
-    builder: (context, snapshot) {
-      if (snapshot.connectionState == ConnectionState.waiting) {
-        return Text("High Score: Loading...");
-      }
-      return Text(
-        "High ${displayer.displayScore(highScoresManager.bestScore)}",
-        style: TextStyle(fontSize: 16),
-      );
-    },
-  );
-}
+  Widget _buildHighScoreText() {
+    final ScoreDisplayer displayer = ScoreDisplayer();
+    final SingleGameHighScoresManager highScoresManager =
+        SingleGameHighScoresManager();
+
+    return FutureBuilder(
+      future: highScoresManager.init(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Text("High Score: Loading...");
+        }
+        return Text(
+          "High ${displayer.displayScore(highScoresManager.bestScore)}",
+          style: TextStyle(fontSize: 16),
+        );
+      },
+    );
+  }
+
   Widget _buildLoadSaveButton() {
     return NiceButton(
       onPressed: () async {
@@ -333,7 +349,8 @@ Widget _buildHighScoreText() {
               NiceButton(
                 text: gameMode == GameMode.waitingToStart ? "Start" : "End",
                 onPressed: () async {
-                  difficultyMultiplier = await difficultyManager.calculateDifficulty();
+                  difficultyMultiplier =
+                      await difficultyManager.calculateDifficulty();
                   setState(() {
                     _hasGameOverBeenShown = false;
                     endGame();
@@ -401,7 +418,12 @@ Widget _buildHighScoreText() {
         onPressed: () {
           ref.read(simpleGameStateProvider.notifier).reset();
           gameController.dispose();
-          Navigator.pop(context);
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => HomeView(),
+            ),
+          );
         },
       ),
     );
@@ -512,6 +534,7 @@ Widget _buildHighScoreText() {
 
   @override
   Widget build(BuildContext context) {
+    //gameController.setRef(ref);
     final gameMode = ref.watch(simpleGameStateProvider).gameMode;
 
     if (gameMode == GameMode.finished && !_hasGameOverBeenShown) {
@@ -521,7 +544,7 @@ Widget _buildHighScoreText() {
       });
     }
 
-    width = MediaQuery.sizeOf(context).width; 
+    width = MediaQuery.sizeOf(context).width;
     rangeSelectionScene.setWidth(width * screenWidthRatio);
     scene.width = width;
     return Scaffold(
@@ -530,7 +553,9 @@ Widget _buildHighScoreText() {
         children: [
           _buildGameScene(),
           SimpleGameTimingText(),
-          SimpleGameScoreText(difficultyMultiplier: difficultyMultiplier,),
+          SimpleGameScoreText(
+            difficultyMultiplier: difficultyMultiplier,
+          ),
           SimpleGameMainText(),
           SimpleGameTranspositionDropdown(player: gameController.player),
           if (gameMode == GameMode.waitingToStart)

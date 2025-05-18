@@ -1,6 +1,6 @@
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:toolkit/tools/shared_prefs_manager.dart';
 
-class SingleGameHighScoresManager {
+class SingleGameHighScoresManager { // Refactoring needs to be done. 
   static final SingleGameHighScoresManager _instance =
       SingleGameHighScoresManager._internal();
 
@@ -14,27 +14,25 @@ class SingleGameHighScoresManager {
   final String bestNotesString = "single_player_best_notes";
   final String bestScoreString = "single_player_best_score";
 
-  SharedPreferences? _prefs;
   bool _isInitialized = false;
 
   Future<void> init() async {
     if (!_isInitialized) {
-      _prefs = await SharedPreferences.getInstance();
-      bestNotes = _prefs?.getInt(bestNotesString) ?? 0;
-      bestScore = _prefs?.getDouble(bestScoreString) ?? 0.0;
+      bestNotes = await SharedPrefsManager.load<int>(bestNotesString) ?? 0;
+      bestScore = await SharedPrefsManager.load<double>(bestScoreString) ?? 0.0;
       _isInitialized = true;
     }
   }
 
-Future<void> saveHighScore(double score) async {
+Future<void> saveHighScore(double score) async { // Todo look at and refine? Working by coincidence? 
   await init();
 
-  double storedBestScore = _prefs?.getDouble(bestScoreString) ?? 0.0; // Load latest saved score
+  double storedBestScore = await SharedPrefsManager.load<double>(bestScoreString) ?? 0.0; // Load latest saved score
   print("Score: $score, Stored Best Score: $storedBestScore");
 
   if (score > storedBestScore) {  // Compare against actual stored value
     bestScore = score;
-    await _prefs?.setDouble(bestScoreString, score);
+    await SharedPrefsManager.save<double>(bestScoreString, score);
     print("New High Score Saved!");
   } else {
     print("Score was not high enough to update.");
@@ -43,12 +41,12 @@ Future<void> saveHighScore(double score) async {
 Future<void> saveBestNotes(int notes) async {
   await init();
 
-  int storedBestNotes = _prefs?.getInt(bestNotesString) ?? 0; // Load latest saved value
+  int storedBestNotes = await SharedPrefsManager.load<int>(bestNotesString) ?? 0;
   print("Notes: $notes, Stored Best Notes: $storedBestNotes");
 
   if (notes > storedBestNotes) {  // Compare against actual stored value
     bestNotes = notes;
-    await _prefs?.setInt(bestNotesString, notes);
+    await SharedPrefsManager.save<int>(bestNotesString, notes);
     print("New Best Notes Saved!");
   } else {
     print("Notes count was not high enough to update.");
@@ -59,7 +57,7 @@ Future<void> saveBestNotes(int notes) async {
     await init();
     bestNotes = 0;
     bestScore = 0.0;
-    await _prefs?.setInt(bestNotesString, 0);
-    await _prefs?.setDouble(bestScoreString, 0.0);
+    await SharedPrefsManager.save<int>(bestNotesString, 0);
+    await SharedPrefsManager.save<double>(bestScoreString, 0.0);
   }
 }

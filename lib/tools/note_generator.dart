@@ -2,9 +2,11 @@ import 'dart:math';
 import 'package:toolkit/models/models.dart';
 
 class NoteGenerator {
-  // todo Next sort out the list for random selection..
-//todo then ensure that note selection stops once there are fewer than two options.
-// todo maybe use the list to do that check? Needs to be modified every time anyway...
+
+  //  todo Next sort out the list for random selection..
+  //  todo then ensure that note selection stops once there are fewer than two options.
+  //  todo maybe use the list to do that check? Needs to be modified every time anyway...
+
   Random random = Random();
   List<NoteData> availableNotes = []; // todo fill this.
   List<NoteData> fullRange = [];
@@ -16,16 +18,7 @@ class NoteGenerator {
     for (int i = player.range.bottom; i <= player.range.top; i++) {
       availableNotes.addAll(NoteData.findNotesByNumber(i));
     }
-    //availableNotes = TranspositionFile.majorScale.notes;
   }
-
-  void buildFullRange(){
-    fullRange = [];
-    for (int i = -100; i <= 100; i++) {
-      fullRange.add(NoteData.findFirstChoiceByNumber(i, Clef.neutral()));
-    }
-  }
-
 
   bool checkValidChange(Player player, bool isTop, bool isUp) {
     List<NoteData> availables = [];
@@ -45,29 +38,6 @@ class NoteGenerator {
       availables.addAll(NoteData.findNotesByNumber(i));
     }
     return availables.length >= 2;
-  }
-
-  NoteData noteFromNumberOld(int num, bool clean, ClefSelection clefSelection) {
-    // Tidy this up when settled on how this class works.
-
-    NoteData? noteToReturn;
-    Clef clef;
-    switch (clefSelection) {
-      case ClefSelection.treble:
-        clef = Clef.treble();
-        break;
-      case ClefSelection.trebleBass:
-        clef = num >= 0 ? Clef.treble() : Clef.bass();
-      default:
-        clef = Clef.bass();
-    }
-    noteToReturn = NoteData.octave[
-            getNoteInOctave(num)] // Todo replace this with value that works!!!!
-        .copyWith(clef: clef);
-    noteToReturn.noteNum = num;
-    noteToReturn.pos += getOctaveNumber(num) * 7;
-    //print("num: ${noteToReturn.noteNum}, pos: ${noteToReturn.pos}");
-    return noteToReturn;
   }
 
   NoteData noteFromNumber(int num, Clef clef) {

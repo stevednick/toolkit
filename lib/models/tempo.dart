@@ -1,4 +1,5 @@
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:toolkit/tools/shared_prefs_manager.dart';
 
 class Tempo{
 
@@ -16,13 +17,13 @@ class Tempo{
     return 60/tempo;
   }
 
-  Future<int> loadSavedTempo() async{
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getInt(key) ?? 72;
+  Future<int> loadSavedTempo() async {
+    int tempo = await SharedPrefsManager.load<int>(key) ?? 72;
+    return tempo;
   }
 
   Future<void> saveTempo(int tempo) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt(key, tempo);
+    await SharedPrefsManager.save<int>(key, tempo);
+
   }
 }

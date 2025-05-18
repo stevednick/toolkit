@@ -1,0 +1,16 @@
+{
+	"Load Shared Pref (int, bool, double)": {
+  		"prefix": "loadpref",
+  		"body": [
+   			 "await SharedPrefsManager.load<${1|int,bool,double,String|}>('${2:key}')${3: ?? ${4:default}};"
+  		],
+  		"description": "Load from SharedPrefsManager with type and key"
+	},
+	"Save Shared Pref": {
+		"prefix": "savepref",
+		"body": [
+			"await SharedPrefsManager.save<${1|int,bool,double,String|}>('${2:key}', ${3:value});"
+		],
+		"description": "Save to SharedPrefsManager with type, key, and value"
+	}
+}

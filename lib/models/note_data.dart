@@ -1,5 +1,5 @@
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:toolkit/models/models.dart';
+import 'package:toolkit/tools/shared_prefs_manager.dart';
 
 class NoteData {
   int pos;
@@ -22,18 +22,21 @@ class NoteData {
       required this.isActiveAtFirstStart}) {
     loadIsActive();
   }
+    static Future<void> init() async {
+    for (final note in octave) {
+      await note.loadIsActive();
+    }
+  }
 
   int get posOnStave => pos + clef.offset;
 
-
   Future<void> saveIsActive() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('isActive_$name', isActive);
+    await SharedPrefsManager.save<bool>('isActive_$name', isActive);
   }
 
   Future<void> loadIsActive() async {
-    final prefs = await SharedPreferences.getInstance();
-    isActive = prefs.getBool('isActive_$name') ?? isActiveAtFirstStart;
+    isActive = await SharedPrefsManager.load<bool>('isActive_$name') ??
+        isActiveAtFirstStart;
   }
 
   NoteData copyWith({Clef? clef}) {
@@ -47,27 +50,27 @@ class NoteData {
         isActiveAtFirstStart: isActiveAtFirstStart);
   }
 
-  static NoteData findFirstChoiceByNumber(int number, Clef clef){
-    List<NoteData> matchingNotes = octave
-        .where((note) => note.noteNum == wrapAround(number, 12))
-        .toList();
+  static NoteData findFirstChoiceByNumber(int number, Clef clef) {
+    List<NoteData> matchingNotes =
+        octave.where((note) => note.noteNum == wrapAround(number, 12)).toList();
     matchingNotes.sort((a, b) => a.priority.compareTo(b.priority));
     NoteData noteToReturn = matchingNotes.first.copyWith(clef: clef);
     noteToReturn.noteNum = number;
-    noteToReturn.pos += getOctaveNumber(number)*7;
+    noteToReturn.pos += getOctaveNumber(number) * 7;
     return noteToReturn;
   }
 
-  static List<NoteData> findNotesByNumber(int number){
+  static List<NoteData> findNotesByNumber(int number) {
     List<NoteData> matchingNotes = octave
-        .where((note) => note.noteNum == wrapAround(number, 12) && note.isActive)
+        .where(
+            (note) => note.noteNum == wrapAround(number, 12) && note.isActive)
         .toList();
     matchingNotes.sort((a, b) => a.priority.compareTo(b.priority));
     List<NoteData> notesToReturn = [];
-    for (NoteData note in matchingNotes){
+    for (NoteData note in matchingNotes) {
       NoteData noteToReturn = note.copyWith(clef: Clef.neutral());
       noteToReturn.noteNum = number;
-      noteToReturn.pos += getOctaveNumber(number)*7;
+      noteToReturn.pos += getOctaveNumber(number) * 7;
       notesToReturn.add(noteToReturn);
     }
     return notesToReturn;
@@ -81,11 +84,11 @@ class NoteData {
     return (value % modulo + modulo) % modulo;
   }
 
-  static bool checkValidSwitch(){
-    for (NoteData noteToCheck in octave){
+  static bool checkValidSwitch() {
+    for (NoteData noteToCheck in octave) {
       if (noteToCheck.isActive) return true;
     }
-    return false; 
+    return false;
   }
 
   static List<NoteData> octave = [

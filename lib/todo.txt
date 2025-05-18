@@ -20,7 +20,3 @@ Tidy up Pong mode:
 3 and 2 and 1 and go... ?
 Green background + red for not playing. 
 
-
-
-
-

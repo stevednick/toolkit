@@ -1,4 +1,5 @@
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:toolkit/tools/shared_prefs_manager.dart';
 
 class ClefThreshold {
   late int trebleClefThreshold;
@@ -11,41 +12,24 @@ class ClefThreshold {
     _loadValues();
   }
   Future<void> _loadValues() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    trebleClefThreshold = prefs.getInt(trebleKey) ??
-        -3; // Load 'top' from SharedPreferences, or default to 8
-    bassClefThreshold = prefs.getInt(bassKey) ??
-        3; // Load 'bottom' from SharedPreferences, or default to 0
-    // print("Clef Thresholds Loaded");
-    // print('$trebleClefThreshold, $bassClefThreshold');
+    trebleClefThreshold = await SharedPrefsManager.load<int>(trebleKey) ?? -3;
+    bassClefThreshold = await SharedPrefsManager.load<int>(bassKey) ?? 3;
   }
 
   Future<List<int>> getValues() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    trebleClefThreshold = prefs.getInt(trebleKey) ??
-        -3; // Load 'top' from SharedPreferences, or default to 8
-    bassClefThreshold = prefs.getInt(bassKey) ??
-        3; // Load 'bottom' from SharedPreferences, or default to 0
-    // print("Clef Thresholds Loaded");
-    // print('$trebleClefThreshold, $bassClefThreshold');
+    _loadValues();
     return [trebleClefThreshold, bassClefThreshold];
   }
 
   Future<void> saveValues() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setInt(
-        trebleKey, trebleClefThreshold); // Save 'top' to SharedPreferences
-    await prefs.setInt(
-        bassKey, bassClefThreshold); // Save 'bottom' to SharedPreferences
-    // print("Thresholds Saved");
-    // print("$trebleClefThreshold: $bassClefThreshold");
+    await SharedPrefsManager.save<int>(trebleKey, trebleClefThreshold);
+    await SharedPrefsManager.save<int>(bassKey, bassClefThreshold);
   }
 
   void increment(bool isTreble, bool incrementUp) async {
     if (isTreble) {
       if (incrementUp) {
-        if (trebleClefThreshold < bassClefThreshold)
-          trebleClefThreshold++; // Increment 'top' if within the limit
+        if (trebleClefThreshold < bassClefThreshold) trebleClefThreshold++; // Increment 'top' if within the limit
       } else {
         trebleClefThreshold--; // Decrement 'top' if it won't cross 'bottom'
       }
@@ -53,8 +37,7 @@ class ClefThreshold {
       if (incrementUp) {
         bassClefThreshold++; // Increment 'bottom' if it won't cross 'top'
       } else {
-        if (bassClefThreshold > trebleClefThreshold)
-          bassClefThreshold--; // Decrement 'bottom' if within the limit
+        if (bassClefThreshold > trebleClefThreshold) bassClefThreshold--; // Decrement 'bottom' if within the limit
       }
     }
     await saveValues(); // Save the updated values

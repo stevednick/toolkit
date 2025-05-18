@@ -10,6 +10,8 @@ class SharedPrefsManager {
       return prefs.getBool(key) as T?;
     } else if (T == double) {
       return prefs.getDouble(key) as T?;
+    } else if (T == String) {
+      return prefs.getString(key) as T?;
     } else {
       throw UnsupportedError("Type $T is not supported");
     }
@@ -24,6 +26,8 @@ class SharedPrefsManager {
       await prefs.setBool(key, value);
     } else if (value is double) {
       await prefs.setDouble(key, value);
+    } else if (value is String) {
+      await prefs.setString(key, value);
     } else {
       throw UnsupportedError("Type ${value.runtimeType} is not supported");
     }

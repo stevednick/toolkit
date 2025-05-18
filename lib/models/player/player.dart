@@ -8,6 +8,7 @@ import 'package:toolkit/models/key_signature/key_signature.dart';
 import 'package:toolkit/models/key_signature/key_signatures.dart';
 import 'package:toolkit/models/note_data.dart';
 import 'package:toolkit/models/range.dart';
+import 'package:toolkit/tools/shared_prefs_manager.dart';
 
 import '../transposition.dart';
 
@@ -39,8 +40,8 @@ class Player {
 
   Future<int> loadKeySignatureInt() async {
     try{
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      int keySignatureInt = prefs.getInt('${playerKey}_key_signature') ?? 0;
+
+      int keySignatureInt = await SharedPrefsManager.load<int>('${playerKey}_key_signature') ?? 0;
       return keySignatureInt;
     }  catch (e) {
       print('Error loading key signature: $e');
@@ -50,8 +51,7 @@ class Player {
 
   Future<void> saveKeySignature(int newValue) async {
     try{
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      prefs.setInt('${playerKey}_key_signature', newValue);
+      await SharedPrefsManager.save<int>('${playerKey}_key_signature', newValue);
     }  catch (e) {
       print('Error saving key signature: $e');
     }
@@ -59,10 +59,9 @@ class Player {
 
   Future<bool> loadInstrumentAndTransposition() async {
     try {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? transpositionName = await SharedPrefsManager.load<String>('${playerKey}_transposition');
 
       // Load the transposition
-      String? transpositionName = prefs.getString('${playerKey}_transposition');
       if (transpositionName != null) {
         Transposition? transposition = Transposition.getByName(transpositionName);
         if (transposition != null && selectedInstrument.isTranspositionAvailable(transposition)) {
@@ -71,7 +70,7 @@ class Player {
       }
 
       // Load the clef
-      String? clefName = prefs.getString('${playerKey}_clef');
+      String? clefName = await SharedPrefsManager.load<String>('${playerKey}_clef');
       if (clefName != null) {
         clefSelection = ClefSelection.values.firstWhere(
           (e) => e.toString().split('.').last == clefName,
@@ -119,6 +118,10 @@ class Player {
 
   int getNoteToCheck(){
     return currentNote.value.noteNum + selectedInstrument.currentTransposition.pitchModifier;
+  }
+
+  int addPitchModifier(int num){
+    return num + selectedInstrument.currentTransposition.pitchModifier;
   }
 
   void incrementScore(int by){

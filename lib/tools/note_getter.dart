@@ -1,6 +1,6 @@
 import 'dart:math';
 
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:toolkit/tools/shared_prefs_manager.dart';
 
 class NoteGetter {
 
@@ -12,15 +12,13 @@ class NoteGetter {
   }
 
   Future<int> getAPitch() async{
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    aPitch = prefs.getInt('aPitch') ?? 440;
+    aPitch = await SharedPrefsManager.load<int>('aPitch') ?? 440;
     aPitchLoaded = true;
     return aPitch;
   }
 
   Future<void> setAPitch(int newAPitch) async{
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setInt('aPitch', newAPitch);
+    await SharedPrefsManager.save<int>('aPitch', newAPitch);
     aPitch = newAPitch;
   }
 

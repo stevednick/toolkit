@@ -5,12 +5,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:toolkit/game_modes/home_screen/home_view.dart';
 import 'package:toolkit/game_modes/home_screen/onboarding_screen.dart';
 import 'package:toolkit/models/asset.dart';
+import 'package:toolkit/models/note_data.dart';
 import 'package:toolkit/providers/language_provider.dart';
 import 'package:toolkit/tools/orientation_helpers.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   setOrientation(ScreenOrientation.landscapeRight);
+  await NoteData.init();
   await AssetManager().initialize();
 
   // Set up logging

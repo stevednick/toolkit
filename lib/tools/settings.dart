@@ -1,4 +1,4 @@
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:toolkit/tools/shared_prefs_manager.dart';
 
 class Settings {
 
@@ -6,12 +6,10 @@ class Settings {
   static String tempoKey = "tempo_key";
 
   static Future<bool> getSetting(String key, {bool initialValue = true}) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.getBool(key) ?? initialValue;
+    return await SharedPrefsManager.load<bool>(key) ?? initialValue;
   }
 
   static Future<void> saveSetting(String key, bool newValue) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(key, newValue);
+    await SharedPrefsManager.save<bool>(key, newValue);
   }
 }

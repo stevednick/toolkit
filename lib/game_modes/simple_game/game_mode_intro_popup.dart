@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:toolkit/tools/shared_prefs_manager.dart';
 
 class GameModeIntroPopup extends StatefulWidget {
   const GameModeIntroPopup({super.key, required this.introSeenKey});
@@ -24,15 +24,14 @@ class GameModeIntroPopupState extends State<GameModeIntroPopup> {
   }
 
   Future<void> _checkFirstTime() async {
-    final prefs = await SharedPreferences.getInstance();
-    final hasSeenIntro = prefs.getBool('hasSeenIntro') ?? false;
+    final hasSeenIntro = await SharedPrefsManager.load<bool>('hasSeenIntro') ?? false;
 
     if (!hasSeenIntro) {
       setState(() {
         _showPopup = true;
         _hasCheckedFirstTime = true;
       });
-      await prefs.setBool('hasSeenIntro', true);
+      await SharedPrefsManager.save<bool>('hasSeenIntro', true);
     } else {
       setState(() {
         _hasCheckedFirstTime = true;

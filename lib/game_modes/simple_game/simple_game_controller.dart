@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:toolkit/game_modes/simple_game/state_management/current_note_manager.dart';
 import 'package:toolkit/game_modes/simple_game/state_management/score_state_manager.dart';
 import 'package:toolkit/game_modes/simple_game/state_management/simple_game_state_manager.dart';
 import 'package:toolkit/game_modes/simple_game/state_management/timer_state_manager.dart';
@@ -15,13 +16,9 @@ enum GameState { listening, correctNoteHeard, fadingIn }
 class SimpleGameController {
   late SimpleGameStateManager gameStateManager;
   late TimerStateManager timerStateManager;
-
-  ValueNotifier<NoteData> currentNote =
-      ValueNotifier<NoteData>(NoteData.placeholderValue); // Where?
-  final NoteGenerator noteGenerator =
-      NoteGenerator(); // Think about all this shit...
+  late NoteStateManager noteStateManager;
   late NoteChecker noteChecker;
-  late Player player; // Deconstruct + sort elements.
+  late Player player;
   final String playerKey =
       "SimpleTestKey"; // Need master key for all game elements,
   Duration waitDuration =
@@ -36,6 +33,7 @@ class SimpleGameController {
 
   SimpleGameController(this.triggerTick, this.ref) {
     WakelockPlus.enable();
+    noteStateManager = ref.read(noteStateProvider.notifier);
     gameStateManager = ref.read(simpleGameStateProvider.notifier);
     timerStateManager = ref.read(timerStateProvider.notifier);
     player = Player(playerKey: playerKey);
@@ -47,6 +45,10 @@ class SimpleGameController {
 
   void noteFeedback(int difference) {
     //
+  }
+
+  void setRef(WidgetRef newRef){
+    ref = newRef;
   }
 
   void update(double dt) {
@@ -129,12 +131,14 @@ class SimpleGameController {
     });
   }
 
-  void changeNote() {
+  void changeNote() { // OK This is where the magic (kinda) happens... Think about flow + dependencies. What does noteGenerator need to know and how to get it to it... 
     // ??
-    player.currentNote.value =
-        noteGenerator.randomNoteFromRange(player, bigJumps: bigJumpsMode);
-    noteChecker.noteToCheck = player.getNoteToCheck();
-    currentNote.value = player.currentNote.value;
+    print("Change Note Runs");
+    noteStateManager.generateNewNote(player, bigJumpsMode);
+    // player.currentNote.value =
+    //     noteGenerator.randomNoteFromRange(player, bigJumps: bigJumpsMode);
+    noteChecker.noteToCheck = player.addPitchModifier(ref.read(noteStateProvider).currentNote.noteNum);
+    //currentNote.value = player.currentNote.value;
   }
 
   void _incrementScore() {
